@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Users table (internal users: Inkoper, Finance, ERP)
+// role: INKOPER | FINANCE | ERP
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  role         String   // INKOPER, FINANCE, ERP
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  createdRequests  SupplierRequest[] @relation("CreatedBy")
+  uploadedFiles    SupplierFile[]
+  auditLogs        AuditLog[]
+}
+
+// Main supplier onboarding requests
+// status: INVITATION_SENT | AWAITING_PURCHASER | AWAITING_FINANCE | AWAITING_ERP | COMPLETED | CANCELLED
+// region: EU | ROW
+// incoterm: CIF | FOB
+model SupplierRequest {
+  id        String   @id @default(uuid())
+  status    String   @default("INVITATION_SENT") // Status enum as string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Created by (Inkoper)
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  // Basic info (filled by Inkoper at start)
+  supplierName  String
+  supplierEmail String
+  region        String  // EU or ROW
+  selfFill      Boolean @default(false) // If true, Inkoper fills form themselves
+
+  // Supplier/Inkoper fills these fields
+  companyName             String?
+  address                 String?
+  postalCode              String?
+  city                    String?
+  country                 String?
+  contactName             String?
+  contactPhone            String?
+  contactEmail            String?
+  chamberOfCommerceNumber String? // KvK nummer
+  vatNumber               String? // BTW nummer
+  iban                    String?
+  bankName                String?
+
+  // Additional fields by Inkoper
+  incoterm             String? // CIF or FOB
+  commissionPercentage Float?
+
+  // Finance fields
+  creditorNumber String? @unique
+
+  // ERP fields
+  kbtCode String? @unique
+
+  // Invitation tracking
+  invitationToken     String?   @unique
+  invitationExpiresAt DateTime?
+  invitationSentAt    DateTime?
+
+  // Supplier submitted timestamp
+  supplierSubmittedAt DateTime?
+
+  // Relations
+  files     SupplierFile[]
+  auditLogs AuditLog[]
+}
+
+// Uploaded files
+// fileType: KVK | PASSPORT | OTHER
+model SupplierFile {
+  id         String   @id @default(uuid())
+  fileName   String
+  fileType   String   // KVK, PASSPORT, OTHER
+  filePath   String
+  uploadedAt DateTime @default(now())
+
+  // Relations
+  requestId  String
+  request    SupplierRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id])
+}
+
+// Audit trail
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // e.g., "INVITATION_SENT", "SUPPLIER_SUBMITTED", "STATUS_CHANGED"
+  details   String?  // JSON string with additional details
+  createdAt DateTime @default(now())
+
+  // Relations
+  requestId String
+  request   SupplierRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id])
+}
