@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,6 +53,11 @@ interface UsersTableProps {
 export function UsersTable({ users: initialUsers }: UsersTableProps) {
   const router = useRouter()
   const [users, setUsers] = useState(initialUsers)
+
+  // Sync state when server component re-renders with new data
+  useEffect(() => {
+    setUsers(initialUsers)
+  }, [initialUsers])
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
