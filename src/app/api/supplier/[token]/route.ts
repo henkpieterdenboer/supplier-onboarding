@@ -7,6 +7,7 @@ import {
   sendSupplierConfirmationEmail,
   sendPurchaserNotificationEmail,
 } from '@/lib/email'
+import { formatUserName } from '@/lib/user-utils'
 
 // Dynamic import for Vercel Blob (only used in production)
 const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
@@ -100,7 +101,9 @@ export async function POST(
       include: {
         createdBy: {
           select: {
-            name: true,
+            firstName: true,
+            middleName: true,
+            lastName: true,
             email: true,
           },
         },
@@ -240,7 +243,7 @@ export async function POST(
     // Notify purchaser
     await sendPurchaserNotificationEmail({
       to: supplierRequest.createdBy.email,
-      purchaserName: supplierRequest.createdBy.name || 'Inkoper',
+      purchaserName: formatUserName(supplierRequest.createdBy) || 'Inkoper',
       supplierName: supplierRequest.supplierName,
       requestId: supplierRequest.id,
     })

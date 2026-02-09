@@ -15,7 +15,9 @@ export default async function DashboardPage() {
     include: {
       createdBy: {
         select: {
-          name: true,
+          firstName: true,
+          middleName: true,
+          lastName: true,
           email: true,
         },
       },

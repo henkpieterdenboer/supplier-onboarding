@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { Status, StatusLabels, RegionLabels, FileTypeLabels } from '@/types'
+import { formatUserName } from '@/lib/user-utils'
 
 interface AuditLog {
   id: string
@@ -28,7 +29,9 @@ interface AuditLog {
   details: string | null
   createdAt: Date
   user: {
-    name: string | null
+    firstName: string
+    middleName: string | null
+    lastName: string
     email: string
   } | null
 }
@@ -52,7 +55,9 @@ interface Request {
   updatedAt: Date
   createdBy: {
     id: string
-    name: string | null
+    firstName: string
+    middleName: string | null
+    lastName: string
     email: string
   }
   // Supplier fields
@@ -257,7 +262,7 @@ export function RequestDetail({ request, userRole, userId }: RequestDetailProps)
               <div>
                 <Label className="text-gray-500">Aangemaakt door</Label>
                 <p className="font-medium">
-                  {request.createdBy.name || request.createdBy.email}
+                  {formatUserName(request.createdBy) || request.createdBy.email}
                 </p>
               </div>
               <div>
@@ -497,7 +502,7 @@ export function RequestDetail({ request, userRole, userId }: RequestDetailProps)
                         <p className="font-medium">{log.action.replace(/_/g, ' ')}</p>
                         <p className="text-sm text-gray-500">
                           {log.user
-                            ? `Door ${log.user.name || log.user.email}`
+                            ? `Door ${formatUserName(log.user) || log.user.email}`
                             : 'Systeem'}
                         </p>
                         {log.details && (

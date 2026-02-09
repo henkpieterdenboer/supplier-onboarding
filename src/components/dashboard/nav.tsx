@@ -69,6 +69,11 @@ export function DashboardNav({ user }: DashboardNavProps) {
     navItems.push({ href: '/requests/new', label: 'Nieuwe aanvraag' })
   }
 
+  // Only show "Gebruikersbeheer" for ADMIN role
+  if (user.role === 'ADMIN') {
+    navItems.push({ href: '/admin/users', label: 'Gebruikersbeheer' })
+  }
+
   return (
     <header className="bg-slate-300 border-b">
       <div className="container mx-auto px-4">

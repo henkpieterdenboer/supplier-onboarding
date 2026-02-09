@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './db'
+import { formatUserName } from './user-utils'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -24,6 +25,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Gebruiker niet gevonden')
         }
 
+        if (!user.passwordHash) {
+          throw new Error('Account nog niet geactiveerd. Gebruik de activatielink uit uw email.')
+        }
+
+        if (!user.isActive) {
+          throw new Error('Account is gedeactiveerd')
+        }
+
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
 
         if (!isValid) {
@@ -38,6 +47,8 @@ export const authOptions: NextAuthOptions = {
           defaultRole = 'FINANCE'
         } else if (credentials.email === 'erp@demo.nl') {
           defaultRole = 'ERP'
+        } else if (credentials.email === 'admin@demo.nl') {
+          defaultRole = 'ADMIN'
         }
 
         // Update role in database if it was changed
@@ -51,7 +62,7 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          name: user.name,
+          name: formatUserName(user),
           role: defaultRole,
         }
       },
@@ -63,15 +74,20 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.role = user.role
       }
-      // Always fetch the latest role from database (for demo role switching)
+      // Always fetch the latest role and isActive from database
       if (token.id) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { role: true },
+            select: { role: true, isActive: true, firstName: true, middleName: true, lastName: true },
           })
           if (dbUser) {
+            if (!dbUser.isActive) {
+              // User was deactivated - invalidate session
+              return {} as typeof token
+            }
             token.role = dbUser.role
+            token.name = formatUserName(dbUser)
           }
         } catch {
           // Database not available during build, use cached role

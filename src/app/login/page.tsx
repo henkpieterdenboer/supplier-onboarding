@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
+import Link from 'next/link'
 
 function LoginForm() {
   const router = useRouter()
@@ -94,11 +95,18 @@ function LoginForm() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Bezig...' : 'Inloggen'}
           </Button>
+
+          <div className="text-center">
+            <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+              Wachtwoord vergeten?
+            </Link>
+          </div>
         </form>
 
         <div className="mt-6 p-4 bg-gray-100 rounded-lg">
           <p className="text-sm text-gray-600 font-medium mb-2">Demo accounts:</p>
           <ul className="text-sm text-gray-500 space-y-1">
+            <li><strong>Admin:</strong> admin@demo.nl / demo123</li>
             <li><strong>Inkoper:</strong> inkoper@demo.nl / demo123</li>
             <li><strong>Finance:</strong> finance@demo.nl / demo123</li>
             <li><strong>ERP:</strong> erp@demo.nl / demo123</li>

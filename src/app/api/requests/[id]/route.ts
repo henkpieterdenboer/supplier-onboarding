@@ -10,6 +10,7 @@ import {
   sendReminderEmail,
   sendCompletionEmail,
 } from '@/lib/email'
+import { formatUserName } from '@/lib/user-utils'
 import { v4 as uuidv4 } from 'uuid'
 
 // GET /api/requests/[id] - Get single request
@@ -31,7 +32,9 @@ export async function GET(
         createdBy: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            middleName: true,
+            lastName: true,
             email: true,
           },
         },
@@ -40,7 +43,9 @@ export async function GET(
           include: {
             user: {
               select: {
-                name: true,
+                firstName: true,
+                middleName: true,
+                lastName: true,
                 email: true,
               },
             },
@@ -207,7 +212,7 @@ export async function PATCH(
             break
           case 'AWAITING_PURCHASER':
             reminderEmail = existingRequest.createdBy.email
-            reminderName = existingRequest.createdBy.name || 'Inkoper'
+            reminderName = formatUserName(existingRequest.createdBy) || 'Inkoper'
             reminderRole = 'purchaser'
             break
           case 'AWAITING_FINANCE':
@@ -406,7 +411,7 @@ export async function PATCH(
         await sendCompletionEmail({
           financeEmail: 'finance@demo.nl', // In real app, get from settings
           purchaserEmail: existingRequest.createdBy.email,
-          purchaserName: existingRequest.createdBy.name || 'Inkoper',
+          purchaserName: formatUserName(existingRequest.createdBy) || 'Inkoper',
           supplierName: existingRequest.supplierName,
           requestId: id,
           creditorNumber: existingRequest.creditorNumber || '',

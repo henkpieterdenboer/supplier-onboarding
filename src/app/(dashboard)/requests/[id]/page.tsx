@@ -22,7 +22,9 @@ export default async function RequestDetailPage({ params }: Props) {
       createdBy: {
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          middleName: true,
+          lastName: true,
           email: true,
         },
       },
@@ -31,7 +33,9 @@ export default async function RequestDetailPage({ params }: Props) {
         include: {
           user: {
             select: {
-              name: true,
+              firstName: true,
+              middleName: true,
+              lastName: true,
               email: true,
             },
           },

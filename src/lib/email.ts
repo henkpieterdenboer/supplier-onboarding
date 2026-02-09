@@ -317,6 +317,88 @@ export async function sendCompletionEmail({
   })
 }
 
+// Activation email for new users
+interface ActivationEmailOptions {
+  to: string
+  firstName: string
+  activationToken: string
+  expiresAt: Date
+}
+
+export async function sendActivationEmail({
+  to,
+  firstName,
+  activationToken,
+  expiresAt,
+}: ActivationEmailOptions) {
+  const activationUrl = `${APP_URL}/activate/${activationToken}`
+
+  await sendEmail({
+    to,
+    subject: 'Activeer uw account - Supplier Onboarding',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Welkom bij Supplier Onboarding</h2>
+        <p>Beste ${firstName},</p>
+        <p>Er is een account voor u aangemaakt. Klik op de onderstaande knop om uw wachtwoord in te stellen en uw account te activeren:</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${activationUrl}"
+             style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            Account activeren
+          </a>
+        </p>
+        <p><strong>Let op:</strong> Deze link is geldig tot ${expiresAt.toLocaleDateString('nl-NL')}.</p>
+        <p>Als u deze aanvraag niet herkent, kunt u deze email negeren.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">
+          Dit is een automatisch gegenereerde email. Niet op reageren.
+        </p>
+      </div>
+    `,
+  })
+}
+
+// Password reset email
+interface PasswordResetEmailOptions {
+  to: string
+  firstName: string
+  resetToken: string
+  expiresAt: Date
+}
+
+export async function sendPasswordResetEmail({
+  to,
+  firstName,
+  resetToken,
+  expiresAt,
+}: PasswordResetEmailOptions) {
+  const resetUrl = `${APP_URL}/reset-password/${resetToken}`
+
+  await sendEmail({
+    to,
+    subject: 'Wachtwoord herstellen - Supplier Onboarding',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Wachtwoord herstellen</h2>
+        <p>Beste ${firstName},</p>
+        <p>Er is een verzoek ingediend om uw wachtwoord te herstellen. Klik op de onderstaande knop om een nieuw wachtwoord in te stellen:</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}"
+             style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            Nieuw wachtwoord instellen
+          </a>
+        </p>
+        <p><strong>Let op:</strong> Deze link is geldig tot ${expiresAt.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })} (1 uur).</p>
+        <p>Als u dit verzoek niet heeft gedaan, kunt u deze email negeren.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">
+          Dit is een automatisch gegenereerde email. Niet op reageren.
+        </p>
+      </div>
+    `,
+  })
+}
+
 // Reminder email
 interface ReminderEmailOptions {
   to: string

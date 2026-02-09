@@ -12,7 +12,9 @@ interface Request {
   region: string
   createdAt: Date
   createdBy: {
-    name: string | null
+    firstName: string
+    middleName: string | null
+    lastName: string
     email: string
   }
 }

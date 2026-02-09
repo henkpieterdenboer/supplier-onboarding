@@ -1,0 +1,126 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { v4 as uuidv4 } from 'uuid'
+import { sendActivationEmail } from '@/lib/email'
+
+// GET /api/admin/users - List all users
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
+    }
+
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        receiveEmails: true,
+        createdAt: true,
+        passwordHash: true,
+        activationToken: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    // Map to hide passwordHash but indicate if account is activated
+    const mapped = users.map(({ passwordHash, activationToken, ...user }) => ({
+      ...user,
+      isActivated: !!passwordHash,
+      hasPendingActivation: !!activationToken,
+    }))
+
+    return NextResponse.json(mapped)
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    return NextResponse.json(
+      { error: 'Er is een fout opgetreden' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST /api/admin/users - Create new user
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
+    }
+
+    const body = await request.json()
+    const { email, firstName, middleName, lastName, role, receiveEmails } = body
+
+    if (!email || !firstName || !lastName || !role) {
+      return NextResponse.json(
+        { error: 'Email, voornaam, achternaam en rol zijn verplicht' },
+        { status: 400 }
+      )
+    }
+
+    // Check for duplicate email
+    const existing = await prisma.user.findUnique({
+      where: { email },
+    })
+
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Er bestaat al een gebruiker met dit emailadres' },
+        { status: 400 }
+      )
+    }
+
+    // Generate activation token (valid for 7 days)
+    const activationToken = uuidv4()
+    const activationExpiresAt = new Date()
+    activationExpiresAt.setDate(activationExpiresAt.getDate() + 7)
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        firstName,
+        middleName: middleName || null,
+        lastName,
+        role,
+        receiveEmails: receiveEmails ?? true,
+        isActive: false,
+        activationToken,
+        activationExpiresAt,
+      },
+    })
+
+    // Send activation email
+    await sendActivationEmail({
+      to: email,
+      firstName,
+      activationToken,
+      expiresAt: activationExpiresAt,
+    })
+
+    return NextResponse.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      middleName: user.middleName,
+      lastName: user.lastName,
+      role: user.role,
+      isActive: user.isActive,
+      receiveEmails: user.receiveEmails,
+    }, { status: 201 })
+  } catch (error) {
+    console.error('Error creating user:', error)
+    return NextResponse.json(
+      { error: 'Er is een fout opgetreden' },
+      { status: 500 }
+    )
+  }
+}

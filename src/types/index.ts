@@ -1,5 +1,6 @@
 // Role enum
 export const Role = {
+  ADMIN: 'ADMIN',
   INKOPER: 'INKOPER',
   FINANCE: 'FINANCE',
   ERP: 'ERP',
@@ -79,7 +80,8 @@ export const AuditAction = {
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 
 // Role labels
-export const RoleLabels: Record<Role, string> = {
+export const RoleLabels: Record<string, string> = {
+  ADMIN: 'Admin',
   INKOPER: 'Inkoper',
   FINANCE: 'Finance',
   ERP: 'ERP',

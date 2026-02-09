@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Status, StatusLabels } from '@/types'
+import { formatUserName } from '@/lib/user-utils'
 import * as XLSX from 'xlsx'
 
 interface Request {
@@ -31,7 +32,9 @@ interface Request {
   region: string
   createdAt: Date
   createdBy: {
-    name: string | null
+    firstName: string
+    middleName: string | null
+    lastName: string
     email: string
   }
 }
@@ -74,7 +77,7 @@ export function RequestsTable({ requests, userRole, externalStatusFilter }: Requ
         (r) =>
           r.supplierName.toLowerCase().includes(searchLower) ||
           r.supplierEmail.toLowerCase().includes(searchLower) ||
-          r.createdBy.name?.toLowerCase().includes(searchLower) ||
+          formatUserName(r.createdBy).toLowerCase().includes(searchLower) ||
           r.createdBy.email.toLowerCase().includes(searchLower)
       )
     }
@@ -107,7 +110,7 @@ export function RequestsTable({ requests, userRole, externalStatusFilter }: Requ
       'Leverancier': r.supplierName,
       'Email': r.supplierEmail,
       'Status': StatusLabels[r.status as Status] || r.status,
-      'Aangemaakt door': r.createdBy.name || r.createdBy.email,
+      'Aangemaakt door': formatUserName(r.createdBy) || r.createdBy.email,
       'Datum': new Date(r.createdAt).toLocaleDateString('nl-NL'),
     }))
 
@@ -221,7 +224,7 @@ export function RequestsTable({ requests, userRole, externalStatusFilter }: Requ
                       {StatusLabels[request.status as Status] || request.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{request.createdBy.name || request.createdBy.email}</TableCell>
+                  <TableCell>{formatUserName(request.createdBy) || request.createdBy.email}</TableCell>
                   <TableCell>
                     {new Date(request.createdAt).toLocaleDateString('nl-NL')}
                   </TableCell>

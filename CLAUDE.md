@@ -38,21 +38,26 @@ npm run lint         # Run ESLint
 
 ### Route Structure
 
-- `/src/app/(dashboard)/` - Protected pages (dashboard, requests) using route groups
-- `/src/app/api/` - API route handlers (auth, requests, supplier)
+- `/src/app/(dashboard)/` - Protected pages (dashboard, requests, admin) using route groups
+- `/src/app/(dashboard)/admin/users/` - Admin user management page (ADMIN only)
+- `/src/app/api/` - API route handlers (auth, requests, supplier, admin)
 - `/src/app/supplier/[token]/` - Public supplier form (no auth required)
 - `/src/app/login/` - Login page
+- `/src/app/activate/[token]/` - Public account activation page
+- `/src/app/forgot-password/` - Public password reset request page
+- `/src/app/reset-password/[token]/` - Public password reset page
 
 ### Key Libraries
 
-- `@/lib/auth.ts` - NextAuth configuration with JWT strategy
+- `@/lib/auth.ts` - NextAuth configuration with JWT strategy, isActive checks
 - `@/lib/db.ts` - Prisma client singleton
-- `@/lib/email.ts` - Email service using Nodemailer
+- `@/lib/email.ts` - Email service using Nodemailer (activation, password reset, notifications)
+- `@/lib/user-utils.ts` - User helper functions (formatUserName)
 - `@/types/index.ts` - Shared TypeScript types and enums (Role, Status, Region, Incoterm, FileType, AuditAction)
 
 ### Database Models (Prisma)
 
-- **User** - Internal users with roles: INKOPER, FINANCE, ERP
+- **User** - Internal users with roles: ADMIN, INKOPER, FINANCE, ERP (soft delete via isActive, activation flow)
 - **SupplierRequest** - Main onboarding request with workflow status
 - **SupplierFile** - Uploaded documents (KVK, PASSPORT, OTHER)
 - **AuditLog** - Audit trail for all actions
@@ -68,8 +73,11 @@ INVITATION_SENT → AWAITING_PURCHASER → AWAITING_FINANCE → AWAITING_ERP →
 ### Authentication
 
 - Protected routes handled by `src/middleware.ts` using NextAuth
-- Public routes: `/supplier/[token]`, `/login`
-- Demo accounts: inkoper@demo.nl, finance@demo.nl, erp@demo.nl (all use demo123)
+- Public routes: `/supplier/[token]`, `/login`, `/activate/[token]`, `/forgot-password`, `/reset-password/[token]`
+- Admin routes (`/admin/*`): only accessible by ADMIN role
+- Demo accounts: admin@demo.nl, inkoper@demo.nl, finance@demo.nl, erp@demo.nl (all use demo123)
+- User activation flow: new users get activation email -> set password -> account activated
+- Password reset flow: forgot password -> email with reset link -> set new password
 
 ### Import Alias
 

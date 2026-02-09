@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -11,16 +12,24 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Users table (internal users: Inkoper, Finance, ERP)
-// role: INKOPER | FINANCE | ERP
+// Users table (internal users: Admin, Inkoper, Finance, ERP)
+// role: ADMIN | INKOPER | FINANCE | ERP
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
-  name         String
-  role         String   // INKOPER, FINANCE, ERP
-  passwordHash String
+  firstName    String
+  middleName   String?
+  lastName     String
+  role         String   // ADMIN, INKOPER, FINANCE, ERP
+  passwordHash String?
+  isActive     Boolean  @default(false)
+  receiveEmails Boolean @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  // Activation
+  activationToken     String?   @unique
+  activationExpiresAt DateTime?
 
   // Relations
   createdRequests  SupplierRequest[] @relation("CreatedBy")
