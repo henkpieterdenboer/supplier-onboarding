@@ -13,7 +13,7 @@ import { formatUserName } from '@/lib/user-utils'
 const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     const { put } = await import('@vercel/blob')
-    const blob = await put(fileName, file, { access: 'public' })
+    const blob = await put(fileName, file, { access: 'public', addRandomSuffix: false })
     return blob.url
   }
   return ''
