@@ -75,7 +75,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
   }
 
   return (
-    <header className="bg-slate-300 border-b">
+    <header className="bg-slate-300 border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">

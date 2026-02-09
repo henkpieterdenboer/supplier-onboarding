@@ -12,6 +12,17 @@ import {
 } from '@/lib/email'
 import { formatUserName } from '@/lib/user-utils'
 import { v4 as uuidv4 } from 'uuid'
+import { writeFile, mkdir } from 'fs/promises'
+import path from 'path'
+
+const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { put } = await import('@vercel/blob')
+    const blob = await put(fileName, file, { access: 'public' })
+    return blob.url
+  }
+  return ''
+}
 
 // GET /api/requests/[id] - Get single request
 export async function GET(
@@ -84,8 +95,25 @@ export async function PATCH(
       return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { action, ...data } = body
+    // Support both JSON and FormData (for file uploads)
+    let action: string
+    let data: Record<string, unknown>
+    let formDataObj: FormData | null = null
+
+    const contentType = request.headers.get('content-type') || ''
+    if (contentType.includes('multipart/form-data')) {
+      formDataObj = await request.formData()
+      const dataJson = formDataObj.get('data') as string
+      const parsed = JSON.parse(dataJson)
+      action = parsed.action
+      const { action: _, ...rest } = parsed
+      data = rest
+    } else {
+      const body = await request.json()
+      action = body.action
+      const { action: _, ...rest } = body
+      data = rest
+    }
 
     const existingRequest = await prisma.supplierRequest.findUnique({
       where: { id },
@@ -197,7 +225,7 @@ export async function PATCH(
       }
 
       case 'send-reminder': {
-        const { reminderTarget } = body
+        const { reminderTarget } = data
 
         // Determine recipient based on current status
         let reminderEmail = ''
@@ -230,7 +258,7 @@ export async function PATCH(
         }
 
         if (reminderTarget) {
-          reminderEmail = reminderTarget
+          reminderEmail = reminderTarget as string
         }
 
         await sendReminderEmail({
@@ -274,6 +302,56 @@ export async function PATCH(
           )
         }
 
+        // Handle file uploads
+        const filesToCreate: { fileName: string; fileType: string; filePath: string }[] = []
+        const useVercelBlob = !!process.env.BLOB_READ_WRITE_TOKEN
+
+        if (formDataObj) {
+          const kvkFile = formDataObj.get('kvk') as File | null
+          if (kvkFile && kvkFile.size > 0) {
+            const fileName = `kvk_${Date.now()}_${kvkFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+
+            if (useVercelBlob) {
+              await uploadToBlob(`${id}/${fileName}`, kvkFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await kvkFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+
+            filesToCreate.push({ fileName: kvkFile.name, fileType: 'KVK', filePath })
+          }
+
+          const passportFile = formDataObj.get('passport') as File | null
+          if (passportFile && passportFile.size > 0) {
+            const fileName = `passport_${Date.now()}_${passportFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+
+            if (useVercelBlob) {
+              await uploadToBlob(`${id}/${fileName}`, passportFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await passportFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+
+            filesToCreate.push({ fileName: passportFile.name, fileType: 'PASSPORT', filePath })
+          }
+        }
+
+        // Create file records
+        for (const file of filesToCreate) {
+          await prisma.supplierFile.create({
+            data: {
+              requestId: id,
+              ...file,
+            },
+          })
+        }
+
         const updated = await prisma.supplierRequest.update({
           where: { id },
           data: {
@@ -287,7 +365,10 @@ export async function PATCH(
             requestId: id,
             userId: session.user.id,
             action: AuditAction.PURCHASER_SUBMITTED,
-            details: JSON.stringify(data),
+            details: JSON.stringify({
+              ...data,
+              filesUploaded: filesToCreate.length,
+            }),
           },
         })
 
@@ -415,7 +496,7 @@ export async function PATCH(
           supplierName: existingRequest.supplierName,
           requestId: id,
           creditorNumber: existingRequest.creditorNumber || '',
-          kbtCode: data.kbtCode,
+          kbtCode: data.kbtCode as string,
         })
 
         return NextResponse.json(updated)

@@ -19,6 +19,17 @@ import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 
+import { Badge } from '@/components/ui/badge'
+import { FileTypeLabels } from '@/types'
+
+interface SupplierFile {
+  id: string
+  fileName: string
+  fileType: string
+  filePath: string
+  uploadedAt: string
+}
+
 interface Request {
   id: string
   status: string
@@ -40,6 +51,7 @@ interface Request {
   bankName: string | null
   incoterm: string | null
   commissionPercentage: number | null
+  files: SupplierFile[]
 }
 
 export default function EditRequestPage() {
@@ -50,6 +62,9 @@ export default function EditRequestPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
+
+  const [kvkFile, setKvkFile] = useState<File | null>(null)
+  const [passportFile, setPassportFile] = useState<File | null>(null)
 
   const [formData, setFormData] = useState({
     // Supplier data
@@ -146,16 +161,21 @@ export default function EditRequestPage() {
     setIsSaving(true)
 
     try {
+      const submitData = new FormData()
+      submitData.append('data', JSON.stringify({
+        action: 'purchaser-submit',
+        ...formData,
+        commissionPercentage: formData.commissionPercentage
+          ? parseFloat(formData.commissionPercentage)
+          : null,
+      }))
+
+      if (kvkFile) submitData.append('kvk', kvkFile)
+      if (passportFile) submitData.append('passport', passportFile)
+
       const response = await fetch(`/api/requests/${params.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'purchaser-submit',
-          ...formData,
-          commissionPercentage: formData.commissionPercentage
-            ? parseFloat(formData.commissionPercentage)
-            : null,
-        }),
+        body: submitData,
       })
 
       const result = await response.json()
@@ -336,6 +356,75 @@ export default function EditRequestPage() {
                   }
                   disabled={isSaving}
                 />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Documents Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Documenten</CardTitle>
+            <CardDescription>
+              Upload KvK uittreksel en paspoort / ID
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Existing files */}
+            {request.files.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Bestaande bestanden</Label>
+                <ul className="space-y-2">
+                  {request.files.map((file) => (
+                    <li key={file.id} className="flex items-center gap-3">
+                      <Badge variant="outline">
+                        {FileTypeLabels[file.fileType as keyof typeof FileTypeLabels] || file.fileType}
+                      </Badge>
+                      <a
+                        href={file.filePath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        {file.fileName}
+                      </a>
+                      <span className="text-xs text-gray-500">
+                        {new Date(file.uploadedAt).toLocaleDateString('nl-NL')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Separator />
+              </div>
+            )}
+
+            {/* File uploads */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="kvk">
+                  KvK uittreksel {request.files.some(f => f.fileType === 'KVK') ? '(vervangen)' : ''}
+                </Label>
+                <Input
+                  id="kvk"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => setKvkFile(e.target.files?.[0] || null)}
+                  disabled={isSaving}
+                />
+                <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="passport">
+                  Paspoort / ID {request.files.some(f => f.fileType === 'PASSPORT') ? '(vervangen)' : ''}
+                </Label>
+                <Input
+                  id="passport"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
+                  disabled={isSaving}
+                />
+                <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
               </div>
             </div>
           </CardContent>

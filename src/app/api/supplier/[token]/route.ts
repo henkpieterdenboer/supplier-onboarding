@@ -146,18 +146,16 @@ export async function POST(
     const kvkFile = formData.get('kvk') as File | null
     if (kvkFile) {
       const fileName = `kvk_${Date.now()}_${kvkFile.name}`
-      let filePath: string
+      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
 
       if (useVercelBlob) {
-        filePath = await uploadToBlob(`${supplierRequest.id}/${fileName}`, kvkFile)
+        await uploadToBlob(`${supplierRequest.id}/${fileName}`, kvkFile)
       } else {
-        // Local storage
         const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
         await mkdir(uploadDir, { recursive: true })
         const buffer = Buffer.from(await kvkFile.arrayBuffer())
         const localPath = path.join(uploadDir, fileName)
         await writeFile(localPath, buffer)
-        filePath = `/uploads/${supplierRequest.id}/${fileName}`
       }
 
       filesToCreate.push({
@@ -170,18 +168,16 @@ export async function POST(
     const passportFile = formData.get('passport') as File | null
     if (passportFile) {
       const fileName = `passport_${Date.now()}_${passportFile.name}`
-      let filePath: string
+      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
 
       if (useVercelBlob) {
-        filePath = await uploadToBlob(`${supplierRequest.id}/${fileName}`, passportFile)
+        await uploadToBlob(`${supplierRequest.id}/${fileName}`, passportFile)
       } else {
-        // Local storage
         const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
         await mkdir(uploadDir, { recursive: true })
         const buffer = Buffer.from(await passportFile.arrayBuffer())
         const localPath = path.join(uploadDir, fileName)
         await writeFile(localPath, buffer)
-        filePath = `/uploads/${supplierRequest.id}/${fileName}`
       }
 
       filesToCreate.push({
