@@ -123,7 +123,7 @@ export default function EditRequestPage() {
   }, [params.id])
 
   // Check permissions
-  if (session?.user?.role !== 'INKOPER') {
+  if (!session?.user?.roles?.includes('INKOPER')) {
     return (
       <div className="max-w-3xl mx-auto">
         <Alert variant="destructive">

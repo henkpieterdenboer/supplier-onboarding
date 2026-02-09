@@ -7,7 +7,7 @@ import { UsersTable } from '@/components/admin/users-table'
 export default async function AdminUsersPage() {
   const session = await getServerSession(authOptions)
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!session || !session.user.roles.includes('ADMIN')) {
     redirect('/dashboard')
   }
 
@@ -18,7 +18,7 @@ export default async function AdminUsersPage() {
       firstName: true,
       middleName: true,
       lastName: true,
-      role: true,
+      roles: true,
       isActive: true,
       receiveEmails: true,
       createdAt: true,

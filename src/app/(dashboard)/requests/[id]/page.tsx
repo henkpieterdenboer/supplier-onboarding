@@ -51,5 +51,5 @@ export default async function RequestDetailPage({ params }: Props) {
     notFound()
   }
 
-  return <RequestDetail request={request} userRole={session.user.role} userId={session.user.id} />
+  return <RequestDetail request={request} userRoles={session.user.roles} userId={session.user.id} />
 }

@@ -41,7 +41,7 @@ interface Request {
 
 interface RequestsTableProps {
   requests: Request[]
-  userRole: string
+  userRoles: string[]
   externalStatusFilter?: string | null
 }
 
@@ -54,7 +54,7 @@ const statusColors: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 }
 
-export function RequestsTable({ requests, userRole, externalStatusFilter }: RequestsTableProps) {
+export function RequestsTable({ requests, userRoles, externalStatusFilter }: RequestsTableProps) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [sortField, setSortField] = useState<'createdAt' | 'supplierName' | 'status' | 'supplierEmail'>('createdAt')

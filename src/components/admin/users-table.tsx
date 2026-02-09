@@ -38,7 +38,7 @@ interface User {
   firstName: string
   middleName: string | null
   lastName: string
-  role: string
+  roles: string[]
   isActive: boolean
   receiveEmails: boolean
   createdAt: Date
@@ -79,7 +79,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
     }
 
     if (roleFilter !== 'all') {
-      result = result.filter((u) => u.role === roleFilter)
+      result = result.filter((u) => u.roles.includes(roleFilter))
     }
 
     if (statusFilter !== 'all') {
@@ -226,9 +226,13 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {RoleLabels[user.role] || user.role}
-                    </Badge>
+                    <div className="flex flex-wrap gap-1">
+                      {user.roles.map((role) => (
+                        <Badge key={role} variant="outline">
+                          {RoleLabels[role] || role}
+                        </Badge>
+                      ))}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {user.isActive ? (

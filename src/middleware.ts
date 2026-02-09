@@ -24,7 +24,7 @@ export default withAuth(
 
     // Admin routes: only ADMIN role can access
     if (path.startsWith('/admin')) {
-      if (token.role !== 'ADMIN') {
+      if (!(token.roles as string[])?.includes('ADMIN')) {
         return NextResponse.redirect(new URL('/dashboard', req.url))
       }
     }

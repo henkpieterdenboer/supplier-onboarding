@@ -20,23 +20,31 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { role } = body
+    const { roles } = body
 
-    // Validate role
-    if (!role || !Object.values(Role).includes(role)) {
+    // Validate roles
+    if (!roles || !Array.isArray(roles) || roles.length === 0) {
+      return NextResponse.json(
+        { error: 'Minimaal één rol is verplicht' },
+        { status: 400 }
+      )
+    }
+
+    const validRoles = Object.values(Role)
+    if (!roles.every((r: string) => validRoles.includes(r as Role))) {
       return NextResponse.json(
         { error: 'Ongeldige rol' },
         { status: 400 }
       )
     }
 
-    // Update user role in database
+    // Update user roles in database
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { role },
+      data: { roles },
     })
 
-    return NextResponse.json({ success: true, role })
+    return NextResponse.json({ success: true, roles })
   } catch (error) {
     console.error('Error switching role:', error)
     return NextResponse.json(

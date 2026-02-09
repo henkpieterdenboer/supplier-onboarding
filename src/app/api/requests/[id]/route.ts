@@ -287,7 +287,7 @@ export async function PATCH(
 
       case 'purchaser-submit': {
         // INKOPER submits after filling additional data
-        if (session.user.role !== 'INKOPER') {
+        if (!session.user.roles.includes('INKOPER')) {
           return NextResponse.json(
             { error: 'Alleen inkopers kunnen deze actie uitvoeren' },
             { status: 403 }
@@ -384,7 +384,7 @@ export async function PATCH(
 
       case 'finance-submit': {
         // FINANCE submits creditor number
-        if (session.user.role !== 'FINANCE') {
+        if (!session.user.roles.includes('FINANCE')) {
           return NextResponse.json(
             { error: 'Alleen Finance kan deze actie uitvoeren' },
             { status: 403 }
@@ -442,7 +442,7 @@ export async function PATCH(
 
       case 'erp-submit': {
         // ERP submits KBT code
-        if (session.user.role !== 'ERP') {
+        if (!session.user.roles.includes('ERP')) {
           return NextResponse.json(
             { error: 'Alleen ERP kan deze actie uitvoeren' },
             { status: 403 }

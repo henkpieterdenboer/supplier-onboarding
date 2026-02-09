@@ -14,7 +14,7 @@ export async function PATCH(
     const session = await getServerSession(authOptions)
     const { id } = await params
 
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (!session?.user || !session.user.roles.includes('ADMIN')) {
       return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
     }
 
@@ -76,12 +76,12 @@ export async function PATCH(
       })
     }
 
-    // Regular update (name, role, receiveEmails)
+    // Regular update (name, roles, receiveEmails)
     const updateData: Record<string, unknown> = {}
     if (data.firstName !== undefined) updateData.firstName = data.firstName
     if (data.middleName !== undefined) updateData.middleName = data.middleName || null
     if (data.lastName !== undefined) updateData.lastName = data.lastName
-    if (data.role !== undefined) updateData.role = data.role
+    if (data.roles !== undefined) updateData.roles = data.roles
     if (data.receiveEmails !== undefined) updateData.receiveEmails = data.receiveEmails
 
     const updated = await prisma.user.update({
@@ -93,7 +93,7 @@ export async function PATCH(
         firstName: true,
         middleName: true,
         lastName: true,
-        role: true,
+        roles: true,
         isActive: true,
         receiveEmails: true,
       },
@@ -118,7 +118,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
     const { id } = await params
 
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (!session?.user || !session.user.roles.includes('ADMIN')) {
       return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
     }
 

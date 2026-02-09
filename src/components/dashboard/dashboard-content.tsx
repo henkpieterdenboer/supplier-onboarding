@@ -32,10 +32,10 @@ interface Stats {
 interface DashboardContentProps {
   stats: Stats
   requests: Request[]
-  userRole: string
+  userRoles: string[]
 }
 
-export function DashboardContent({ stats, requests, userRole }: DashboardContentProps) {
+export function DashboardContent({ stats, requests, userRoles }: DashboardContentProps) {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
 
   return (
@@ -48,7 +48,7 @@ export function DashboardContent({ stats, requests, userRole }: DashboardContent
 
       <RequestsTable
         requests={requests}
-        userRole={userRole}
+        userRoles={userRoles}
         externalStatusFilter={selectedStatus}
       />
     </>

@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { Role, RoleLabels } from '@/types'
@@ -19,7 +19,7 @@ import { LOGO_BASE64 } from '@/lib/logo-base64'
 interface User {
   name?: string | null
   email?: string | null
-  role: string
+  roles: string[]
 }
 
 interface DashboardNavProps {
@@ -31,17 +31,27 @@ export function DashboardNav({ user }: DashboardNavProps) {
   const router = useRouter()
   const [isChangingRole, setIsChangingRole] = useState(false)
 
-  const handleRoleChange = async (newRole: string) => {
-    if (newRole === user.role || isChangingRole) return
+  const handleRoleToggle = async (role: string) => {
+    if (isChangingRole) return
 
     setIsChangingRole(true)
     try {
+      let newRoles: string[]
+      if (user.roles.includes(role)) {
+        // Remove role (but keep at least one)
+        if (user.roles.length <= 1) return
+        newRoles = user.roles.filter((r) => r !== role)
+      } else {
+        // Add role
+        newRoles = [...user.roles, role]
+      }
+
       const response = await fetch('/api/auth/switch-role', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ role: newRole }),
+        body: JSON.stringify({ roles: newRoles }),
       })
 
       if (response.ok) {
@@ -49,10 +59,10 @@ export function DashboardNav({ user }: DashboardNavProps) {
         router.refresh()
         window.location.reload()
       } else {
-        console.error('Failed to switch role')
+        console.error('Failed to switch roles')
       }
     } catch (error) {
-      console.error('Error switching role:', error)
+      console.error('Error switching roles:', error)
     } finally {
       setIsChangingRole(false)
     }
@@ -64,13 +74,13 @@ export function DashboardNav({ user }: DashboardNavProps) {
     { href: '/dashboard', label: 'Dashboard' },
   ]
 
-  // Only show "Nieuwe aanvraag" for INKOPER role
-  if (user.role === 'INKOPER') {
+  // Show "Nieuwe aanvraag" for INKOPER role
+  if (user.roles.includes('INKOPER')) {
     navItems.push({ href: '/requests/new', label: 'Nieuwe aanvraag' })
   }
 
-  // Only show "Gebruikersbeheer" for ADMIN role
-  if (user.role === 'ADMIN') {
+  // Show "Gebruikersbeheer" for ADMIN role
+  if (user.roles.includes('ADMIN')) {
     navItems.push({ href: '/admin/users', label: 'Gebruikersbeheer' })
   }
 
@@ -101,7 +111,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Demo: Role switcher dropdown */}
+            {/* Demo: Role switcher dropdown with checkboxes */}
             {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -112,9 +122,13 @@ export function DashboardNav({ user }: DashboardNavProps) {
                     disabled={isChangingRole}
                   >
                     <span className="text-xs text-yellow-700">Demo:</span>
-                    <Badge variant="outline" className="ml-1">
-                      {RoleLabels[user.role as keyof typeof RoleLabels] || user.role}
-                    </Badge>
+                    <div className="flex gap-1 ml-1">
+                      {user.roles.map((role) => (
+                        <Badge key={role} variant="outline" className="text-xs">
+                          {RoleLabels[role as keyof typeof RoleLabels] || role}
+                        </Badge>
+                      ))}
+                    </div>
                     <svg
                       className="h-3 w-3 text-yellow-700"
                       fill="none"
@@ -132,35 +146,31 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <div className="px-2 py-1.5 text-xs text-gray-500 font-medium">
-                    Rol wijzigen
+                    Rollen wijzigen
                   </div>
                   <DropdownMenuSeparator />
                   {availableRoles.map((role) => (
                     <DropdownMenuItem
                       key={role}
-                      onClick={() => handleRoleChange(role)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleRoleToggle(role)
+                      }}
                       className={`cursor-pointer ${
-                        user.role === role
+                        user.roles.includes(role)
                           ? 'bg-blue-50 text-blue-700 font-medium'
                           : ''
                       }`}
                     >
-                      {RoleLabels[role as keyof typeof RoleLabels]}
-                      {user.role === role && (
-                        <svg
-                          className="ml-auto h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      )}
+                      <div className="flex items-center gap-2 w-full">
+                        <input
+                          type="checkbox"
+                          checked={user.roles.includes(role)}
+                          readOnly
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        {RoleLabels[role as keyof typeof RoleLabels]}
+                      </div>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>

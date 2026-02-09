@@ -40,23 +40,25 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Reset demo user roles to their default on login (only in demo mode)
-        let effectiveRole = user.role
+        let effectiveRoles = user.roles
         if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
-          if (credentials.email === 'inkoper@demo.nl') {
-            effectiveRole = 'INKOPER'
-          } else if (credentials.email === 'finance@demo.nl') {
-            effectiveRole = 'FINANCE'
-          } else if (credentials.email === 'erp@demo.nl') {
-            effectiveRole = 'ERP'
-          } else if (credentials.email === 'admin@demo.nl') {
-            effectiveRole = 'ADMIN'
+          const defaultRolesMap: Record<string, string[]> = {
+            'inkoper@demo.nl': ['INKOPER'],
+            'finance@demo.nl': ['FINANCE'],
+            'erp@demo.nl': ['ERP'],
+            'admin@demo.nl': ['ADMIN'],
           }
 
-          // Update role in database if it was changed
-          if (effectiveRole !== user.role) {
+          const defaultRoles = defaultRolesMap[credentials.email]
+          if (defaultRoles) {
+            effectiveRoles = defaultRoles
+          }
+
+          // Update roles in database if they were changed
+          if (JSON.stringify(effectiveRoles) !== JSON.stringify(user.roles)) {
             await prisma.user.update({
               where: { id: user.id },
-              data: { role: effectiveRole },
+              data: { roles: effectiveRoles },
             })
           }
         }
@@ -65,7 +67,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: formatUserName(user),
-          role: effectiveRole,
+          roles: effectiveRoles,
         }
       },
     }),
@@ -74,25 +76,25 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = user.role
+        token.roles = user.roles
       }
-      // Always fetch the latest role and isActive from database
+      // Always fetch the latest roles and isActive from database
       if (token.id) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { role: true, isActive: true, firstName: true, middleName: true, lastName: true },
+            select: { roles: true, isActive: true, firstName: true, middleName: true, lastName: true },
           })
           if (dbUser) {
             if (!dbUser.isActive) {
               // User was deactivated - invalidate session
               return {} as typeof token
             }
-            token.role = dbUser.role
+            token.roles = dbUser.roles
             token.name = formatUserName(dbUser)
           }
         } catch {
-          // Database not available during build, use cached role
+          // Database not available during build, use cached roles
         }
       }
       return token
@@ -100,7 +102,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
-        session.user.role = token.role as string
+        session.user.roles = token.roles as string[]
       }
       return session
     },

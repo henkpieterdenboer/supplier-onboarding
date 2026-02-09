@@ -12,13 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
 import { Role, RoleLabels } from '@/types'
 
@@ -28,7 +21,7 @@ interface User {
   firstName: string
   middleName: string | null
   lastName: string
-  role: string
+  roles: string[]
   receiveEmails: boolean
 }
 
@@ -45,10 +38,21 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
   const [middleName, setMiddleName] = useState(user?.middleName || '')
   const [lastName, setLastName] = useState(user?.lastName || '')
   const [email, setEmail] = useState(user?.email || '')
-  const [role, setRole] = useState(user?.role || 'INKOPER')
+  const [roles, setRoles] = useState<string[]>(user?.roles || ['INKOPER'])
   const [receiveEmails, setReceiveEmails] = useState(user?.receiveEmails ?? true)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const handleRoleToggle = (role: string) => {
+    setRoles((prev) => {
+      if (prev.includes(role)) {
+        // Don't allow removing the last role
+        if (prev.length <= 1) return prev
+        return prev.filter((r) => r !== role)
+      }
+      return [...prev, role]
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,7 +67,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
         firstName,
         middleName: middleName || null,
         lastName,
-        role,
+        roles,
         receiveEmails,
       }
 
@@ -162,19 +166,24 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Rol *</Label>
-            <Select value={role} onValueChange={setRole} disabled={isLoading}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(RoleLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
+            <Label>Rollen * (minimaal 1)</Label>
+            <div className="space-y-2">
+              {Object.entries(RoleLabels).map(([value, label]) => (
+                <div key={value} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`role-${value}`}
+                    checked={roles.includes(value)}
+                    onChange={() => handleRoleToggle(value)}
+                    disabled={isLoading}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <Label htmlFor={`role-${value}`} className="font-normal">
                     {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

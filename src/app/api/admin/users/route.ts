@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (!session?.user || !session.user.roles.includes('ADMIN')) {
       return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
     }
 
@@ -21,7 +21,7 @@ export async function GET() {
         firstName: true,
         middleName: true,
         lastName: true,
-        role: true,
+        roles: true,
         isActive: true,
         receiveEmails: true,
         createdAt: true,
@@ -53,16 +53,16 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (!session?.user || !session.user.roles.includes('ADMIN')) {
       return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
     }
 
     const body = await request.json()
-    const { email, firstName, middleName, lastName, role, receiveEmails } = body
+    const { email, firstName, middleName, lastName, roles, receiveEmails } = body
 
-    if (!email || !firstName || !lastName || !role) {
+    if (!email || !firstName || !lastName || !roles || !Array.isArray(roles) || roles.length === 0) {
       return NextResponse.json(
-        { error: 'Email, voornaam, achternaam en rol zijn verplicht' },
+        { error: 'Email, voornaam, achternaam en minimaal één rol zijn verplicht' },
         { status: 400 }
       )
     }
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         firstName,
         middleName: middleName || null,
         lastName,
-        role,
+        roles,
         receiveEmails: receiveEmails ?? true,
         isActive: false,
         activationToken,
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       firstName: user.firstName,
       middleName: user.middleName,
       lastName: user.lastName,
-      role: user.role,
+      roles: user.roles,
       isActive: user.isActive,
       receiveEmails: user.receiveEmails,
     }, { status: 201 })

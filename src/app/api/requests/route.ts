@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
     }
 
-    if (session.user.role !== 'INKOPER') {
+    if (!session.user.roles.includes('INKOPER')) {
       return NextResponse.json(
         { error: 'Alleen inkopers kunnen aanvragen aanmaken' },
         { status: 403 }

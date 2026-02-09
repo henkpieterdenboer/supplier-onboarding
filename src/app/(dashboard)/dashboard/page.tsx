@@ -45,7 +45,7 @@ export default async function DashboardPage() {
         <p className="text-gray-500">Overzicht van alle leveranciersaanvragen</p>
       </div>
 
-      <DashboardContent stats={stats} requests={requests} userRole={session.user.role} />
+      <DashboardContent stats={stats} requests={requests} userRoles={session.user.roles} />
 
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <p className="text-sm text-gray-600 font-medium mb-2">Om verstuurde mails te kunnen zien:</p>

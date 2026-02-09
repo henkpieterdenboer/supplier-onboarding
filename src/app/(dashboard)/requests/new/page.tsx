@@ -33,7 +33,7 @@ export default function NewRequestPage() {
   })
 
   // Only INKOPER can create new requests
-  if (session?.user?.role !== 'INKOPER') {
+  if (!session?.user?.roles?.includes('INKOPER')) {
     return (
       <div className="max-w-2xl mx-auto">
         <Alert variant="destructive">

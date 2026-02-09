@@ -92,7 +92,7 @@ interface Request {
 
 interface RequestDetailProps {
   request: Request
-  userRole: string
+  userRoles: string[]
   userId: string
 }
 
@@ -105,7 +105,7 @@ const statusColors: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 }
 
-export function RequestDetail({ request, userRole, userId }: RequestDetailProps) {
+export function RequestDetail({ request, userRoles, userId }: RequestDetailProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [creditorNumber, setCreditorNumber] = useState('')
@@ -142,9 +142,9 @@ export function RequestDetail({ request, userRole, userId }: RequestDetailProps)
   }
 
   const canEdit =
-    (userRole === 'INKOPER' && request.status === 'AWAITING_PURCHASER') ||
-    (userRole === 'FINANCE' && request.status === 'AWAITING_FINANCE') ||
-    (userRole === 'ERP' && request.status === 'AWAITING_ERP')
+    (userRoles.includes('INKOPER') && request.status === 'AWAITING_PURCHASER') ||
+    (userRoles.includes('FINANCE') && request.status === 'AWAITING_FINANCE') ||
+    (userRoles.includes('ERP') && request.status === 'AWAITING_ERP')
 
   const canCancel = request.status !== 'CANCELLED' && request.status !== 'COMPLETED'
   const canReopen = request.status === 'CANCELLED'
@@ -419,7 +419,7 @@ export function RequestDetail({ request, userRole, userId }: RequestDetailProps)
                     <Label className="text-gray-500">Crediteurnummer</Label>
                     <p className="font-medium">{request.creditorNumber}</p>
                   </div>
-                ) : userRole === 'FINANCE' ? (
+                ) : userRoles.includes('FINANCE') ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="creditorNumber">Crediteurnummer *</Label>
@@ -459,7 +459,7 @@ export function RequestDetail({ request, userRole, userId }: RequestDetailProps)
                     <Label className="text-gray-500">KBT-code</Label>
                     <p className="font-medium">{request.kbtCode}</p>
                   </div>
-                ) : userRole === 'ERP' ? (
+                ) : userRoles.includes('ERP') ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="kbtCode">KBT-code *</Label>
