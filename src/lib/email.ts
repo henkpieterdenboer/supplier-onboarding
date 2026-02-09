@@ -8,8 +8,9 @@ const EMAIL_HEADER = `
   </div>
 `
 
-// For demo purposes, all emails go to a single address
-const DEMO_EMAIL = process.env.DEMO_EMAIL || 'henk.pieter.den.boer@coloriginz.com'
+// In demo mode, all emails go to a single address
+const DEMO_EMAIL = process.env.DEMO_EMAIL
+const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && !!DEMO_EMAIL
 const APP_URL = process.env.APP_URL || 'http://localhost:3000'
 
 // Create transporter (configure for your SMTP server)
@@ -30,24 +31,37 @@ interface SendEmailOptions {
 }
 
 async function sendEmail({ to, subject, html }: SendEmailOptions) {
-  // For demo, all emails go to the demo address with the original recipient shown in the body
-  const demoHtml = `
-    <div style="background-color: #f0f0f0; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
-      <strong>DEMO MODUS</strong><br>
-      Oorspronkelijke ontvanger: <strong>${to}</strong>
-    </div>
-    ${EMAIL_HEADER}
-    ${html}
-  `
-
   try {
-    await transporter.sendMail({
-      from: '"Supplier Onboarding" <noreply@supplier-onboarding.local>',
-      to: DEMO_EMAIL,
-      subject: `[DEMO] ${subject}`,
-      html: demoHtml,
-    })
-    console.log(`Email sent to ${DEMO_EMAIL} (original: ${to})`)
+    if (IS_DEMO_MODE) {
+      // In demo mode, all emails go to the demo address with the original recipient shown in the body
+      const demoHtml = `
+        <div style="background-color: #f0f0f0; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+          <strong>DEMO MODUS</strong><br>
+          Oorspronkelijke ontvanger: <strong>${to}</strong>
+        </div>
+        ${EMAIL_HEADER}
+        ${html}
+      `
+
+      await transporter.sendMail({
+        from: '"Supplier Onboarding" <noreply@supplier-onboarding.local>',
+        to: DEMO_EMAIL!,
+        subject: `[DEMO] ${subject}`,
+        html: demoHtml,
+      })
+      console.log(`Email sent to ${DEMO_EMAIL} (original: ${to})`)
+    } else {
+      // Production: send to actual recipient
+      const fullHtml = `${EMAIL_HEADER}${html}`
+
+      await transporter.sendMail({
+        from: '"Supplier Onboarding" <noreply@supplier-onboarding.local>',
+        to,
+        subject,
+        html: fullHtml,
+      })
+      console.log(`Email sent to ${to}`)
+    }
   } catch (error) {
     console.error('Failed to send email:', error)
     // Don't throw - email failures shouldn't block the process

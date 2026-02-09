@@ -103,28 +103,32 @@ function LoginForm() {
           </div>
         </form>
 
-        <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-          <p className="text-sm text-gray-600 font-medium mb-2">Demo accounts:</p>
-          <ul className="text-sm text-gray-500 space-y-1">
-            <li><strong>Admin:</strong> admin@demo.nl / demo123</li>
-            <li><strong>Inkoper:</strong> inkoper@demo.nl / demo123</li>
-            <li><strong>Finance:</strong> finance@demo.nl / demo123</li>
-            <li><strong>ERP:</strong> erp@demo.nl / demo123</li>
-          </ul>
-        </div>
+        {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+          <>
+            <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+              <p className="text-sm text-gray-600 font-medium mb-2">Demo accounts:</p>
+              <ul className="text-sm text-gray-500 space-y-1">
+                <li><strong>Admin:</strong> admin@demo.nl / demo123</li>
+                <li><strong>Inkoper:</strong> inkoper@demo.nl / demo123</li>
+                <li><strong>Finance:</strong> finance@demo.nl / demo123</li>
+                <li><strong>ERP:</strong> erp@demo.nl / demo123</li>
+              </ul>
+            </div>
 
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-600 font-medium mb-2">Om verstuurde mails te kunnen zien:</p>
-          <p className="text-sm text-gray-500 mb-1">
-            <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-              https://ethereal.email/login
-            </a>
-          </p>
-          <ul className="text-sm text-gray-500 space-y-1">
-            <li><strong>Email:</strong> dxubywxljl4roleu@ethereal.email</li>
-            <li><strong>Wachtwoord:</strong> SbGwM71ZJusSNSQWr3</li>
-          </ul>
-        </div>
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-gray-600 font-medium mb-2">Om verstuurde mails te kunnen zien:</p>
+              <p className="text-sm text-gray-500 mb-1">
+                <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  https://ethereal.email/login
+                </a>
+              </p>
+              <ul className="text-sm text-gray-500 space-y-1">
+                <li><strong>Email:</strong> dxubywxljl4roleu@ethereal.email</li>
+                <li><strong>Wachtwoord:</strong> SbGwM71ZJusSNSQWr3</li>
+              </ul>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   )

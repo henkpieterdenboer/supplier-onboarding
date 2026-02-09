@@ -39,31 +39,33 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Ongeldig wachtwoord')
         }
 
-        // Reset demo user roles to their default on login
-        let defaultRole = user.role
-        if (credentials.email === 'inkoper@demo.nl') {
-          defaultRole = 'INKOPER'
-        } else if (credentials.email === 'finance@demo.nl') {
-          defaultRole = 'FINANCE'
-        } else if (credentials.email === 'erp@demo.nl') {
-          defaultRole = 'ERP'
-        } else if (credentials.email === 'admin@demo.nl') {
-          defaultRole = 'ADMIN'
-        }
+        // Reset demo user roles to their default on login (only in demo mode)
+        let effectiveRole = user.role
+        if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+          if (credentials.email === 'inkoper@demo.nl') {
+            effectiveRole = 'INKOPER'
+          } else if (credentials.email === 'finance@demo.nl') {
+            effectiveRole = 'FINANCE'
+          } else if (credentials.email === 'erp@demo.nl') {
+            effectiveRole = 'ERP'
+          } else if (credentials.email === 'admin@demo.nl') {
+            effectiveRole = 'ADMIN'
+          }
 
-        // Update role in database if it was changed
-        if (defaultRole !== user.role) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { role: defaultRole },
-          })
+          // Update role in database if it was changed
+          if (effectiveRole !== user.role) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { role: effectiveRole },
+            })
+          }
         }
 
         return {
           id: user.id,
           email: user.email,
           name: formatUserName(user),
-          role: defaultRole,
+          role: effectiveRole,
         }
       },
     }),

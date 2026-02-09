@@ -5,6 +5,10 @@ import { prisma } from '@/lib/db'
 import { Role } from '@/types'
 
 export async function POST(request: Request) {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE !== 'true') {
+    return new NextResponse(null, { status: 404 })
+  }
+
   try {
     const session = await getServerSession(authOptions)
 
