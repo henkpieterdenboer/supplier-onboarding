@@ -8,8 +8,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
 import Link from 'next/link'
+
+const ssoErrorMessages: Record<string, string> = {
+  AccountNotFound: 'Account niet gevonden. Neem contact op met uw beheerder.',
+  NoEmail: 'Geen e-mailadres ontvangen van Microsoft.',
+  OAuthCallback: 'Er is een fout opgetreden bij het inloggen met Microsoft. Probeer het opnieuw.',
+  OAuthSignin: 'Er is een fout opgetreden bij het inloggen met Microsoft. Probeer het opnieuw.',
+}
 
 function LoginForm() {
   const router = useRouter()
@@ -20,6 +28,11 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSsoLoading, setIsSsoLoading] = useState(false)
+
+  // Show SSO error from URL params
+  const ssoError = searchParams.get('error')
+  const ssoErrorMessage = ssoError ? ssoErrorMessages[ssoError] : null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,6 +73,12 @@ function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {ssoErrorMessage && (
+          <Alert variant="destructive" className="mb-4">
+            {ssoErrorMessage}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <Alert variant="destructive">
@@ -102,6 +121,42 @@ function LoginForm() {
             </Link>
           </div>
         </form>
+
+        {process.env.NEXT_PUBLIC_AZURE_AD_ENABLED === 'true' && (
+          <>
+            <div className="relative my-6">
+              <Separator />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-muted-foreground">
+                of
+              </span>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={isSsoLoading || isLoading}
+              onClick={() => {
+                setIsSsoLoading(true)
+                signIn('azure-ad', { callbackUrl })
+              }}
+            >
+              {isSsoLoading ? (
+                'Bezig...'
+              ) : (
+                <>
+                  <svg className="mr-2 h-4 w-4" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                    <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                    <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                    <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+                  </svg>
+                  Inloggen met Microsoft
+                </>
+              )}
+            </Button>
+          </>
+        )}
 
         {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
           <>

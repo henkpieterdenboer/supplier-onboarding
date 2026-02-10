@@ -1,5 +1,6 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import AzureADProvider from 'next-auth/providers/azure-ad'
 import bcrypt from 'bcryptjs'
 import { prisma } from './db'
 import { formatUserName } from './user-utils'
@@ -71,12 +72,67 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    ...(process.env.AZURE_AD_CLIENT_ID
+      ? [AzureADProvider({
+          clientId: process.env.AZURE_AD_CLIENT_ID!,
+          clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
+          tenantId: process.env.AZURE_AD_TENANT_ID!,
+          authorization: { params: { prompt: 'select_account' } },
+        })]
+      : []),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async signIn({ user, account }) {
+      if (account?.provider === 'credentials') {
+        return true
+      }
+
+      if (account?.provider === 'azure-ad') {
+        const email = user.email
+        if (!email) {
+          return '/login?error=NoEmail'
+        }
+
+        const dbUser = await prisma.user.findFirst({
+          where: { email: { equals: email, mode: 'insensitive' } },
+        })
+
+        if (!dbUser) {
+          return '/login?error=AccountNotFound'
+        }
+
+        // Auto-activate on first SSO login
+        if (!dbUser.isActive) {
+          await prisma.user.update({
+            where: { id: dbUser.id },
+            data: {
+              isActive: true,
+              activationToken: null,
+              activationExpiresAt: null,
+            },
+          })
+        }
+
+        return true
+      }
+
+      return true
+    },
+    async jwt({ token, user, account }) {
+      if (user && account?.provider === 'credentials') {
         token.id = user.id
         token.roles = user.roles
+      }
+
+      if (account?.provider === 'azure-ad') {
+        const dbUser = await prisma.user.findFirst({
+          where: { email: { equals: user.email!, mode: 'insensitive' } },
+          select: { id: true, roles: true },
+        })
+        if (dbUser) {
+          token.id = dbUser.id
+          token.roles = dbUser.roles
+        }
       }
       // Always fetch the latest roles and isActive from database
       if (token.id) {
