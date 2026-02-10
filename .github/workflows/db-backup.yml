@@ -1,0 +1,33 @@
+name: Daily Database Backup
+
+on:
+  schedule:
+    # Elke dag om 03:00 UTC (04:00 CET / 05:00 CEST)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Handmatig triggeren mogelijk
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run pg_dump
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
+        run: |
+          TIMESTAMP=$(date +%Y-%m-%d_%H%M)
+          FILENAME="backup_production_${TIMESTAMP}.sql.gz"
+          pg_dump "$DATABASE_URL" | gzip > "$FILENAME"
+          echo "BACKUP_FILE=$FILENAME" >> $GITHUB_ENV
+          echo "Backup created: $FILENAME ($(du -h "$FILENAME" | cut -f1))"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 90
