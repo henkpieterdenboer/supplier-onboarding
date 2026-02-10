@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,12 +19,15 @@ import { Alert } from '@/components/ui/alert'
 import { toast } from 'sonner'
 import { Region, RegionLabels } from '@/types'
 
+const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
+
 export default function NewRequestPage() {
   const router = useRouter()
   const { data: session } = useSession()
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successData, setSuccessData] = useState<{ id: string; emailPreviewUrl: string | null } | null>(null)
 
   const [formData, setFormData] = useState({
     supplierName: '',
@@ -70,6 +74,9 @@ export default function NewRequestPage() {
       // Redirect to the request detail page or edit page if self-fill
       if (formData.selfFill) {
         router.push(`/requests/${data.id}/edit`)
+      } else if (isDemoMode && data.emailPreviewUrl) {
+        // In demo mode, show success screen with email preview link
+        setSuccessData({ id: data.id, emailPreviewUrl: data.emailPreviewUrl })
       } else {
         router.push(`/requests/${data.id}`)
       }
@@ -78,6 +85,47 @@ export default function NewRequestPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Demo mode: show success screen with test email info
+  if (successData) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Uitnodiging verstuurd</CardTitle>
+            <CardDescription>
+              De uitnodiging is aangemaakt en de email is verstuurd via de test SMTP-server.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
+              <p className="font-medium text-amber-900">Test SMTP-server (Ethereal)</p>
+              <p className="text-sm text-amber-800">
+                In demo-modus worden emails verstuurd via Ethereal, een test SMTP-server.
+                Klik op de onderstaande link om het verstuurde bericht te bekijken:
+              </p>
+              <a
+                href={successData.emailPreviewUrl!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-sm font-medium text-blue-700 underline break-all"
+              >
+                {successData.emailPreviewUrl}
+              </a>
+            </div>
+            <div className="flex gap-4 pt-2">
+              <Link href={`/requests/${successData.id}`}>
+                <Button>Naar aanvraag</Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button variant="outline">Naar dashboard</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (

@@ -10,7 +10,8 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "db:sync-test": "tsx prisma/sync-test-db.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

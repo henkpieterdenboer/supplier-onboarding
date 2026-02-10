@@ -30,7 +30,7 @@ interface SendEmailOptions {
   html: string
 }
 
-async function sendEmail({ to, subject, html }: SendEmailOptions) {
+async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<string | null> {
   try {
     if (IS_DEMO_MODE) {
       // In demo mode, all emails go to the demo address with the original recipient shown in the body
@@ -43,13 +43,17 @@ async function sendEmail({ to, subject, html }: SendEmailOptions) {
         ${html}
       `
 
-      await transporter.sendMail({
+      const info = await transporter.sendMail({
         from: '"Supplier Onboarding" <noreply@supplier-onboarding.local>',
         to: DEMO_EMAIL!,
         subject: `[DEMO] ${subject}`,
         html: demoHtml,
       })
       console.log(`Email sent to ${DEMO_EMAIL} (original: ${to})`)
+
+      // Return Ethereal preview URL if available
+      const previewUrl = nodemailer.getTestMessageUrl(info)
+      return previewUrl || null
     } else {
       // Production: send to actual recipient
       const fullHtml = `${EMAIL_HEADER}${html}`
@@ -61,10 +65,12 @@ async function sendEmail({ to, subject, html }: SendEmailOptions) {
         html: fullHtml,
       })
       console.log(`Email sent to ${to}`)
+      return null
     }
   } catch (error) {
     console.error('Failed to send email:', error)
     // Don't throw - email failures shouldn't block the process
+    return null
   }
 }
 
@@ -81,10 +87,10 @@ export async function sendInvitationEmail({
   supplierName,
   invitationToken,
   expiresAt,
-}: InvitationEmailOptions) {
+}: InvitationEmailOptions): Promise<string | null> {
   const invitationUrl = `${APP_URL}/supplier/${invitationToken}`
 
-  await sendEmail({
+  return sendEmail({
     to,
     subject: 'Uitnodiging voor Supplier Onboarding',
     html: `

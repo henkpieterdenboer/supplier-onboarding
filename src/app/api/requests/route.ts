@@ -90,8 +90,9 @@ export async function POST(request: NextRequest) {
     })
 
     // Send invitation email if not self-fill
+    let emailPreviewUrl: string | null = null
     if (!selfFill) {
-      await sendInvitationEmail({
+      emailPreviewUrl = await sendInvitationEmail({
         to: supplierEmail,
         supplierName,
         invitationToken,
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(newRequest, { status: 201 })
+    return NextResponse.json({ ...newRequest, emailPreviewUrl }, { status: 201 })
   } catch (error) {
     console.error('Error creating request:', error)
     return NextResponse.json(
