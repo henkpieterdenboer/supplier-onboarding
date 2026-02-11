@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
@@ -30,6 +30,39 @@ export function DashboardNav({ user }: DashboardNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isChangingRole, setIsChangingRole] = useState(false)
+  const [emailProvider, setEmailProvider] = useState<'ethereal' | 'resend'>('ethereal')
+  const [isChangingProvider, setIsChangingProvider] = useState(false)
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+      fetch('/api/email-provider')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.provider) setEmailProvider(data.provider)
+        })
+        .catch(() => {})
+    }
+  }, [])
+
+  const handleEmailProviderToggle = async () => {
+    if (isChangingProvider) return
+    setIsChangingProvider(true)
+    try {
+      const newProvider = emailProvider === 'ethereal' ? 'resend' : 'ethereal'
+      const response = await fetch('/api/email-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: newProvider }),
+      })
+      if (response.ok) {
+        setEmailProvider(newProvider)
+      }
+    } catch (error) {
+      console.error('Error switching email provider:', error)
+    } finally {
+      setIsChangingProvider(false)
+    }
+  }
 
   const handleRoleToggle = async (role: string) => {
     if (isChangingRole) return
@@ -112,7 +145,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
 
           <div className="flex items-center gap-4">
             {/* Demo: Role switcher dropdown with checkboxes */}
-            {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+            {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (<>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -175,7 +208,27 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
+                onClick={handleEmailProviderToggle}
+                disabled={isChangingProvider}
+              >
+                <span className="text-xs text-yellow-700">Mail:</span>
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${
+                    emailProvider === 'resend'
+                      ? 'bg-green-100 text-green-700 border-green-300'
+                      : 'bg-gray-100 text-gray-600 border-gray-300'
+                  }`}
+                >
+                  {emailProvider === 'resend' ? 'Demomail' : 'Ethereal'}
+                </Badge>
+              </Button>
+            </>)}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

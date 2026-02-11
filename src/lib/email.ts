@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { cookies } from 'next/headers'
 import { LOGO_BASE64 } from './logo-base64'
 
 // Email header with logo
@@ -12,17 +13,68 @@ const EMAIL_HEADER = `
 const DEMO_EMAIL = process.env.DEMO_EMAIL
 const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && !!DEMO_EMAIL
 const APP_URL = process.env.APP_URL || 'http://localhost:3000'
+const EMAIL_FROM = process.env.EMAIL_FROM || '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
 
-// Create transporter (configure for your SMTP server)
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
+type EmailProvider = 'ethereal' | 'resend'
+
+/**
+ * Determine which email provider to use.
+ * - Production (non-demo): always uses SMTP_* env vars (which point to Resend in prod)
+ * - Demo mode: reads cookie to toggle between Ethereal and Resend
+ */
+async function getEmailProvider(): Promise<EmailProvider> {
+  if (!IS_DEMO_MODE) {
+    // Production: always use whatever SMTP_* is configured (Resend in prod env)
+    return 'resend'
+  }
+
+  try {
+    const cookieStore = await cookies()
+    const providerCookie = cookieStore.get('email-provider')
+    if (providerCookie?.value === 'resend') {
+      return 'resend'
+    }
+  } catch {
+    // cookies() can fail outside of request context (e.g. build time)
+  }
+
+  return 'ethereal'
+}
+
+/**
+ * Create a nodemailer transporter for the given provider.
+ * - 'ethereal': uses SMTP_* env vars (defaults to smtp.ethereal.email)
+ * - 'resend': uses Resend SMTP with RESEND_API_KEY
+ */
+function createTransporter(provider: EmailProvider) {
+  if (provider === 'resend') {
+    const apiKey = process.env.RESEND_API_KEY
+    if (apiKey) {
+      // Use Resend SMTP
+      return nodemailer.createTransport({
+        host: 'smtp.resend.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: 'resend',
+          pass: apiKey,
+        },
+      })
+    }
+    // Fallback: if no RESEND_API_KEY, try SMTP_* env vars (production Resend setup)
+  }
+
+  // Ethereal or fallback: use SMTP_* env vars
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  })
+}
 
 interface SendEmailOptions {
   to: string
@@ -32,39 +84,48 @@ interface SendEmailOptions {
 
 async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<string | null> {
   try {
+    const provider = await getEmailProvider()
+    const transporter = createTransporter(provider)
+    const fromAddress = provider === 'resend' ? EMAIL_FROM : '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
+
     if (IS_DEMO_MODE) {
       // In demo mode, all emails go to the demo address with the original recipient shown in the body
+      const providerLabel = provider === 'resend' ? 'Resend (echte mail)' : 'Ethereal (nep)'
       const demoHtml = `
         <div style="background-color: #f0f0f0; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
           <strong>DEMO MODUS</strong><br>
-          Oorspronkelijke ontvanger: <strong>${to}</strong>
+          Oorspronkelijke ontvanger: <strong>${to}</strong><br>
+          E-mailprovider: <strong>${providerLabel}</strong>
         </div>
         ${EMAIL_HEADER}
         ${html}
       `
 
       const info = await transporter.sendMail({
-        from: '"Supplier Onboarding" <noreply@supplier-onboarding.local>',
+        from: fromAddress,
         to: DEMO_EMAIL!,
         subject: `[DEMO] ${subject}`,
         html: demoHtml,
       })
-      console.log(`Email sent to ${DEMO_EMAIL} (original: ${to})`)
+      console.log(`Email sent via ${provider} to ${DEMO_EMAIL} (original: ${to})`)
 
-      // Return Ethereal preview URL if available
-      const previewUrl = nodemailer.getTestMessageUrl(info)
-      return previewUrl || null
+      // Return Ethereal preview URL only for Ethereal transport
+      if (provider === 'ethereal') {
+        const previewUrl = nodemailer.getTestMessageUrl(info)
+        return previewUrl || null
+      }
+      return null
     } else {
       // Production: send to actual recipient
       const fullHtml = `${EMAIL_HEADER}${html}`
 
       await transporter.sendMail({
-        from: '"Supplier Onboarding" <noreply@supplier-onboarding.local>',
+        from: fromAddress,
         to,
         subject,
         html: fullHtml,
       })
-      console.log(`Email sent to ${to}`)
+      console.log(`Email sent via ${provider} to ${to}`)
       return null
     }
   } catch (error) {
