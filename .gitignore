@@ -34,6 +34,8 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+.env.vercel
+.env.vercel-demo
 
 # Keep .env.example for documentation
 !.env.example
@@ -55,9 +57,7 @@ next-env.d.ts
 /src/generated/prisma
 
 # Local utility scripts
+*.ps1
 generate-hash.js
-npm-install.ps1
-run-hash.ps1
-seed-neon.ps1
 vercel-import.env
 nul
