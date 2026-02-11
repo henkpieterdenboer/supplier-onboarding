@@ -21,19 +21,27 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
         run: |
-          set -eo pipefail
+          set -e
           if [ -z "$DATABASE_URL" ]; then
             echo "::error::PRODUCTION_DIRECT_URL secret is not set"
             exit 1
           fi
+          echo "pg_dump version: $(pg_dump --version)"
           TIMESTAMP=$(date +%Y-%m-%d_%H%M)
           FILENAME="backup_production_${TIMESTAMP}.sql.gz"
-          pg_dump --verbose "$DATABASE_URL" 2>&1 | tee /tmp/pg_dump_output.sql | gzip > "$FILENAME"
+          # Run pg_dump: stdout → gzip, stderr → log file
+          if pg_dump "$DATABASE_URL" 2>/tmp/pg_dump.log | gzip > "$FILENAME"; then
+            echo "pg_dump succeeded"
+          else
+            echo "::error::pg_dump failed with exit code $?"
+            cat /tmp/pg_dump.log
+            exit 1
+          fi
+          cat /tmp/pg_dump.log
           # Verify the dump is not empty (gzip of empty = 20 bytes)
           FILESIZE=$(stat --format=%s "$FILENAME")
           if [ "$FILESIZE" -lt 100 ]; then
             echo "::error::Backup file too small (${FILESIZE} bytes) - pg_dump likely failed"
-            cat /tmp/pg_dump_output.sql
             exit 1
           fi
           echo "BACKUP_FILE=$FILENAME" >> $GITHUB_ENV
