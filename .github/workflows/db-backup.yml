@@ -16,21 +16,24 @@ jobs:
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
+          # Verify version 17 is installed
+          /usr/lib/postgresql/17/bin/pg_dump --version
 
       - name: Run pg_dump
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
         run: |
           set -e
+          PG_DUMP=/usr/lib/postgresql/17/bin/pg_dump
           if [ -z "$DATABASE_URL" ]; then
             echo "::error::PRODUCTION_DIRECT_URL secret is not set"
             exit 1
           fi
-          echo "pg_dump version: $(pg_dump --version)"
+          echo "pg_dump version: $($PG_DUMP --version)"
           TIMESTAMP=$(date +%Y-%m-%d_%H%M)
           FILENAME="backup_production_${TIMESTAMP}.sql.gz"
           # Run pg_dump: stdout → gzip, stderr → log file
-          if pg_dump "$DATABASE_URL" 2>/tmp/pg_dump.log | gzip > "$FILENAME"; then
+          if $PG_DUMP "$DATABASE_URL" 2>/tmp/pg_dump.log | gzip > "$FILENAME"; then
             echo "pg_dump succeeded"
           else
             echo "::error::pg_dump failed with exit code $?"
