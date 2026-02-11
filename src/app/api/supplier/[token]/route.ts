@@ -105,6 +105,7 @@ export async function POST(
             middleName: true,
             lastName: true,
             email: true,
+            receiveEmails: true,
           },
         },
       },
@@ -236,13 +237,15 @@ export async function POST(
       supplierName: supplierRequest.supplierName,
     })
 
-    // Notify purchaser
-    await sendPurchaserNotificationEmail({
-      to: supplierRequest.createdBy.email,
-      purchaserName: formatUserName(supplierRequest.createdBy) || 'Inkoper',
-      supplierName: supplierRequest.supplierName,
-      requestId: supplierRequest.id,
-    })
+    // Notify purchaser (only if they want to receive emails)
+    if (supplierRequest.createdBy.receiveEmails) {
+      await sendPurchaserNotificationEmail({
+        to: supplierRequest.createdBy.email,
+        purchaserName: formatUserName(supplierRequest.createdBy) || 'Inkoper',
+        supplierName: supplierRequest.supplierName,
+        requestId: supplierRequest.id,
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -118,7 +118,16 @@ export async function PATCH(
     const existingRequest = await prisma.supplierRequest.findUnique({
       where: { id },
       include: {
-        createdBy: true,
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            middleName: true,
+            lastName: true,
+            receiveEmails: true,
+          },
+        },
       },
     })
 
@@ -225,50 +234,53 @@ export async function PATCH(
       }
 
       case 'send-reminder': {
-        const { reminderTarget } = data
-
-        // Determine recipient based on current status
-        let reminderEmail = ''
-        let reminderName = ''
+        // Determine recipients based on current status
+        type ReminderRecipient = { email: string; name: string }
+        let recipients: ReminderRecipient[] = []
         let reminderRole: 'supplier' | 'purchaser' | 'finance' | 'erp' = 'supplier'
 
         switch (existingRequest.status) {
           case 'INVITATION_SENT':
-            reminderEmail = existingRequest.supplierEmail
-            reminderName = existingRequest.supplierName
+            // Supplier reminders always send (external party)
+            recipients = [{ email: existingRequest.supplierEmail, name: existingRequest.supplierName }]
             reminderRole = 'supplier'
             break
           case 'AWAITING_PURCHASER':
-            reminderEmail = existingRequest.createdBy.email
-            reminderName = formatUserName(existingRequest.createdBy) || 'Inkoper'
+            if (existingRequest.createdBy.receiveEmails) {
+              recipients = [{ email: existingRequest.createdBy.email, name: formatUserName(existingRequest.createdBy) || 'Inkoper' }]
+            }
             reminderRole = 'purchaser'
             break
-          case 'AWAITING_FINANCE':
-            // In real app, get Finance team email from settings
-            reminderEmail = 'finance@demo.nl'
-            reminderName = 'Finance Team'
+          case 'AWAITING_FINANCE': {
+            const financeUsers = await prisma.user.findMany({
+              where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
+              select: { email: true, firstName: true, middleName: true, lastName: true },
+            })
+            recipients = financeUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'Finance' }))
             reminderRole = 'finance'
             break
-          case 'AWAITING_ERP':
-            // In real app, get ERP team email from settings
-            reminderEmail = 'erp@demo.nl'
-            reminderName = 'ERP Team'
+          }
+          case 'AWAITING_ERP': {
+            const erpUsers = await prisma.user.findMany({
+              where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true },
+              select: { email: true, firstName: true, middleName: true, lastName: true },
+            })
+            recipients = erpUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'ERP' }))
             reminderRole = 'erp'
             break
+          }
         }
 
-        if (reminderTarget) {
-          reminderEmail = reminderTarget as string
+        for (const recipient of recipients) {
+          await sendReminderEmail({
+            to: recipient.email,
+            recipientName: recipient.name,
+            supplierName: existingRequest.supplierName,
+            requestId: id,
+            role: reminderRole,
+            invitationToken: existingRequest.invitationToken || undefined,
+          })
         }
-
-        await sendReminderEmail({
-          to: reminderEmail,
-          recipientName: reminderName,
-          supplierName: existingRequest.supplierName,
-          requestId: id,
-          role: reminderRole,
-          invitationToken: existingRequest.invitationToken || undefined,
-        })
 
         await prisma.auditLog.create({
           data: {
@@ -276,7 +288,7 @@ export async function PATCH(
             userId: session.user.id,
             action: AuditAction.REMINDER_SENT,
             details: JSON.stringify({
-              email: reminderEmail,
+              emails: recipients.map(r => r.email),
               role: reminderRole,
             }),
           },
@@ -372,12 +384,18 @@ export async function PATCH(
           },
         })
 
-        // Notify Finance
-        await sendFinanceNotificationEmail({
-          to: 'finance@demo.nl', // In real app, get from settings
-          supplierName: existingRequest.supplierName,
-          requestId: id,
+        // Notify Finance users with receiveEmails enabled
+        const financeUsersForNotify = await prisma.user.findMany({
+          where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
+          select: { email: true },
         })
+        for (const fu of financeUsersForNotify) {
+          await sendFinanceNotificationEmail({
+            to: fu.email,
+            supplierName: existingRequest.supplierName,
+            requestId: id,
+          })
+        }
 
         return NextResponse.json(updated)
       }
@@ -430,12 +448,18 @@ export async function PATCH(
           },
         })
 
-        // Notify ERP
-        await sendERPNotificationEmail({
-          to: 'erp@demo.nl', // In real app, get from settings
-          supplierName: existingRequest.supplierName,
-          requestId: id,
+        // Notify ERP users with receiveEmails enabled
+        const erpUsersForNotify = await prisma.user.findMany({
+          where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true },
+          select: { email: true },
         })
+        for (const eu of erpUsersForNotify) {
+          await sendERPNotificationEmail({
+            to: eu.email,
+            supplierName: existingRequest.supplierName,
+            requestId: id,
+          })
+        }
 
         return NextResponse.json(updated)
       }
@@ -488,10 +512,14 @@ export async function PATCH(
           },
         })
 
-        // Send completion email to Finance and Purchaser
+        // Send completion email to Finance users and Purchaser (respecting receiveEmails)
+        const financeUsersForCompletion = await prisma.user.findMany({
+          where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
+          select: { email: true },
+        })
         await sendCompletionEmail({
-          financeEmail: 'finance@demo.nl', // In real app, get from settings
-          purchaserEmail: existingRequest.createdBy.email,
+          financeEmails: financeUsersForCompletion.map(u => u.email),
+          purchaserEmail: existingRequest.createdBy.receiveEmails ? existingRequest.createdBy.email : null,
           purchaserName: formatUserName(existingRequest.createdBy) || 'Inkoper',
           supplierName: existingRequest.supplierName,
           requestId: id,

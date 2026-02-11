@@ -262,8 +262,8 @@ export async function sendERPNotificationEmail({
 
 // Completion email to Finance and Purchaser
 interface CompletionEmailOptions {
-  financeEmail: string
-  purchaserEmail: string
+  financeEmails: string[]
+  purchaserEmail: string | null
   purchaserName: string
   supplierName: string
   requestId: string
@@ -272,7 +272,7 @@ interface CompletionEmailOptions {
 }
 
 export async function sendCompletionEmail({
-  financeEmail,
+  financeEmails,
   purchaserEmail,
   purchaserName,
   supplierName,
@@ -282,10 +282,11 @@ export async function sendCompletionEmail({
 }: CompletionEmailOptions) {
   const requestUrl = `${APP_URL}/requests/${requestId}`
 
-  // Email to Finance
-  await sendEmail({
-    to: financeEmail,
-    subject: `Leverancier ${supplierName} - Registratie voltooid`,
+  // Email to Finance users
+  for (const financeEmail of financeEmails) {
+    await sendEmail({
+      to: financeEmail,
+      subject: `Leverancier ${supplierName} - Registratie voltooid`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Leveranciersregistratie voltooid</h2>
@@ -307,34 +308,37 @@ export async function sendCompletionEmail({
         </p>
       </div>
     `,
-  })
+    })
+  }
 
   // Email to Purchaser
-  await sendEmail({
-    to: purchaserEmail,
-    subject: `Leverancier ${supplierName} - Registratie voltooid`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333;">Leveranciersregistratie voltooid</h2>
-        <p>Beste ${purchaserName},</p>
-        <p>De leveranciersregistratie voor <strong>${supplierName}</strong> die u heeft aangevraagd, is volledig afgerond.</p>
-        <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Crediteurnummer:</strong> ${creditorNumber}</p>
-          <p style="margin: 8px 0 0 0;"><strong>KBT-code:</strong> ${kbtCode}</p>
+  if (purchaserEmail) {
+    await sendEmail({
+      to: purchaserEmail,
+      subject: `Leverancier ${supplierName} - Registratie voltooid`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Leveranciersregistratie voltooid</h2>
+          <p>Beste ${purchaserName},</p>
+          <p>De leveranciersregistratie voor <strong>${supplierName}</strong> die u heeft aangevraagd, is volledig afgerond.</p>
+          <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>Crediteurnummer:</strong> ${creditorNumber}</p>
+            <p style="margin: 8px 0 0 0;"><strong>KBT-code:</strong> ${kbtCode}</p>
+          </div>
+          <p style="text-align: center; margin: 30px 0;">
+            <a href="${requestUrl}"
+               style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              Aanvraag bekijken
+            </a>
+          </p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #666; font-size: 12px;">
+            Dit is een automatisch gegenereerde email. Niet op reageren.
+          </p>
         </div>
-        <p style="text-align: center; margin: 30px 0;">
-          <a href="${requestUrl}"
-             style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Aanvraag bekijken
-          </a>
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-        <p style="color: #666; font-size: 12px;">
-          Dit is een automatisch gegenereerde email. Niet op reageren.
-        </p>
-      </div>
-    `,
-  })
+      `,
+    })
+  }
 }
 
 // Activation email for new users
