@@ -64,3 +64,9 @@ next-env.d.ts
 generate-hash.js
 vercel-import.env
 nul
+
+# Local documentation with credentials
+VERCEL-ENV.md
+
+# One-off SQL migration scripts
+prisma/migrate-roles.sql
