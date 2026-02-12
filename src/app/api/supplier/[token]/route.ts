@@ -6,6 +6,7 @@ import { AuditAction, Status } from '@/types'
 import {
   sendSupplierConfirmationEmail,
   sendPurchaserNotificationEmail,
+  sendSupplierSaveEmail,
 } from '@/lib/email'
 import { formatUserName } from '@/lib/user-utils'
 
@@ -35,7 +36,9 @@ export async function GET(
         supplierEmail: true,
         region: true,
         status: true,
+        supplierType: true,
         invitationExpiresAt: true,
+        supplierSavedAt: true,
         companyName: true,
         address: true,
         postalCode: true,
@@ -48,6 +51,20 @@ export async function GET(
         vatNumber: true,
         iban: true,
         bankName: true,
+        glnNumber: true,
+        invoiceEmail: true,
+        invoiceAddress: true,
+        invoicePostalCode: true,
+        invoiceCity: true,
+        invoiceCurrency: true,
+        directorName: true,
+        directorFunction: true,
+        directorDateOfBirth: true,
+        directorPassportNumber: true,
+        auctionNumberRFH: true,
+        salesSheetEmail: true,
+        mandateRFH: true,
+        apiKeyFloriday: true,
       },
     })
 
@@ -69,7 +86,7 @@ export async function GET(
       )
     }
 
-    // Check if already submitted
+    // Check if already submitted (but allow re-access when saved)
     if (supplierRequest.status !== 'INVITATION_SENT') {
       return NextResponse.json(
         { error: 'Het formulier is al ingevuld.' },
@@ -87,7 +104,7 @@ export async function GET(
   }
 }
 
-// POST /api/supplier/[token] - Submit supplier form
+// POST /api/supplier/[token] - Submit or save supplier form
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
@@ -140,7 +157,10 @@ export async function POST(
     const dataJson = formData.get('data') as string
     const data = JSON.parse(dataJson)
 
-    // Handle file uploads - use Vercel Blob in production, local storage in development
+    // Determine action: 'save' or 'submit' (default: 'submit' for backward compat)
+    const action = data.action || 'submit'
+
+    // Handle file uploads
     const filesToCreate: { fileName: string; fileType: string; filePath: string }[] = []
     const useVercelBlob = !!process.env.BLOB_READ_WRITE_TOKEN
 
@@ -188,66 +208,150 @@ export async function POST(
       })
     }
 
-    // Update request with supplier data
-    const updated = await prisma.supplierRequest.update({
-      where: { id: supplierRequest.id },
-      data: {
-        companyName: data.companyName,
-        address: data.address,
-        postalCode: data.postalCode,
-        city: data.city,
-        country: data.country,
-        contactName: data.contactName,
-        contactPhone: data.contactPhone,
-        contactEmail: data.contactEmail,
-        chamberOfCommerceNumber: data.chamberOfCommerceNumber,
-        vatNumber: data.vatNumber,
-        iban: data.iban,
-        bankName: data.bankName,
-        status: Status.AWAITING_PURCHASER,
-        supplierSubmittedAt: new Date(),
-        invitationToken: null, // Invalidate token after use
-      },
-    })
+    const bankFile = formData.get('bankDetails') as File | null
+    if (bankFile) {
+      const fileName = `bank_${Date.now()}_${bankFile.name}`
+      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
 
-    // Create file records
-    for (const file of filesToCreate) {
-      await prisma.supplierFile.create({
+      if (useVercelBlob) {
+        await uploadToBlob(`${supplierRequest.id}/${fileName}`, bankFile)
+      } else {
+        const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
+        await mkdir(uploadDir, { recursive: true })
+        const buffer = Buffer.from(await bankFile.arrayBuffer())
+        const localPath = path.join(uploadDir, fileName)
+        await writeFile(localPath, buffer)
+      }
+
+      filesToCreate.push({
+        fileName: bankFile.name,
+        fileType: 'BANK_DETAILS',
+        filePath,
+      })
+    }
+
+    // Common data fields to update
+    const updateData: Record<string, unknown> = {
+      companyName: data.companyName || null,
+      address: data.address || null,
+      postalCode: data.postalCode || null,
+      city: data.city || null,
+      country: data.country || null,
+      contactName: data.contactName || null,
+      contactPhone: data.contactPhone || null,
+      contactEmail: data.contactEmail || null,
+      chamberOfCommerceNumber: data.chamberOfCommerceNumber || null,
+      vatNumber: data.vatNumber || null,
+      iban: data.iban || null,
+      bankName: data.bankName || null,
+      glnNumber: data.glnNumber || null,
+      // Financial fields (Koop + O-kweker)
+      invoiceEmail: data.invoiceEmail || null,
+      invoiceAddress: data.invoiceAddress || null,
+      invoicePostalCode: data.invoicePostalCode || null,
+      invoiceCity: data.invoiceCity || null,
+      invoiceCurrency: data.invoiceCurrency || null,
+      // Director fields (Koop + O-kweker, ROW)
+      directorName: data.directorName || null,
+      directorFunction: data.directorFunction || null,
+      directorDateOfBirth: data.directorDateOfBirth || null,
+      directorPassportNumber: data.directorPassportNumber || null,
+      // Auction fields (X-kweker)
+      auctionNumberRFH: data.auctionNumberRFH || null,
+      salesSheetEmail: data.salesSheetEmail || null,
+      mandateRFH: data.mandateRFH ?? null,
+      apiKeyFloriday: data.apiKeyFloriday || null,
+    }
+
+    if (action === 'save') {
+      // Save: update fields, keep token valid, do NOT change status
+      updateData.supplierSavedAt = new Date()
+
+      await prisma.supplierRequest.update({
+        where: { id: supplierRequest.id },
+        data: updateData,
+      })
+
+      // Create file records
+      for (const file of filesToCreate) {
+        await prisma.supplierFile.create({
+          data: {
+            requestId: supplierRequest.id,
+            ...file,
+          },
+        })
+      }
+
+      // Create audit log
+      await prisma.auditLog.create({
         data: {
           requestId: supplierRequest.id,
-          ...file,
+          action: AuditAction.SUPPLIER_SAVED,
+          details: JSON.stringify({ filesUploaded: filesToCreate.length }),
         },
       })
-    }
 
-    // Create audit log
-    await prisma.auditLog.create({
-      data: {
-        requestId: supplierRequest.id,
-        action: AuditAction.SUPPLIER_SUBMITTED,
-        details: JSON.stringify({
-          filesUploaded: filesToCreate.length,
-        }),
-      },
-    })
+      // Send "continue later" email
+      if (supplierRequest.invitationExpiresAt) {
+        await sendSupplierSaveEmail({
+          to: supplierRequest.supplierEmail,
+          supplierName: supplierRequest.supplierName,
+          invitationToken: token,
+          expiresAt: new Date(supplierRequest.invitationExpiresAt),
+        })
+      }
 
-    // Send confirmation email to supplier
-    await sendSupplierConfirmationEmail({
-      to: supplierRequest.supplierEmail,
-      supplierName: supplierRequest.supplierName,
-    })
+      return NextResponse.json({ success: true, saved: true })
+    } else {
+      // Submit: existing behavior — status change, invalidate token
+      updateData.status = Status.AWAITING_PURCHASER
+      updateData.supplierSubmittedAt = new Date()
+      updateData.invitationToken = null // Invalidate token after use
 
-    // Notify purchaser (only if they want to receive emails)
-    if (supplierRequest.createdBy.receiveEmails) {
-      await sendPurchaserNotificationEmail({
-        to: supplierRequest.createdBy.email,
-        purchaserName: formatUserName(supplierRequest.createdBy) || 'Inkoper',
-        supplierName: supplierRequest.supplierName,
-        requestId: supplierRequest.id,
+      await prisma.supplierRequest.update({
+        where: { id: supplierRequest.id },
+        data: updateData,
       })
-    }
 
-    return NextResponse.json({ success: true })
+      // Create file records
+      for (const file of filesToCreate) {
+        await prisma.supplierFile.create({
+          data: {
+            requestId: supplierRequest.id,
+            ...file,
+          },
+        })
+      }
+
+      // Create audit log
+      await prisma.auditLog.create({
+        data: {
+          requestId: supplierRequest.id,
+          action: AuditAction.SUPPLIER_SUBMITTED,
+          details: JSON.stringify({
+            filesUploaded: filesToCreate.length,
+          }),
+        },
+      })
+
+      // Send confirmation email to supplier
+      await sendSupplierConfirmationEmail({
+        to: supplierRequest.supplierEmail,
+        supplierName: supplierRequest.supplierName,
+      })
+
+      // Notify purchaser (only if they want to receive emails)
+      if (supplierRequest.createdBy.receiveEmails) {
+        await sendPurchaserNotificationEmail({
+          to: supplierRequest.createdBy.email,
+          purchaserName: formatUserName(supplierRequest.createdBy) || 'Inkoper',
+          supplierName: supplierRequest.supplierName,
+          requestId: supplierRequest.id,
+        })
+      }
+
+      return NextResponse.json({ success: true })
+    }
   } catch (error) {
     console.error('Error processing supplier submission:', error)
     return NextResponse.json(

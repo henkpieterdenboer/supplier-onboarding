@@ -8,14 +8,30 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
+import {
+  showFinancialSection,
+  showDirectorSection,
+  showAuctionSection,
+  showBankUpload,
+} from '@/lib/supplier-type-utils'
 
 interface Request {
   id: string
   supplierName: string
   supplierEmail: string
   region: string
+  supplierType: string
+  supplierSavedAt: string | null
   companyName: string | null
   address: string | null
   postalCode: string | null
@@ -28,6 +44,20 @@ interface Request {
   vatNumber: string | null
   iban: string | null
   bankName: string | null
+  glnNumber: string | null
+  invoiceEmail: string | null
+  invoiceAddress: string | null
+  invoicePostalCode: string | null
+  invoiceCity: string | null
+  invoiceCurrency: string | null
+  directorName: string | null
+  directorFunction: string | null
+  directorDateOfBirth: string | null
+  directorPassportNumber: string | null
+  auctionNumberRFH: string | null
+  salesSheetEmail: string | null
+  mandateRFH: boolean | null
+  apiKeyFloriday: string | null
 }
 
 export default function SupplierFormPage() {
@@ -35,10 +65,13 @@ export default function SupplierFormPage() {
   const [request, setRequest] = useState<Request | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
   const [error, setError] = useState('')
 
   const [formData, setFormData] = useState({
+    // Shared
     companyName: '',
     address: '',
     postalCode: '',
@@ -47,15 +80,37 @@ export default function SupplierFormPage() {
     contactName: '',
     contactPhone: '',
     contactEmail: '',
+    glnNumber: '',
+    // Financial (Koop + O-kweker)
     chamberOfCommerceNumber: '',
     vatNumber: '',
     iban: '',
     bankName: '',
+    invoiceEmail: '',
+    invoiceAddress: '',
+    invoicePostalCode: '',
+    invoiceCity: '',
+    invoiceCurrency: '',
+    // Director (Koop + O-kweker, ROW)
+    directorName: '',
+    directorFunction: '',
+    directorDateOfBirth: '',
+    directorPassportNumber: '',
+    // Auction (X-kweker)
+    auctionNumberRFH: '',
+    salesSheetEmail: '',
+    mandateRFH: false,
+    apiKeyFloriday: '',
   })
 
-  const [files, setFiles] = useState<{ kvk: File | null; passport: File | null }>({
+  const [files, setFiles] = useState<{
+    kvk: File | null
+    passport: File | null
+    bankDetails: File | null
+  }>({
     kvk: null,
     passport: null,
+    bankDetails: null,
   })
 
   useEffect(() => {
@@ -81,10 +136,24 @@ export default function SupplierFormPage() {
             contactName: data.contactName || '',
             contactPhone: data.contactPhone || '',
             contactEmail: data.contactEmail || data.supplierEmail || '',
+            glnNumber: data.glnNumber || '',
             chamberOfCommerceNumber: data.chamberOfCommerceNumber || '',
             vatNumber: data.vatNumber || '',
             iban: data.iban || '',
             bankName: data.bankName || '',
+            invoiceEmail: data.invoiceEmail || '',
+            invoiceAddress: data.invoiceAddress || '',
+            invoicePostalCode: data.invoicePostalCode || '',
+            invoiceCity: data.invoiceCity || '',
+            invoiceCurrency: data.invoiceCurrency || '',
+            directorName: data.directorName || '',
+            directorFunction: data.directorFunction || '',
+            directorDateOfBirth: data.directorDateOfBirth || '',
+            directorPassportNumber: data.directorPassportNumber || '',
+            auctionNumberRFH: data.auctionNumberRFH || '',
+            salesSheetEmail: data.salesSheetEmail || '',
+            mandateRFH: data.mandateRFH || false,
+            apiKeyFloriday: data.apiKeyFloriday || '',
           })
         }
       } catch (err) {
@@ -97,26 +166,25 @@ export default function SupplierFormPage() {
     validateToken()
   }, [params.token])
 
-  const handleFileChange = (type: 'kvk' | 'passport', file: File | null) => {
+  const handleFileChange = (type: 'kvk' | 'passport' | 'bankDetails', file: File | null) => {
     setFiles({ ...files, [type]: file })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submitForm = async (action: 'save' | 'submit') => {
     setError('')
-    setIsSubmitting(true)
+    if (action === 'save') {
+      setIsSaving(true)
+    } else {
+      setIsSubmitting(true)
+    }
 
     try {
-      // Create FormData for file upload
       const submitData = new FormData()
-      submitData.append('data', JSON.stringify(formData))
+      submitData.append('data', JSON.stringify({ ...formData, action }))
 
-      if (files.kvk) {
-        submitData.append('kvk', files.kvk)
-      }
-      if (files.passport) {
-        submitData.append('passport', files.passport)
-      }
+      if (files.kvk) submitData.append('kvk', files.kvk)
+      if (files.passport) submitData.append('passport', files.passport)
+      if (files.bankDetails) submitData.append('bankDetails', files.bankDetails)
 
       const response = await fetch(`/api/supplier/${params.token}`, {
         method: 'POST',
@@ -129,14 +197,31 @@ export default function SupplierFormPage() {
         throw new Error(result.error || 'Er is een fout opgetreden')
       }
 
-      setIsSubmitted(true)
-      toast.success('Gegevens succesvol verstuurd!')
+      if (action === 'save') {
+        setIsSaved(true)
+        toast.success('Gegevens opgeslagen! U ontvangt een email met de link om later verder te gaan.')
+      } else {
+        setIsSubmitted(true)
+        toast.success('Gegevens succesvol verstuurd!')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Er is een fout opgetreden')
     } finally {
+      setIsSaving(false)
       setIsSubmitting(false)
     }
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await submitForm('submit')
+  }
+
+  const handleSave = async () => {
+    await submitForm('save')
+  }
+
+  const isDisabled = isSubmitting || isSaving
 
   if (isLoading) {
     return (
@@ -149,7 +234,7 @@ export default function SupplierFormPage() {
     )
   }
 
-  if (error) {
+  if (error && !request) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <Card className="w-full max-w-md">
@@ -194,6 +279,39 @@ export default function SupplierFormPage() {
     )
   }
 
+  if (isSaved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <img
+                src={LOGO_BASE64}
+                alt="Coloriginz Logo"
+                className="h-16 w-auto"
+              />
+            </div>
+            <CardTitle className="text-blue-600">Gegevens opgeslagen</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600">
+              Uw gegevens zijn tussentijds opgeslagen. U ontvangt een email met een link
+              om het formulier later af te ronden.
+            </p>
+            <p className="mt-4 text-sm text-gray-500">U kunt dit venster sluiten.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  const supplierType = request?.supplierType || 'KOOP'
+  const region = request?.region || 'EU'
+  const showFinancial = showFinancialSection(supplierType)
+  const showDirector = showDirectorSection(supplierType, region)
+  const showAuction = showAuctionSection(supplierType)
+  const showBank = showBankUpload(supplierType)
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -204,7 +322,29 @@ export default function SupplierFormPage() {
           </p>
         </div>
 
+        {/* Saved before notice */}
+        {request?.supplierSavedAt && (
+          <Alert className="mb-6">
+            U heeft eerder gegevens opgeslagen op{' '}
+            {new Date(request.supplierSavedAt).toLocaleDateString('nl-NL', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+            . Uw eerdere gegevens zijn hieronder ingevuld.
+          </Alert>
+        )}
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            {error}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit}>
+          {/* Company details - always shown */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Bedrijfsgegevens</CardTitle>
@@ -216,11 +356,9 @@ export default function SupplierFormPage() {
                 <Input
                   id="companyName"
                   value={formData.companyName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, companyName: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                   required
-                  disabled={isSubmitting}
+                  disabled={isDisabled}
                 />
               </div>
 
@@ -229,11 +367,9 @@ export default function SupplierFormPage() {
                 <Input
                   id="address"
                   value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required
-                  disabled={isSubmitting}
+                  disabled={isDisabled}
                 />
               </div>
 
@@ -243,11 +379,9 @@ export default function SupplierFormPage() {
                   <Input
                     id="postalCode"
                     value={formData.postalCode}
-                    onChange={(e) =>
-                      setFormData({ ...formData, postalCode: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
                     required
-                    disabled={isSubmitting}
+                    disabled={isDisabled}
                   />
                 </div>
                 <div className="space-y-2">
@@ -255,11 +389,9 @@ export default function SupplierFormPage() {
                   <Input
                     id="city"
                     value={formData.city}
-                    onChange={(e) =>
-                      setFormData({ ...formData, city: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     required
-                    disabled={isSubmitting}
+                    disabled={isDisabled}
                   />
                 </div>
                 <div className="space-y-2">
@@ -267,13 +399,21 @@ export default function SupplierFormPage() {
                   <Input
                     id="country"
                     value={formData.country}
-                    onChange={(e) =>
-                      setFormData({ ...formData, country: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                     required
-                    disabled={isSubmitting}
+                    disabled={isDisabled}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="glnNumber">GLN-nummer</Label>
+                <Input
+                  id="glnNumber"
+                  value={formData.glnNumber}
+                  onChange={(e) => setFormData({ ...formData, glnNumber: e.target.value })}
+                  disabled={isDisabled}
+                />
               </div>
 
               <Separator />
@@ -284,11 +424,9 @@ export default function SupplierFormPage() {
                   <Input
                     id="contactName"
                     value={formData.contactName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, contactName: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                     required
-                    disabled={isSubmitting}
+                    disabled={isDisabled}
                   />
                 </div>
                 <div className="space-y-2">
@@ -296,11 +434,9 @@ export default function SupplierFormPage() {
                   <Input
                     id="contactPhone"
                     value={formData.contactPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, contactPhone: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
                     required
-                    disabled={isSubmitting}
+                    disabled={isDisabled}
                   />
                 </div>
               </div>
@@ -311,83 +447,256 @@ export default function SupplierFormPage() {
                   id="contactEmail"
                   type="email"
                   value={formData.contactEmail}
-                  onChange={(e) =>
-                    setFormData({ ...formData, contactEmail: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                   required
-                  disabled={isSubmitting}
+                  disabled={isDisabled}
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Financiële gegevens</CardTitle>
-              <CardDescription>
-                Vul uw bedrijfs- en bankgegevens in
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="chamberOfCommerceNumber">KvK nummer *</Label>
-                  <Input
-                    id="chamberOfCommerceNumber"
-                    value={formData.chamberOfCommerceNumber}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        chamberOfCommerceNumber: e.target.value,
-                      })
-                    }
-                    required
-                    disabled={isSubmitting}
-                  />
+          {/* Financial section - Koop + O-kweker */}
+          {showFinancial && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Financi&euml;le gegevens</CardTitle>
+                <CardDescription>
+                  Vul uw bedrijfs- en bankgegevens in
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="chamberOfCommerceNumber">KvK nummer *</Label>
+                    <Input
+                      id="chamberOfCommerceNumber"
+                      value={formData.chamberOfCommerceNumber}
+                      onChange={(e) =>
+                        setFormData({ ...formData, chamberOfCommerceNumber: e.target.value })
+                      }
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="vatNumber">BTW nummer *</Label>
+                    <Input
+                      id="vatNumber"
+                      value={formData.vatNumber}
+                      onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vatNumber">BTW nummer *</Label>
-                  <Input
-                    id="vatNumber"
-                    value={formData.vatNumber}
-                    onChange={(e) =>
-                      setFormData({ ...formData, vatNumber: e.target.value })
-                    }
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="iban">IBAN *</Label>
-                  <Input
-                    id="iban"
-                    value={formData.iban}
-                    onChange={(e) =>
-                      setFormData({ ...formData, iban: e.target.value })
-                    }
-                    required
-                    disabled={isSubmitting}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="iban">IBAN *</Label>
+                    <Input
+                      id="iban"
+                      value={formData.iban}
+                      onChange={(e) => setFormData({ ...formData, iban: e.target.value })}
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bankName">Bank *</Label>
+                    <Input
+                      id="bankName"
+                      value={formData.bankName}
+                      onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bankName">Bank *</Label>
-                  <Input
-                    id="bankName"
-                    value={formData.bankName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bankName: e.target.value })
-                    }
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label htmlFor="invoiceEmail">Factuur email</Label>
+                  <Input
+                    id="invoiceEmail"
+                    type="email"
+                    value={formData.invoiceEmail}
+                    onChange={(e) => setFormData({ ...formData, invoiceEmail: e.target.value })}
+                    disabled={isDisabled}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="invoiceAddress">Factuuradres</Label>
+                  <Input
+                    id="invoiceAddress"
+                    value={formData.invoiceAddress}
+                    onChange={(e) => setFormData({ ...formData, invoiceAddress: e.target.value })}
+                    placeholder="Alleen invullen als dit afwijkt van het bedrijfsadres"
+                    disabled={isDisabled}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="invoicePostalCode">Factuur postcode</Label>
+                    <Input
+                      id="invoicePostalCode"
+                      value={formData.invoicePostalCode}
+                      onChange={(e) => setFormData({ ...formData, invoicePostalCode: e.target.value })}
+                      disabled={isDisabled}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="invoiceCity">Factuur plaats</Label>
+                    <Input
+                      id="invoiceCity"
+                      value={formData.invoiceCity}
+                      onChange={(e) => setFormData({ ...formData, invoiceCity: e.target.value })}
+                      disabled={isDisabled}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="invoiceCurrency">Valuta</Label>
+                  <Select
+                    value={formData.invoiceCurrency}
+                    onValueChange={(value) => setFormData({ ...formData, invoiceCurrency: value })}
+                    disabled={isDisabled}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer valuta" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EUR">EUR - Euro</SelectItem>
+                      <SelectItem value="USD">USD - US Dollar</SelectItem>
+                      <SelectItem value="GBP">GBP - Brits Pond</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Director section - Koop + O-kweker, only ROW */}
+          {showDirector && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Bestuurder</CardTitle>
+                <CardDescription>
+                  Gegevens van de bestuurder (verplicht voor leveranciers buiten de EU)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="directorName">Naam bestuurder *</Label>
+                    <Input
+                      id="directorName"
+                      value={formData.directorName}
+                      onChange={(e) => setFormData({ ...formData, directorName: e.target.value })}
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="directorFunction">Functie *</Label>
+                    <Input
+                      id="directorFunction"
+                      value={formData.directorFunction}
+                      onChange={(e) => setFormData({ ...formData, directorFunction: e.target.value })}
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="directorDateOfBirth">Geboortedatum *</Label>
+                    <Input
+                      id="directorDateOfBirth"
+                      type="date"
+                      value={formData.directorDateOfBirth}
+                      onChange={(e) => setFormData({ ...formData, directorDateOfBirth: e.target.value })}
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="directorPassportNumber">Paspoortnummer *</Label>
+                    <Input
+                      id="directorPassportNumber"
+                      value={formData.directorPassportNumber}
+                      onChange={(e) => setFormData({ ...formData, directorPassportNumber: e.target.value })}
+                      required
+                      disabled={isDisabled}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Auction section - X-kweker only */}
+          {showAuction && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Veilinggegevens</CardTitle>
+                <CardDescription>
+                  Gegevens voor de veiling
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="auctionNumberRFH">Aanvoernummer RFH</Label>
+                    <Input
+                      id="auctionNumberRFH"
+                      value={formData.auctionNumberRFH}
+                      onChange={(e) => setFormData({ ...formData, auctionNumberRFH: e.target.value })}
+                      disabled={isDisabled}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="salesSheetEmail">Salessheet email</Label>
+                    <Input
+                      id="salesSheetEmail"
+                      type="email"
+                      value={formData.salesSheetEmail}
+                      onChange={(e) => setFormData({ ...formData, salesSheetEmail: e.target.value })}
+                      disabled={isDisabled}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="mandateRFH"
+                    checked={formData.mandateRFH}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, mandateRFH: checked === true })
+                    }
+                    disabled={isDisabled}
+                  />
+                  <Label htmlFor="mandateRFH">Mandaat RFH</Label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="apiKeyFloriday">API key Floriday</Label>
+                  <Input
+                    id="apiKeyFloriday"
+                    value={formData.apiKeyFloriday}
+                    onChange={(e) => setFormData({ ...formData, apiKeyFloriday: e.target.value })}
+                    disabled={isDisabled}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Documents */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Documenten</CardTitle>
@@ -400,10 +709,8 @@ export default function SupplierFormPage() {
                   id="kvk"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) =>
-                    handleFileChange('kvk', e.target.files?.[0] || null)
-                  }
-                  disabled={isSubmitting}
+                  onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
+                  disabled={isDisabled}
                 />
                 <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
               </div>
@@ -414,13 +721,25 @@ export default function SupplierFormPage() {
                   id="passport"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) =>
-                    handleFileChange('passport', e.target.files?.[0] || null)
-                  }
-                  disabled={isSubmitting}
+                  onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
+                  disabled={isDisabled}
                 />
                 <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
               </div>
+
+              {showBank && (
+                <div className="space-y-2">
+                  <Label htmlFor="bankDetails">Screenshot bankgegevens</Label>
+                  <Input
+                    id="bankDetails"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
+                    disabled={isDisabled}
+                  />
+                  <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -430,9 +749,20 @@ export default function SupplierFormPage() {
             </Alert>
           )}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Bezig met verzenden...' : 'Gegevens versturen'}
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSave}
+              disabled={isDisabled}
+              className="flex-1"
+            >
+              {isSaving ? 'Bezig met opslaan...' : 'Opslaan en later verder'}
+            </Button>
+            <Button type="submit" disabled={isDisabled} className="flex-1">
+              {isSubmitting ? 'Bezig met verzenden...' : 'Definitief versturen'}
+            </Button>
+          </div>
         </form>
       </div>
     </div>

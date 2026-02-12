@@ -56,6 +56,7 @@ model SupplierRequest {
   supplierEmail String
   region        String  // EU or ROW
   selfFill      Boolean @default(false) // If true, Inkoper fills form themselves
+  supplierType  String  @default("KOOP") // KOOP, X_KWEKER, O_KWEKER
 
   // Supplier/Inkoper fills these fields
   companyName             String?
@@ -70,10 +71,32 @@ model SupplierRequest {
   vatNumber               String? // BTW nummer
   iban                    String?
   bankName                String?
+  glnNumber               String? // GLN nummer
+
+  // Financial (Koop + O-kweker)
+  invoiceEmail      String?
+  invoiceAddress    String?
+  invoicePostalCode String?
+  invoiceCity       String?
+  invoiceCurrency   String?
+
+  // Director (Koop + O-kweker, only ROW)
+  directorName           String?
+  directorFunction       String?
+  directorDateOfBirth    String?
+  directorPassportNumber String?
 
   // Additional fields by Inkoper
   incoterm             String? // CIF or FOB
   commissionPercentage Float?
+  paymentTerm          String? // "14" or "30"
+  accountManager       String?
+
+  // X-kweker: auction fields
+  auctionNumberRFH  String?
+  salesSheetEmail   String?
+  mandateRFH        Boolean?
+  apiKeyFloriday    String?
 
   // Finance fields
   creditorNumber String? @unique
@@ -86,8 +109,9 @@ model SupplierRequest {
   invitationExpiresAt DateTime?
   invitationSentAt    DateTime?
 
-  // Supplier submitted timestamp
+  // Supplier submitted/saved timestamps
   supplierSubmittedAt DateTime?
+  supplierSavedAt     DateTime?
 
   // Relations
   files     SupplierFile[]

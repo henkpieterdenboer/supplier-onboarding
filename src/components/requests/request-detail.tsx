@@ -20,8 +20,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Status, StatusLabels, RegionLabels, FileTypeLabels } from '@/types'
+import { Status, StatusLabels, RegionLabels, FileTypeLabels, SupplierTypeLabels, SupplierType } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
+import {
+  showFinancialSection,
+  showDirectorSection,
+  showAuctionSection,
+} from '@/lib/supplier-type-utils'
 
 interface AuditLog {
   id: string
@@ -51,6 +56,7 @@ interface Request {
   supplierEmail: string
   region: string
   selfFill: boolean
+  supplierType: string
   createdAt: Date
   updatedAt: Date
   createdBy: {
@@ -73,9 +79,28 @@ interface Request {
   vatNumber: string | null
   iban: string | null
   bankName: string | null
+  glnNumber: string | null
+  // Financial
+  invoiceEmail: string | null
+  invoiceAddress: string | null
+  invoicePostalCode: string | null
+  invoiceCity: string | null
+  invoiceCurrency: string | null
+  // Director
+  directorName: string | null
+  directorFunction: string | null
+  directorDateOfBirth: string | null
+  directorPassportNumber: string | null
+  // Auction
+  auctionNumberRFH: string | null
+  salesSheetEmail: string | null
+  mandateRFH: boolean | null
+  apiKeyFloriday: string | null
   // Purchaser fields
   incoterm: string | null
   commissionPercentage: number | null
+  paymentTerm: string | null
+  accountManager: string | null
   // Finance fields
   creditorNumber: string | null
   // ERP fields
@@ -85,6 +110,7 @@ interface Request {
   invitationExpiresAt: Date | null
   invitationSentAt: Date | null
   supplierSubmittedAt: Date | null
+  supplierSavedAt: Date | null
   // Relations
   files: SupplierFile[]
   auditLogs: AuditLog[]
@@ -105,11 +131,23 @@ const statusColors: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 }
 
+const supplierTypeColors: Record<string, string> = {
+  KOOP: 'bg-slate-100 text-slate-800',
+  X_KWEKER: 'bg-emerald-100 text-emerald-800',
+  O_KWEKER: 'bg-cyan-100 text-cyan-800',
+}
+
 export function RequestDetail({ request, userRoles, userId }: RequestDetailProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [creditorNumber, setCreditorNumber] = useState('')
   const [kbtCode, setKbtCode] = useState('')
+
+  const supplierType = request.supplierType || 'KOOP'
+  const region = request.region || 'EU'
+  const showFinancial = showFinancialSection(supplierType)
+  const showDirector = showDirectorSection(supplierType, region)
+  const showAuction = showAuctionSection(supplierType)
 
   const handleAction = async (action: string, data?: Record<string, unknown>) => {
     setIsLoading(true)
@@ -161,6 +199,9 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
             <h1 className="text-2xl font-bold text-gray-900">{request.supplierName}</h1>
             <Badge className={statusColors[request.status]}>
               {StatusLabels[request.status as Status] || request.status}
+            </Badge>
+            <Badge className={supplierTypeColors[supplierType] || 'bg-gray-100 text-gray-800'}>
+              {SupplierTypeLabels[supplierType as SupplierType] || supplierType}
             </Badge>
           </div>
           <p className="text-gray-500">{request.supplierEmail}</p>
@@ -254,6 +295,12 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                 <p className="font-medium">{request.supplierEmail}</p>
               </div>
               <div>
+                <Label className="text-gray-500">Type</Label>
+                <p className="font-medium">
+                  {SupplierTypeLabels[supplierType as SupplierType] || supplierType}
+                </p>
+              </div>
+              <div>
                 <Label className="text-gray-500">Regio</Label>
                 <p className="font-medium">
                   {RegionLabels[request.region as keyof typeof RegionLabels] || request.region}
@@ -291,55 +338,167 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                     : 'Ingevuld door inkoper'}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-gray-500">Bedrijfsnaam</Label>
-                  <p className="font-medium">{request.companyName || '-'}</p>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-500">Bedrijfsnaam</Label>
+                    <p className="font-medium">{request.companyName || '-'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Adres</Label>
+                    <p className="font-medium">{request.address || '-'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Postcode</Label>
+                    <p className="font-medium">{request.postalCode || '-'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Plaats</Label>
+                    <p className="font-medium">{request.city || '-'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Land</Label>
+                    <p className="font-medium">{request.country || '-'}</p>
+                  </div>
+                  {request.glnNumber && (
+                    <div>
+                      <Label className="text-gray-500">GLN-nummer</Label>
+                      <p className="font-medium">{request.glnNumber}</p>
+                    </div>
+                  )}
+                  <div>
+                    <Label className="text-gray-500">Contactpersoon</Label>
+                    <p className="font-medium">{request.contactName || '-'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Telefoon</Label>
+                    <p className="font-medium">{request.contactPhone || '-'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Contact email</Label>
+                    <p className="font-medium">{request.contactEmail || '-'}</p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-gray-500">Adres</Label>
-                  <p className="font-medium">{request.address || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Postcode</Label>
-                  <p className="font-medium">{request.postalCode || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Plaats</Label>
-                  <p className="font-medium">{request.city || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Land</Label>
-                  <p className="font-medium">{request.country || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Contactpersoon</Label>
-                  <p className="font-medium">{request.contactName || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Telefoon</Label>
-                  <p className="font-medium">{request.contactPhone || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Contact email</Label>
-                  <p className="font-medium">{request.contactEmail || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">KvK nummer</Label>
-                  <p className="font-medium">{request.chamberOfCommerceNumber || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">BTW nummer</Label>
-                  <p className="font-medium">{request.vatNumber || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">IBAN</Label>
-                  <p className="font-medium">{request.iban || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Bank</Label>
-                  <p className="font-medium">{request.bankName || '-'}</p>
-                </div>
+
+                {/* Financial details - Koop + O-kweker */}
+                {showFinancial && (request.chamberOfCommerceNumber || request.iban) && (
+                  <>
+                    <Separator />
+                    <p className="text-sm font-medium text-gray-700">Financi&euml;le gegevens</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-gray-500">KvK nummer</Label>
+                        <p className="font-medium">{request.chamberOfCommerceNumber || '-'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-gray-500">BTW nummer</Label>
+                        <p className="font-medium">{request.vatNumber || '-'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-gray-500">IBAN</Label>
+                        <p className="font-medium">{request.iban || '-'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-gray-500">Bank</Label>
+                        <p className="font-medium">{request.bankName || '-'}</p>
+                      </div>
+                      {request.invoiceEmail && (
+                        <div>
+                          <Label className="text-gray-500">Factuur email</Label>
+                          <p className="font-medium">{request.invoiceEmail}</p>
+                        </div>
+                      )}
+                      {request.invoiceAddress && (
+                        <div>
+                          <Label className="text-gray-500">Factuuradres</Label>
+                          <p className="font-medium">{request.invoiceAddress}</p>
+                        </div>
+                      )}
+                      {request.invoicePostalCode && (
+                        <div>
+                          <Label className="text-gray-500">Factuur postcode</Label>
+                          <p className="font-medium">{request.invoicePostalCode}</p>
+                        </div>
+                      )}
+                      {request.invoiceCity && (
+                        <div>
+                          <Label className="text-gray-500">Factuur plaats</Label>
+                          <p className="font-medium">{request.invoiceCity}</p>
+                        </div>
+                      )}
+                      {request.invoiceCurrency && (
+                        <div>
+                          <Label className="text-gray-500">Valuta</Label>
+                          <p className="font-medium">{request.invoiceCurrency}</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Director details - Koop + O-kweker, ROW */}
+                {showDirector && request.directorName && (
+                  <>
+                    <Separator />
+                    <p className="text-sm font-medium text-gray-700">Bestuurder</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-gray-500">Naam</Label>
+                        <p className="font-medium">{request.directorName}</p>
+                      </div>
+                      {request.directorFunction && (
+                        <div>
+                          <Label className="text-gray-500">Functie</Label>
+                          <p className="font-medium">{request.directorFunction}</p>
+                        </div>
+                      )}
+                      {request.directorDateOfBirth && (
+                        <div>
+                          <Label className="text-gray-500">Geboortedatum</Label>
+                          <p className="font-medium">{request.directorDateOfBirth}</p>
+                        </div>
+                      )}
+                      {request.directorPassportNumber && (
+                        <div>
+                          <Label className="text-gray-500">Paspoortnummer</Label>
+                          <p className="font-medium">{request.directorPassportNumber}</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Auction details - X-kweker */}
+                {showAuction && (request.auctionNumberRFH || request.salesSheetEmail) && (
+                  <>
+                    <Separator />
+                    <p className="text-sm font-medium text-gray-700">Veilinggegevens</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      {request.auctionNumberRFH && (
+                        <div>
+                          <Label className="text-gray-500">Aanvoernummer RFH</Label>
+                          <p className="font-medium">{request.auctionNumberRFH}</p>
+                        </div>
+                      )}
+                      {request.salesSheetEmail && (
+                        <div>
+                          <Label className="text-gray-500">Salessheet email</Label>
+                          <p className="font-medium">{request.salesSheetEmail}</p>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="text-gray-500">Mandaat RFH</Label>
+                        <p className="font-medium">{request.mandateRFH ? 'Ja' : 'Nee'}</p>
+                      </div>
+                      {request.apiKeyFloriday && (
+                        <div>
+                          <Label className="text-gray-500">API key Floriday</Label>
+                          <p className="font-medium">{request.apiKeyFloriday}</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
@@ -377,7 +536,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           )}
 
           {/* Purchaser Additional Info */}
-          {(request.incoterm || request.commissionPercentage !== null) && (
+          {(request.incoterm || request.paymentTerm || request.accountManager) && (
             <Card>
               <CardHeader>
                 <CardTitle>Aanvullende gegevens (Inkoper)</CardTitle>
@@ -386,18 +545,30 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-gray-500">Incoterm</Label>
-                  <p className="font-medium">{request.incoterm || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Commissiepercentage</Label>
-                  <p className="font-medium">
-                    {request.commissionPercentage !== null
-                      ? `${request.commissionPercentage}%`
-                      : '-'}
-                  </p>
-                </div>
+                {request.incoterm && (
+                  <div>
+                    <Label className="text-gray-500">Incoterm</Label>
+                    <p className="font-medium">{request.incoterm}</p>
+                  </div>
+                )}
+                {request.paymentTerm && (
+                  <div>
+                    <Label className="text-gray-500">Betalingstermijn</Label>
+                    <p className="font-medium">{request.paymentTerm} dagen</p>
+                  </div>
+                )}
+                {request.accountManager && (
+                  <div>
+                    <Label className="text-gray-500">Accountmanager</Label>
+                    <p className="font-medium">{request.accountManager}</p>
+                  </div>
+                )}
+                {request.commissionPercentage !== null && request.commissionPercentage !== undefined && (
+                  <div>
+                    <Label className="text-gray-500">Commissiepercentage</Label>
+                    <p className="font-medium">{request.commissionPercentage}%</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

@@ -1,3 +1,17 @@
+// SupplierType enum
+export const SupplierType = {
+  KOOP: 'KOOP',
+  X_KWEKER: 'X_KWEKER',
+  O_KWEKER: 'O_KWEKER',
+} as const
+export type SupplierType = (typeof SupplierType)[keyof typeof SupplierType]
+
+export const SupplierTypeLabels: Record<SupplierType, string> = {
+  KOOP: 'Koop',
+  X_KWEKER: 'X-kweker',
+  O_KWEKER: 'O-kweker',
+}
+
 // Role enum
 export const Role = {
   ADMIN: 'ADMIN',
@@ -51,6 +65,7 @@ export type Incoterm = (typeof Incoterm)[keyof typeof Incoterm]
 export const FileType = {
   KVK: 'KVK',
   PASSPORT: 'PASSPORT',
+  BANK_DETAILS: 'BANK_DETAILS',
   OTHER: 'OTHER',
 } as const
 export type FileType = (typeof FileType)[keyof typeof FileType]
@@ -58,6 +73,7 @@ export type FileType = (typeof FileType)[keyof typeof FileType]
 export const FileTypeLabels: Record<FileType, string> = {
   KVK: 'KvK Uittreksel',
   PASSPORT: 'Paspoort',
+  BANK_DETAILS: 'Screenshot bankgegevens',
   OTHER: 'Overig',
 }
 
@@ -76,6 +92,8 @@ export const AuditAction = {
   FILE_UPLOADED: 'FILE_UPLOADED',
   FILE_DELETED: 'FILE_DELETED',
   REMINDER_SENT: 'REMINDER_SENT',
+  SUPPLIER_SAVED: 'SUPPLIER_SAVED',
+  SUPPLIER_TYPE_CHANGED: 'SUPPLIER_TYPE_CHANGED',
 } as const
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 

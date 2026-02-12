@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Status, StatusLabels } from '@/types'
+import { Status, StatusLabels, SupplierType, SupplierTypeLabels } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
 import * as XLSX from 'xlsx'
 
@@ -30,6 +30,7 @@ interface Request {
   supplierEmail: string
   status: string
   region: string
+  supplierType: string
   createdAt: Date
   createdBy: {
     firstName: string
@@ -54,9 +55,16 @@ const statusColors: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 }
 
+const supplierTypeColors: Record<string, string> = {
+  KOOP: 'bg-slate-100 text-slate-800',
+  X_KWEKER: 'bg-emerald-100 text-emerald-800',
+  O_KWEKER: 'bg-cyan-100 text-cyan-800',
+}
+
 export function RequestsTable({ requests, userRoles, externalStatusFilter }: RequestsTableProps) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
   const [sortField, setSortField] = useState<'createdAt' | 'supplierName' | 'status' | 'supplierEmail'>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
@@ -87,6 +95,11 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
       result = result.filter((r) => r.status === statusFilter)
     }
 
+    // Filter by type
+    if (typeFilter !== 'all') {
+      result = result.filter((r) => r.supplierType === typeFilter)
+    }
+
     // Sort
     result.sort((a, b) => {
       let comparison = 0
@@ -103,12 +116,13 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
     })
 
     return result
-  }, [requests, search, statusFilter, sortField, sortOrder])
+  }, [requests, search, statusFilter, typeFilter, sortField, sortOrder])
 
   const handleExport = () => {
     const data = filteredAndSortedRequests.map((r) => ({
       'Leverancier': r.supplierName,
       'Email': r.supplierEmail,
+      'Type': SupplierTypeLabels[r.supplierType as SupplierType] || r.supplierType,
       'Status': StatusLabels[r.status as Status] || r.status,
       'Aangemaakt door': formatUserName(r.createdBy) || r.createdBy.email,
       'Datum': new Date(r.createdAt).toLocaleDateString('nl-NL'),
@@ -152,6 +166,19 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
               ))}
             </SelectContent>
           </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Filter op type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle typen</SelectItem>
+              {Object.entries(SupplierTypeLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button onClick={handleExport} variant="outline">
@@ -172,6 +199,7 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
                   <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
+              <TableHead>Type</TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort('supplierEmail')}
@@ -206,7 +234,7 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
           <TableBody>
             {filteredAndSortedRequests.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   Geen aanvragen gevonden
                 </TableCell>
               </TableRow>
@@ -217,6 +245,11 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
                     <Link href={`/requests/${request.id}`} className="hover:text-blue-600 hover:underline">
                       {request.supplierName}
                     </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={supplierTypeColors[request.supplierType] || 'bg-gray-100 text-gray-800'}>
+                      {SupplierTypeLabels[request.supplierType as SupplierType] || request.supplierType}
+                    </Badge>
                   </TableCell>
                   <TableCell>{request.supplierEmail}</TableCell>
                   <TableCell>

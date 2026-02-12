@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { AuditAction, Status } from '@/types'
+import { AuditAction, Status, SupplierType } from '@/types'
+import { requiresIncoterm } from '@/lib/supplier-type-utils'
 import {
   sendFinanceNotificationEmail,
   sendERPNotificationEmail,
@@ -169,8 +170,14 @@ export async function PATCH(
         if (existingRequest.supplierSubmittedAt || existingRequest.selfFill) {
           newStatus = Status.AWAITING_PURCHASER
         }
-        if (existingRequest.incoterm && existingRequest.commissionPercentage !== null) {
-          newStatus = Status.AWAITING_FINANCE
+        // Check if purchaser has submitted (type-aware: incoterm only required for Koop/O-kweker)
+        const needsIncoterm = requiresIncoterm(existingRequest.supplierType)
+        const purchaserDone = needsIncoterm ? !!existingRequest.incoterm : true
+        if (purchaserDone && (existingRequest.supplierSubmittedAt || existingRequest.selfFill) && newStatus === Status.AWAITING_PURCHASER) {
+          // Only advance if purchaser actually submitted (status was AWAITING_FINANCE before cancel)
+          if (existingRequest.incoterm || existingRequest.accountManager || existingRequest.paymentTerm) {
+            newStatus = Status.AWAITING_FINANCE
+          }
         }
         if (existingRequest.creditorNumber) {
           newStatus = Status.AWAITING_ERP
@@ -197,10 +204,10 @@ export async function PATCH(
       }
 
       case 'resend-invitation': {
-        // Generate new token
+        // Generate new token (valid for 2 weeks)
         const invitationToken = uuidv4()
         const invitationExpiresAt = new Date()
-        invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7)
+        invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 14)
 
         const updated = await prisma.supplierRequest.update({
           where: { id },
@@ -306,10 +313,11 @@ export async function PATCH(
           )
         }
 
-        // Check for required fields
-        if (!data.incoterm || data.commissionPercentage === undefined) {
+        // Type-aware validation: incoterm only required for Koop/O-kweker
+        const submitType = (data.supplierType as string) || existingRequest.supplierType || 'KOOP'
+        if (requiresIncoterm(submitType) && !data.incoterm) {
           return NextResponse.json(
-            { error: 'Incoterm en commissiepercentage zijn verplicht' },
+            { error: 'Incoterm is verplicht voor dit leverancierstype' },
             { status: 400 }
           )
         }
@@ -352,6 +360,23 @@ export async function PATCH(
 
             filesToCreate.push({ fileName: passportFile.name, fileType: 'PASSPORT', filePath })
           }
+
+          const bankDetailsFile = formDataObj.get('bankDetails') as File | null
+          if (bankDetailsFile && bankDetailsFile.size > 0) {
+            const fileName = `bank_${Date.now()}_${bankDetailsFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+
+            if (useVercelBlob) {
+              await uploadToBlob(`${id}/${fileName}`, bankDetailsFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await bankDetailsFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+
+            filesToCreate.push({ fileName: bankDetailsFile.name, fileType: 'BANK_DETAILS', filePath })
+          }
         }
 
         // Create file records
@@ -368,6 +393,7 @@ export async function PATCH(
           where: { id },
           data: {
             ...data,
+            supplierType: submitType,
             status: Status.AWAITING_FINANCE,
           },
         })
@@ -379,6 +405,7 @@ export async function PATCH(
             action: AuditAction.PURCHASER_SUBMITTED,
             details: JSON.stringify({
               ...data,
+              supplierType: submitType,
               filesUploaded: filesToCreate.length,
             }),
           },
@@ -528,6 +555,44 @@ export async function PATCH(
         })
 
         return NextResponse.json(updated)
+      }
+
+      case 'change-type': {
+        // INKOPER can change supplier type
+        if (!session.user.roles.includes('INKOPER')) {
+          return NextResponse.json(
+            { error: 'Alleen inkopers kunnen het type wijzigen' },
+            { status: 403 }
+          )
+        }
+
+        const newType = data.supplierType as string
+        const validTypes = Object.values(SupplierType)
+        if (!newType || !validTypes.includes(newType as SupplierType)) {
+          return NextResponse.json(
+            { error: 'Ongeldig leverancierstype' },
+            { status: 400 }
+          )
+        }
+
+        const updatedType = await prisma.supplierRequest.update({
+          where: { id },
+          data: { supplierType: newType },
+        })
+
+        await prisma.auditLog.create({
+          data: {
+            requestId: id,
+            userId: session.user.id,
+            action: AuditAction.SUPPLIER_TYPE_CHANGED,
+            details: JSON.stringify({
+              oldType: existingRequest.supplierType,
+              newType,
+            }),
+          },
+        })
+
+        return NextResponse.json(updatedType)
       }
 
       default:

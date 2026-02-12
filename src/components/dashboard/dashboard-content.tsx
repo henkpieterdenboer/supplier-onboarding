@@ -10,6 +10,7 @@ interface Request {
   supplierEmail: string
   status: string
   region: string
+  supplierType: string
   createdAt: Date
   createdBy: {
     firstName: string

@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendInvitationEmail } from '@/lib/email'
-import { AuditAction, Status } from '@/types'
+import { AuditAction, Status, SupplierType } from '@/types'
 
 // POST /api/requests - Create new request
 export async function POST(request: NextRequest) {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { supplierName, supplierEmail, region, selfFill } = body
+    const { supplierName, supplierEmail, region, selfFill, supplierType } = body
 
     // Validate required fields
     if (!supplierName || !supplierEmail || !region) {
@@ -32,6 +32,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Validate supplier type
+    const validTypes = Object.values(SupplierType)
+    const resolvedType = supplierType && validTypes.includes(supplierType) ? supplierType : 'KOOP'
 
     // Check for duplicate supplier (name or email)
     const existing = await prisma.supplierRequest.findFirst({
@@ -51,10 +55,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate invitation token (valid for 1 week)
+    // Generate invitation token (valid for 2 weeks)
     const invitationToken = uuidv4()
     const invitationExpiresAt = new Date()
-    invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7)
+    invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 14)
 
     // Determine initial status
     const status = selfFill ? Status.AWAITING_PURCHASER : Status.INVITATION_SENT
@@ -66,6 +70,7 @@ export async function POST(request: NextRequest) {
         supplierEmail,
         region,
         selfFill,
+        supplierType: resolvedType,
         status,
         createdById: session.user.id,
         invitationToken: selfFill ? null : invitationToken,
@@ -85,6 +90,7 @@ export async function POST(request: NextRequest) {
           supplierEmail,
           region,
           selfFill,
+          supplierType: resolvedType,
         }),
       },
     })

@@ -177,6 +177,47 @@ export async function sendInvitationEmail({
   })
 }
 
+// Save email to supplier (continue later)
+interface SupplierSaveEmailOptions {
+  to: string
+  supplierName: string
+  invitationToken: string
+  expiresAt: Date
+}
+
+export async function sendSupplierSaveEmail({
+  to,
+  supplierName,
+  invitationToken,
+  expiresAt,
+}: SupplierSaveEmailOptions): Promise<string | null> {
+  const invitationUrl = `${APP_URL}/supplier/${invitationToken}`
+
+  return sendEmail({
+    to,
+    subject: 'Uw gegevens zijn opgeslagen - Supplier Onboarding',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Gegevens opgeslagen</h2>
+        <p>Beste ${supplierName},</p>
+        <p>Uw gegevens zijn tussentijds opgeslagen. U kunt het formulier op elk moment verder invullen via onderstaande link:</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${invitationUrl}"
+             style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            Formulier verder invullen
+          </a>
+        </p>
+        <p><strong>Let op:</strong> Deze link is geldig tot ${expiresAt.toLocaleDateString('nl-NL')}.</p>
+        <p>Als u vragen heeft, neem dan contact op met uw contactpersoon.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">
+          Dit is een automatisch gegenereerde email. Niet op reageren.
+        </p>
+      </div>
+    `,
+  })
+}
+
 // Confirmation email to supplier after submission
 interface ConfirmationEmailOptions {
   to: string

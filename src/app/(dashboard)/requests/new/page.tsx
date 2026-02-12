@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
 import { toast } from 'sonner'
-import { Region, RegionLabels } from '@/types'
+import { Region, RegionLabels, SupplierType, SupplierTypeLabels } from '@/types'
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 
@@ -34,6 +34,7 @@ export default function NewRequestPage() {
     supplierEmail: '',
     region: 'EU' as Region,
     selfFill: false,
+    supplierType: 'KOOP' as SupplierType,
   })
 
   // Only INKOPER can create new requests
@@ -142,6 +143,33 @@ export default function NewRequestPage() {
             {error && (
               <Alert variant="destructive">{error}</Alert>
             )}
+
+            {/* Supplier Type Selector */}
+            <div className="space-y-4">
+              <Label>Type leverancier *</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {Object.entries(SupplierTypeLabels).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, supplierType: value as SupplierType })}
+                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                      formData.supplierType === value
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    disabled={isLoading}
+                  >
+                    <div className="font-medium">{label}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {value === 'KOOP' && 'Standaard leverancier'}
+                      {value === 'X_KWEKER' && 'Veilingleverancier'}
+                      {value === 'O_KWEKER' && 'Directe kweker'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="supplierName">Naam leverancier *</Label>
