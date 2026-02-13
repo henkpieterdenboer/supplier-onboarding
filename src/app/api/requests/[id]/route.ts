@@ -12,6 +12,7 @@ import {
   sendCompletionEmail,
 } from '@/lib/email'
 import { formatUserName } from '@/lib/user-utils'
+import type { Language } from '@/lib/i18n'
 import { v4 as uuidv4 } from 'uuid'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
@@ -35,7 +36,7 @@ export async function GET(
     const { id } = await params
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const supplierRequest = await prisma.supplierRequest.findUnique({
@@ -70,14 +71,14 @@ export async function GET(
     })
 
     if (!supplierRequest) {
-      return NextResponse.json({ error: 'Aanvraag niet gevonden' }, { status: 404 })
+      return NextResponse.json({ error: 'Request not found' }, { status: 404 })
     }
 
     return NextResponse.json(supplierRequest)
   } catch (error) {
     console.error('Error fetching request:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }
@@ -93,7 +94,7 @@ export async function PATCH(
     const { id } = await params
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Support both JSON and FormData (for file uploads)
@@ -127,13 +128,14 @@ export async function PATCH(
             middleName: true,
             lastName: true,
             receiveEmails: true,
+            preferredLanguage: true,
           },
         },
       },
     })
 
     if (!existingRequest) {
-      return NextResponse.json({ error: 'Aanvraag niet gevonden' }, { status: 404 })
+      return NextResponse.json({ error: 'Request not found' }, { status: 404 })
     }
 
     // Handle different actions
@@ -160,7 +162,7 @@ export async function PATCH(
         // Any role can reopen a cancelled request
         if (existingRequest.status !== 'CANCELLED') {
           return NextResponse.json(
-            { error: 'Alleen afgebroken aanvragen kunnen worden heropend' },
+            { error: 'Only cancelled requests can be reopened' },
             { status: 400 }
           )
         }
@@ -223,6 +225,7 @@ export async function PATCH(
           supplierName: existingRequest.supplierName,
           invitationToken,
           expiresAt: invitationExpiresAt,
+          language: (existingRequest.supplierLanguage || 'nl') as Language,
         })
 
         await prisma.auditLog.create({
@@ -242,37 +245,37 @@ export async function PATCH(
 
       case 'send-reminder': {
         // Determine recipients based on current status
-        type ReminderRecipient = { email: string; name: string }
+        type ReminderRecipient = { email: string; name: string; language: Language }
         let recipients: ReminderRecipient[] = []
         let reminderRole: 'supplier' | 'purchaser' | 'finance' | 'erp' = 'supplier'
 
         switch (existingRequest.status) {
           case 'INVITATION_SENT':
             // Supplier reminders always send (external party)
-            recipients = [{ email: existingRequest.supplierEmail, name: existingRequest.supplierName }]
+            recipients = [{ email: existingRequest.supplierEmail, name: existingRequest.supplierName, language: (existingRequest.supplierLanguage || 'nl') as Language }]
             reminderRole = 'supplier'
             break
           case 'AWAITING_PURCHASER':
             if (existingRequest.createdBy.receiveEmails) {
-              recipients = [{ email: existingRequest.createdBy.email, name: formatUserName(existingRequest.createdBy) || 'Inkoper' }]
+              recipients = [{ email: existingRequest.createdBy.email, name: formatUserName(existingRequest.createdBy) || 'Inkoper', language: (existingRequest.createdBy.preferredLanguage || 'nl') as Language }]
             }
             reminderRole = 'purchaser'
             break
           case 'AWAITING_FINANCE': {
             const financeUsers = await prisma.user.findMany({
               where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
-              select: { email: true, firstName: true, middleName: true, lastName: true },
+              select: { email: true, firstName: true, middleName: true, lastName: true, preferredLanguage: true },
             })
-            recipients = financeUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'Finance' }))
+            recipients = financeUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'Finance', language: (u.preferredLanguage || 'nl') as Language }))
             reminderRole = 'finance'
             break
           }
           case 'AWAITING_ERP': {
             const erpUsers = await prisma.user.findMany({
               where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true },
-              select: { email: true, firstName: true, middleName: true, lastName: true },
+              select: { email: true, firstName: true, middleName: true, lastName: true, preferredLanguage: true },
             })
-            recipients = erpUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'ERP' }))
+            recipients = erpUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'ERP', language: (u.preferredLanguage || 'nl') as Language }))
             reminderRole = 'erp'
             break
           }
@@ -286,6 +289,7 @@ export async function PATCH(
             requestId: id,
             role: reminderRole,
             invitationToken: existingRequest.invitationToken || undefined,
+            language: recipient.language,
           })
         }
 
@@ -308,7 +312,7 @@ export async function PATCH(
         // INKOPER submits after filling additional data
         if (!session.user.roles.includes('INKOPER')) {
           return NextResponse.json(
-            { error: 'Alleen inkopers kunnen deze actie uitvoeren' },
+            { error: 'Only purchasers can perform this action' },
             { status: 403 }
           )
         }
@@ -317,7 +321,7 @@ export async function PATCH(
         const submitType = (data.supplierType as string) || existingRequest.supplierType || 'KOOP'
         if (requiresIncoterm(submitType) && !data.incoterm) {
           return NextResponse.json(
-            { error: 'Incoterm is verplicht voor dit leverancierstype' },
+            { error: 'Incoterm is required for this supplier type' },
             { status: 400 }
           )
         }
@@ -414,13 +418,14 @@ export async function PATCH(
         // Notify Finance users with receiveEmails enabled
         const financeUsersForNotify = await prisma.user.findMany({
           where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
-          select: { email: true },
+          select: { email: true, preferredLanguage: true },
         })
         for (const fu of financeUsersForNotify) {
           await sendFinanceNotificationEmail({
             to: fu.email,
             supplierName: existingRequest.supplierName,
             requestId: id,
+            language: (fu.preferredLanguage || 'nl') as Language,
           })
         }
 
@@ -431,14 +436,14 @@ export async function PATCH(
         // FINANCE submits creditor number
         if (!session.user.roles.includes('FINANCE')) {
           return NextResponse.json(
-            { error: 'Alleen Finance kan deze actie uitvoeren' },
+            { error: 'Only Finance can perform this action' },
             { status: 403 }
           )
         }
 
         if (!data.creditorNumber) {
           return NextResponse.json(
-            { error: 'Crediteurnummer is verplicht' },
+            { error: 'Creditor number is required' },
             { status: 400 }
           )
         }
@@ -453,7 +458,7 @@ export async function PATCH(
 
         if (existingCreditor) {
           return NextResponse.json(
-            { error: 'Dit crediteurnummer is al in gebruik' },
+            { error: 'This creditor number is already in use' },
             { status: 400 }
           )
         }
@@ -478,13 +483,14 @@ export async function PATCH(
         // Notify ERP users with receiveEmails enabled
         const erpUsersForNotify = await prisma.user.findMany({
           where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true },
-          select: { email: true },
+          select: { email: true, preferredLanguage: true },
         })
         for (const eu of erpUsersForNotify) {
           await sendERPNotificationEmail({
             to: eu.email,
             supplierName: existingRequest.supplierName,
             requestId: id,
+            language: (eu.preferredLanguage || 'nl') as Language,
           })
         }
 
@@ -495,14 +501,14 @@ export async function PATCH(
         // ERP submits KBT code
         if (!session.user.roles.includes('ERP')) {
           return NextResponse.json(
-            { error: 'Alleen ERP kan deze actie uitvoeren' },
+            { error: 'Only ERP can perform this action' },
             { status: 403 }
           )
         }
 
         if (!data.kbtCode) {
           return NextResponse.json(
-            { error: 'KBT-code is verplicht' },
+            { error: 'KBT code is required' },
             { status: 400 }
           )
         }
@@ -517,7 +523,7 @@ export async function PATCH(
 
         if (existingKbt) {
           return NextResponse.json(
-            { error: 'Deze KBT-code is al in gebruik' },
+            { error: 'This KBT code is already in use' },
             { status: 400 }
           )
         }
@@ -542,7 +548,7 @@ export async function PATCH(
         // Send completion email to Finance users and Purchaser (respecting receiveEmails)
         const financeUsersForCompletion = await prisma.user.findMany({
           where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
-          select: { email: true },
+          select: { email: true, preferredLanguage: true },
         })
         await sendCompletionEmail({
           financeEmails: financeUsersForCompletion.map(u => u.email),
@@ -552,6 +558,7 @@ export async function PATCH(
           requestId: id,
           creditorNumber: existingRequest.creditorNumber || '',
           kbtCode: data.kbtCode as string,
+          language: (existingRequest.createdBy.preferredLanguage || 'nl') as Language,
         })
 
         return NextResponse.json(updated)
@@ -561,7 +568,7 @@ export async function PATCH(
         // INKOPER can change supplier type
         if (!session.user.roles.includes('INKOPER')) {
           return NextResponse.json(
-            { error: 'Alleen inkopers kunnen het type wijzigen' },
+            { error: 'Only purchasers can change the type' },
             { status: 403 }
           )
         }
@@ -570,7 +577,7 @@ export async function PATCH(
         const validTypes = Object.values(SupplierType)
         if (!newType || !validTypes.includes(newType as SupplierType)) {
           return NextResponse.json(
-            { error: 'Ongeldig leverancierstype' },
+            { error: 'Invalid supplier type' },
             { status: 400 }
           )
         }
@@ -596,12 +603,12 @@ export async function PATCH(
       }
 
       default:
-        return NextResponse.json({ error: 'Ongeldige actie' }, { status: 400 })
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
     console.error('Error updating request:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }

@@ -10,16 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
+import { useLanguage } from '@/lib/i18n-context'
+import { LanguageSelector } from '@/components/ui/language-selector'
 import Link from 'next/link'
 
-const ssoErrorMessages: Record<string, string> = {
-  AccountNotFound: 'Account niet gevonden. Neem contact op met uw beheerder.',
-  NoEmail: 'Geen e-mailadres ontvangen van Microsoft.',
-  OAuthCallback: 'Er is een fout opgetreden bij het inloggen met Microsoft. Probeer het opnieuw.',
-  OAuthSignin: 'Er is een fout opgetreden bij het inloggen met Microsoft. Probeer het opnieuw.',
-}
+const validSsoErrors = ['AccountNotFound', 'NoEmail', 'OAuthCallback', 'OAuthSignin']
 
 function LoginForm() {
+  const { t } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
@@ -32,7 +30,7 @@ function LoginForm() {
 
   // Show SSO error from URL params
   const ssoError = searchParams.get('error')
-  const ssoErrorMessage = ssoError ? ssoErrorMessages[ssoError] : null
+  const ssoErrorMessage = ssoError && validSsoErrors.includes(ssoError) ? t(`auth.login.ssoErrors.${ssoError}`) : null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,23 +51,27 @@ function LoginForm() {
         router.refresh()
       }
     } catch {
-      setError('Er is een fout opgetreden')
+      setError(t('auth.login.errorGeneric'))
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
+    <>
+    <div className="w-full max-w-md flex justify-end mb-2">
+      <LanguageSelector />
+    </div>
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-4">
         <div className="flex justify-center">
           <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
         </div>
         <CardTitle className="text-2xl font-bold text-center">
-          Supplier Onboarding
+          {t('auth.login.title')}
         </CardTitle>
         <CardDescription className="text-center">
-          Log in om door te gaan
+          {t('auth.login.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -87,11 +89,11 @@ function LoginForm() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('auth.login.email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="uw@email.nl"
+              placeholder={t('auth.login.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -100,7 +102,7 @@ function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Wachtwoord</Label>
+            <Label htmlFor="password">{t('auth.login.password')}</Label>
             <Input
               id="password"
               type="password"
@@ -112,12 +114,12 @@ function LoginForm() {
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Bezig...' : 'Inloggen'}
+            {isLoading ? t('auth.login.submitting') : t('auth.login.submit')}
           </Button>
 
           <div className="text-center">
             <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
-              Wachtwoord vergeten?
+              {t('auth.login.forgotPassword')}
             </Link>
           </div>
         </form>
@@ -127,7 +129,7 @@ function LoginForm() {
             <div className="relative my-6">
               <Separator />
               <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-muted-foreground">
-                of
+                {t('common.or')}
               </span>
             </div>
 
@@ -142,7 +144,7 @@ function LoginForm() {
               }}
             >
               {isSsoLoading ? (
-                'Bezig...'
+                t('auth.login.ssoLoading')
               ) : (
                 <>
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
@@ -151,7 +153,7 @@ function LoginForm() {
                     <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
                     <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
                   </svg>
-                  Inloggen met Microsoft
+                  {t('auth.login.ssoButton')}
                 </>
               )}
             </Button>
@@ -161,7 +163,7 @@ function LoginForm() {
         {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
           <>
             <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-              <p className="text-sm text-gray-600 font-medium mb-2">Demo accounts:</p>
+              <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.accounts')}</p>
               <ul className="text-sm text-gray-500 space-y-1">
                 <li><strong>Admin:</strong> admin@demo.nl / demo123</li>
                 <li><strong>Inkoper:</strong> inkoper@demo.nl / demo123</li>
@@ -171,7 +173,7 @@ function LoginForm() {
             </div>
 
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600 font-medium mb-2">Om verstuurde mails te kunnen zien:</p>
+              <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.viewEmails')}</p>
               <p className="text-sm text-gray-500 mb-1">
                 <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   https://ethereal.email/login
@@ -179,23 +181,26 @@ function LoginForm() {
               </p>
               <ul className="text-sm text-gray-500 space-y-1">
                 <li><strong>Email:</strong> dxubywxljl4roleu@ethereal.email</li>
-                <li><strong>Wachtwoord:</strong> SbGwM71ZJusSNSQWr3</li>
+                <li>{t('demo.passwordCreds')}</li>
               </ul>
             </div>
           </>
         )}
       </CardContent>
     </Card>
+    </>
   )
 }
 
 export default function LoginPage() {
+  const { t } = useLanguage()
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Suspense fallback={
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
-            Laden...
+            {t('common.loading')}
           </CardContent>
         </Card>
       }>

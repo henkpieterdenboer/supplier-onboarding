@@ -28,8 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { RoleLabels } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
+import { useLanguage } from '@/lib/i18n-context'
 import { UserFormDialog } from './user-form-dialog'
 
 interface User {
@@ -41,6 +41,7 @@ interface User {
   roles: string[]
   isActive: boolean
   receiveEmails: boolean
+  preferredLanguage?: string
   createdAt: Date
   isActivated: boolean
   hasPendingActivation: boolean
@@ -52,6 +53,7 @@ interface UsersTableProps {
 
 export function UsersTable({ users: initialUsers }: UsersTableProps) {
   const router = useRouter()
+  const { t } = useLanguage()
   const [users, setUsers] = useState(initialUsers)
 
   // Sync state when server component re-renders with new data
@@ -101,10 +103,10 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
   const handleToggleActive = async (user: User) => {
     setConfirmDialog({
       open: true,
-      title: user.isActive ? 'Gebruiker deactiveren' : 'Gebruiker activeren',
+      title: user.isActive ? t('admin.users.table.confirmDeactivate') : t('admin.users.table.confirmActivate'),
       description: user.isActive
-        ? `Weet u zeker dat u ${formatUserName(user)} (${user.email}) wilt deactiveren? De gebruiker kan dan niet meer inloggen.`
-        : `Weet u zeker dat u ${formatUserName(user)} (${user.email}) wilt activeren?`,
+        ? t('admin.users.table.confirmDeactivateMessage', { name: formatUserName(user), email: user.email })
+        : t('admin.users.table.confirmActivateMessage', { name: formatUserName(user), email: user.email }),
       action: async () => {
         const response = await fetch(`/api/admin/users/${user.id}`, {
           method: 'PATCH',
@@ -165,42 +167,48 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
   }
 
   return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">{t('admin.users.title')}</h1>
+        <p className="text-gray-500">{t('admin.users.description')}</p>
+      </div>
+
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <Input
-            placeholder="Zoeken op naam of email..."
+            placeholder={t('admin.users.table.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-64"
           />
           <Select value={roleFilter} onValueChange={setRoleFilter}>
             <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Filter op rol" />
+              <SelectValue placeholder={t('admin.users.table.filterRole')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle rollen</SelectItem>
-              {Object.entries(RoleLabels).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
+              <SelectItem value="all">{t('admin.users.table.allRoles')}</SelectItem>
+              {(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
+                <SelectItem key={role} value={role}>
+                  {t(`enums.role.${role}`)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Filter op status" />
+              <SelectValue placeholder={t('admin.users.table.filterStatus')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle statussen</SelectItem>
-              <SelectItem value="active">Actief</SelectItem>
-              <SelectItem value="inactive">Inactief</SelectItem>
+              <SelectItem value="all">{t('admin.users.table.allStatuses')}</SelectItem>
+              <SelectItem value="active">{t('admin.users.table.active')}</SelectItem>
+              <SelectItem value="inactive">{t('admin.users.table.inactive')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <Button onClick={() => setIsCreateOpen(true)}>
-          Nieuwe gebruiker
+          {t('admin.users.table.newUser')}
         </Button>
       </div>
 
@@ -208,19 +216,19 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Naam</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Email ontvangen</TableHead>
-              <TableHead>Acties</TableHead>
+              <TableHead>{t('admin.users.table.name')}</TableHead>
+              <TableHead>{t('admin.users.table.email')}</TableHead>
+              <TableHead>{t('admin.users.table.role')}</TableHead>
+              <TableHead>{t('admin.users.table.status')}</TableHead>
+              <TableHead>{t('admin.users.table.receiveEmail')}</TableHead>
+              <TableHead>{t('admin.users.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                  Geen gebruikers gevonden
+                  {t('admin.users.table.empty')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -234,25 +242,25 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                     <div className="flex flex-wrap gap-1">
                       {user.roles.map((role) => (
                         <Badge key={role} variant="outline">
-                          {RoleLabels[role] || role}
+                          {t(`enums.role.${role}`)}
                         </Badge>
                       ))}
                     </div>
                   </TableCell>
                   <TableCell>
                     {user.isActive ? (
-                      <Badge className="bg-green-100 text-green-800">Actief</Badge>
+                      <Badge className="bg-green-100 text-green-800">{t('admin.users.table.statusActive')}</Badge>
                     ) : user.isActivated ? (
-                      <Badge className="bg-red-100 text-red-800">Inactief</Badge>
+                      <Badge className="bg-red-100 text-red-800">{t('admin.users.table.statusInactive')}</Badge>
                     ) : (
-                      <Badge className="bg-yellow-100 text-yellow-800">Niet geactiveerd</Badge>
+                      <Badge className="bg-yellow-100 text-yellow-800">{t('admin.users.table.statusNotActivated')}</Badge>
                     )}
                   </TableCell>
                   <TableCell>
                     {user.receiveEmails ? (
-                      <span className="text-green-600">Ja</span>
+                      <span className="text-green-600">{t('common.yes')}</span>
                     ) : (
-                      <span className="text-gray-400">Nee</span>
+                      <span className="text-gray-400">{t('common.no')}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -262,7 +270,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                         size="sm"
                         onClick={() => setEditingUser(user)}
                       >
-                        Bewerken
+                        {t('admin.users.table.edit')}
                       </Button>
                       <Button
                         variant="ghost"
@@ -270,7 +278,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                         onClick={() => handleToggleActive(user)}
                         className={user.isActive ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}
                       >
-                        {user.isActive ? 'Deactiveren' : 'Activeren'}
+                        {user.isActive ? t('admin.users.table.deactivate') : t('admin.users.table.activate')}
                       </Button>
                       {!user.isActivated && (
                         <Button
@@ -280,7 +288,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                           disabled={isLoading}
                           className="text-blue-600 hover:text-blue-700"
                         >
-                          Activatiemail
+                          {t('admin.users.table.resendActivation')}
                         </Button>
                       )}
                     </div>
@@ -293,7 +301,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
       </div>
 
       <div className="text-sm text-gray-500">
-        {filteredUsers.length} van {users.length} gebruikers
+        {t('admin.users.table.count', { filtered: filteredUsers.length, total: users.length })}
       </div>
 
       {/* Create user dialog */}
@@ -326,17 +334,18 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
               onClick={() => setConfirmDialog({ open: false, title: '', description: '', action: async () => {} })}
               disabled={isLoading}
             >
-              Annuleren
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleConfirmAction}
               disabled={isLoading}
             >
-              {isLoading ? 'Bezig...' : 'Bevestigen'}
+              {isLoading ? t('common.submitting') : t('common.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   )
 }

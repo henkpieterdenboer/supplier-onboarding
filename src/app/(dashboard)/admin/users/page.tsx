@@ -21,6 +21,7 @@ export default async function AdminUsersPage() {
       roles: true,
       isActive: true,
       receiveEmails: true,
+      preferredLanguage: true,
       createdAt: true,
       passwordHash: true,
       activationToken: true,
@@ -36,13 +37,6 @@ export default async function AdminUsersPage() {
   }))
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Gebruikersbeheer</h1>
-        <p className="text-gray-500">Beheer gebruikers en hun rechten</p>
-      </div>
-
-      <UsersTable users={safeUsers} />
-    </div>
+    <UsersTable users={safeUsers} />
   )
 }

@@ -9,6 +9,7 @@ import {
   sendSupplierSaveEmail,
 } from '@/lib/email'
 import { formatUserName } from '@/lib/user-utils'
+import type { Language } from '@/lib/i18n'
 
 // Dynamic import for Vercel Blob (only used in production)
 const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
@@ -65,12 +66,13 @@ export async function GET(
         salesSheetEmail: true,
         mandateRFH: true,
         apiKeyFloriday: true,
+        supplierLanguage: true,
       },
     })
 
     if (!supplierRequest) {
       return NextResponse.json(
-        { error: 'Ongeldige link. Neem contact op voor een nieuwe uitnodiging.' },
+        { error: 'Invalid link. Please contact us for a new invitation.' },
         { status: 404 }
       )
     }
@@ -81,7 +83,7 @@ export async function GET(
       new Date() > new Date(supplierRequest.invitationExpiresAt)
     ) {
       return NextResponse.json(
-        { error: 'Deze link is verlopen. Neem contact op voor een nieuwe uitnodiging.' },
+        { error: 'This link has expired. Please contact us for a new invitation.' },
         { status: 410 }
       )
     }
@@ -89,7 +91,7 @@ export async function GET(
     // Check if already submitted (but allow re-access when saved)
     if (supplierRequest.status !== 'INVITATION_SENT') {
       return NextResponse.json(
-        { error: 'Het formulier is al ingevuld.' },
+        { error: 'The form has already been submitted.' },
         { status: 400 }
       )
     }
@@ -98,7 +100,7 @@ export async function GET(
   } catch (error) {
     console.error('Error validating token:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }
@@ -123,6 +125,7 @@ export async function POST(
             lastName: true,
             email: true,
             receiveEmails: true,
+            preferredLanguage: true,
           },
         },
       },
@@ -130,7 +133,7 @@ export async function POST(
 
     if (!supplierRequest) {
       return NextResponse.json(
-        { error: 'Ongeldige link' },
+        { error: 'Invalid link' },
         { status: 404 }
       )
     }
@@ -140,14 +143,14 @@ export async function POST(
       new Date() > new Date(supplierRequest.invitationExpiresAt)
     ) {
       return NextResponse.json(
-        { error: 'Deze link is verlopen' },
+        { error: 'This link has expired' },
         { status: 410 }
       )
     }
 
     if (supplierRequest.status !== 'INVITATION_SENT') {
       return NextResponse.json(
-        { error: 'Het formulier is al ingevuld' },
+        { error: 'The form has already been submitted' },
         { status: 400 }
       )
     }
@@ -298,6 +301,7 @@ export async function POST(
           supplierName: supplierRequest.supplierName,
           invitationToken: token,
           expiresAt: new Date(supplierRequest.invitationExpiresAt),
+          language: (supplierRequest.supplierLanguage || 'nl') as Language,
         })
       }
 
@@ -338,6 +342,7 @@ export async function POST(
       await sendSupplierConfirmationEmail({
         to: supplierRequest.supplierEmail,
         supplierName: supplierRequest.supplierName,
+        language: (supplierRequest.supplierLanguage || 'nl') as Language,
       })
 
       // Notify purchaser (only if they want to receive emails)
@@ -347,6 +352,7 @@ export async function POST(
           purchaserName: formatUserName(supplierRequest.createdBy) || 'Inkoper',
           supplierName: supplierRequest.supplierName,
           requestId: supplierRequest.id,
+          language: (supplierRequest.createdBy.preferredLanguage || 'nl') as Language,
         })
       }
 
@@ -355,7 +361,7 @@ export async function POST(
   } catch (error) {
     console.error('Error processing supplier submission:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden bij het verwerken van uw gegevens' },
+      { error: 'An error occurred while processing your data' },
       { status: 500 }
     )
   }

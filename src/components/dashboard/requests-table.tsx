@@ -20,9 +20,11 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Status, StatusLabels, SupplierType, SupplierTypeLabels } from '@/types'
+import { Status, SupplierType } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
 import * as XLSX from 'xlsx'
+import { useLanguage } from '@/lib/i18n-context'
+import { getDateLocale } from '@/lib/i18n'
 
 interface Request {
   id: string
@@ -62,6 +64,7 @@ const supplierTypeColors: Record<string, string> = {
 }
 
 export function RequestsTable({ requests, userRoles, externalStatusFilter }: RequestsTableProps) {
+  const { t, language } = useLanguage()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
@@ -120,17 +123,17 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
 
   const handleExport = () => {
     const data = filteredAndSortedRequests.map((r) => ({
-      'Leverancier': r.supplierName,
+      [t('requests.table.supplier')]: r.supplierName,
       'Email': r.supplierEmail,
-      'Type': SupplierTypeLabels[r.supplierType as SupplierType] || r.supplierType,
-      'Status': StatusLabels[r.status as Status] || r.status,
-      'Aangemaakt door': formatUserName(r.createdBy) || r.createdBy.email,
-      'Datum': new Date(r.createdAt).toLocaleDateString('nl-NL'),
+      [t('requests.table.type')]: t(`enums.supplierType.${r.supplierType}`),
+      [t('requests.table.status')]: t(`enums.status.${r.status}`),
+      [t('requests.table.createdBy')]: formatUserName(r.createdBy) || r.createdBy.email,
+      [t('requests.table.date')]: new Date(r.createdAt).toLocaleDateString(getDateLocale(language)),
     }))
 
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Aanvragen')
+    XLSX.utils.book_append_sheet(wb, ws, t('requests.table.sheetName'))
     XLSX.writeFile(wb, `leveranciersaanvragen_${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
@@ -148,33 +151,33 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <Input
-            placeholder="Zoeken op naam of email..."
+            placeholder={t('requests.table.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-64"
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter op status" />
+              <SelectValue placeholder={t('requests.table.filterStatus')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle statussen</SelectItem>
-              {Object.entries(StatusLabels).map(([value, label]) => (
+              <SelectItem value="all">{t('requests.table.allStatuses')}</SelectItem>
+              {Object.values(Status).map((value) => (
                 <SelectItem key={value} value={value}>
-                  {label}
+                  {t(`enums.status.${value}`)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Filter op type" />
+              <SelectValue placeholder={t('requests.table.filterType')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle typen</SelectItem>
-              {Object.entries(SupplierTypeLabels).map(([value, label]) => (
+              <SelectItem value="all">{t('requests.table.allTypes')}</SelectItem>
+              {Object.values(SupplierType).map((value) => (
                 <SelectItem key={value} value={value}>
-                  {label}
+                  {t(`enums.supplierType.${value}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -182,7 +185,7 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
         </div>
 
         <Button onClick={handleExport} variant="outline">
-          Export naar Excel
+          {t('requests.table.export')}
         </Button>
       </div>
 
@@ -194,17 +197,17 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort('supplierName')}
               >
-                Leverancier
+                {t('requests.table.supplier')}
                 {sortField === 'supplierName' && (
                   <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead>{t('requests.table.type')}</TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort('supplierEmail')}
               >
-                Email
+                {t('requests.table.email')}
                 {sortField === 'supplierEmail' && (
                   <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
@@ -213,29 +216,29 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort('status')}
               >
-                Status
+                {t('requests.table.status')}
                 {sortField === 'status' && (
                   <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
-              <TableHead>Aangemaakt door</TableHead>
+              <TableHead>{t('requests.table.createdBy')}</TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort('createdAt')}
               >
-                Datum
+                {t('requests.table.date')}
                 {sortField === 'createdAt' && (
                   <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
-              <TableHead>Acties</TableHead>
+              <TableHead>{t('requests.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredAndSortedRequests.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                  Geen aanvragen gevonden
+                  {t('requests.table.empty')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -248,23 +251,23 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
                   </TableCell>
                   <TableCell>
                     <Badge className={supplierTypeColors[request.supplierType] || 'bg-gray-100 text-gray-800'}>
-                      {SupplierTypeLabels[request.supplierType as SupplierType] || request.supplierType}
+                      {t(`enums.supplierType.${request.supplierType}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>{request.supplierEmail}</TableCell>
                   <TableCell>
                     <Badge className={statusColors[request.status]}>
-                      {StatusLabels[request.status as Status] || request.status}
+                      {t(`enums.status.${request.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatUserName(request.createdBy) || request.createdBy.email}</TableCell>
                   <TableCell>
-                    {new Date(request.createdAt).toLocaleDateString('nl-NL')}
+                    {new Date(request.createdAt).toLocaleDateString(getDateLocale(language))}
                   </TableCell>
                   <TableCell>
                     <Link href={`/requests/${request.id}`}>
                       <Button variant="ghost" size="sm">
-                        Bekijken
+                        {t('requests.table.view')}
                       </Button>
                     </Link>
                   </TableCell>
@@ -276,7 +279,7 @@ export function RequestsTable({ requests, userRoles, externalStatusFilter }: Req
       </div>
 
       <div className="text-sm text-gray-500">
-        {filteredAndSortedRequests.length} van {requests.length} aanvragen
+        {t('requests.table.count', { filtered: filteredAndSortedRequests.length, total: requests.length })}
       </div>
     </div>
   )

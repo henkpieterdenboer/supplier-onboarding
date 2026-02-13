@@ -23,9 +23,10 @@ model User {
   roles        String[] @default([])
   passwordHash String?
   isActive     Boolean  @default(false)
-  receiveEmails Boolean @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  receiveEmails     Boolean @default(true)
+  preferredLanguage String  @default("nl")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Activation
   activationToken     String?   @unique
@@ -56,7 +57,8 @@ model SupplierRequest {
   supplierEmail String
   region        String  // EU or ROW
   selfFill      Boolean @default(false) // If true, Inkoper fills form themselves
-  supplierType  String  @default("KOOP") // KOOP, X_KWEKER, O_KWEKER
+  supplierType     String  @default("KOOP") // KOOP, X_KWEKER, O_KWEKER
+  supplierLanguage String  @default("nl")  // Language for supplier form/emails
 
   // Supplier/Inkoper fills these fields
   companyName             String?

@@ -1,0 +1,627 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "submitting": "Submitting...",
+    "error": "An error occurred",
+    "success": "Action completed successfully",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "download": "Download",
+    "upload": "Upload",
+    "view": "View",
+    "days": "days",
+    "or": "or",
+    "of": "of",
+    "all": "All"
+  },
+  "demo": {
+    "banner": "Test / Demo environment",
+    "label": "Demo:",
+    "accounts": "Demo accounts:",
+    "emailLabel": "Mail:",
+    "emailResend": "Demo mail",
+    "emailEthereal": "Ethereal",
+    "changeRoles": "Change roles",
+    "viewEmails": "To view sent emails:",
+    "emailCreds": "Email: dxubywxljl4roleu@ethereal.email",
+    "passwordCreds": "Password: SbGwM71ZJusSNSQWr3"
+  },
+  "auth": {
+    "login": {
+      "title": "Supplier Onboarding",
+      "subtitle": "Sign in to continue",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "forgotPassword": "Forgot password?",
+      "ssoButton": "Sign in with Microsoft",
+      "ssoLoading": "Signing in...",
+      "errorGeneric": "An error occurred",
+      "ssoErrors": {
+        "AccountNotFound": "Account not found. Please contact your administrator.",
+        "NoEmail": "No email address received from Microsoft.",
+        "OAuthCallback": "An error occurred while signing in with Microsoft. Please try again.",
+        "OAuthSignin": "An error occurred while signing in with Microsoft. Please try again."
+      }
+    },
+    "activate": {
+      "title": "Activate account",
+      "subtitle": "Set your password to activate your account",
+      "password": "Password",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPlaceholder": "Repeat your password",
+      "submit": "Activate account",
+      "submitting": "Activating...",
+      "success": "Account activated",
+      "successMessage": "Your account has been successfully activated. You will be redirected to the login page...",
+      "errorMinLength": "Password must be at least 6 characters",
+      "errorMismatch": "Passwords do not match",
+      "errorGeneric": "An error occurred"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email address to receive a reset link",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "submit": "Send reset link",
+      "submitting": "Sending...",
+      "success": "Email sent",
+      "successMessage": "If the email address is registered with us, you will receive an email with instructions to reset your password.",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "subtitle": "Choose a new password for your account",
+      "password": "New password",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPlaceholder": "Repeat your password",
+      "submit": "Save password",
+      "submitting": "Saving...",
+      "success": "Password changed",
+      "successMessage": "Your password has been successfully changed. You will be redirected to the login page...",
+      "errorMinLength": "Password must be at least 6 characters",
+      "errorMismatch": "Passwords do not match",
+      "errorGeneric": "An error occurred"
+    },
+    "logout": "Sign out"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "newRequest": "New request",
+    "userManagement": "User management"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Overview of all supplier requests",
+    "stats": {
+      "total": "Total",
+      "waitingSupplier": "Waiting for supplier",
+      "waitingPurchaser": "Waiting for purchaser",
+      "waitingFinance": "Waiting for finance",
+      "waitingERP": "Waiting for ERP",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "requests": {
+    "table": {
+      "searchPlaceholder": "Search by name or email...",
+      "filterStatus": "Filter by status",
+      "allStatuses": "All statuses",
+      "filterType": "Filter by type",
+      "allTypes": "All types",
+      "export": "Export to Excel",
+      "supplier": "Supplier",
+      "type": "Type",
+      "email": "Email",
+      "status": "Status",
+      "createdBy": "Created by",
+      "date": "Date",
+      "actions": "Actions",
+      "view": "View",
+      "empty": "No requests found",
+      "count": "{filtered} of {total} requests",
+      "sheetName": "Requests"
+    },
+    "new": {
+      "title": "New supplier request",
+      "description": "Enter the basic details to onboard a new supplier",
+      "supplierType": "Supplier type *",
+      "typeKoop": "Standard supplier",
+      "typeXKweker": "Auction supplier",
+      "typeOKweker": "Direct grower",
+      "supplierName": "Supplier name *",
+      "supplierNamePlaceholder": "Company name",
+      "supplierEmail": "Supplier email *",
+      "supplierEmailPlaceholder": "contact@supplier.com",
+      "region": "Region *",
+      "regionPlaceholder": "Select region",
+      "supplierLanguage": "Supplier language",
+      "supplierLanguageDescription": "The language for the supplier form and emails",
+      "languageNl": "Dutch",
+      "languageEn": "English",
+      "howToContinue": "How would you like to continue?",
+      "sendInvitation": "Send invitation",
+      "sendInvitationDescription": "The supplier receives an email to fill in the form themselves",
+      "selfFill": "Fill in yourself",
+      "selfFillDescription": "You fill in the details on behalf of the supplier",
+      "cancel": "Cancel",
+      "submit": "Create and fill in",
+      "submitting": "Creating...",
+      "noPermission": "You do not have permission to create new requests.",
+      "successSelfFill": "Request created. You can now fill in the details.",
+      "successInvitation": "Invitation sent to the supplier.",
+      "successTitle": "Invitation sent",
+      "successEtherealTitle": "The invitation has been created and the email has been sent via the test SMTP server.",
+      "successEtherealLabel": "Test SMTP server (Ethereal)",
+      "successEtherealDescription": "In demo mode, emails are sent via Ethereal, a test SMTP server. Click the link below to view the sent message:",
+      "goToRequest": "Go to request",
+      "goToDashboard": "Go to dashboard"
+    },
+    "edit": {
+      "notFound": "Request not found",
+      "noPermission": "You do not have permission to edit this request.",
+      "cannotEdit": "This request cannot be edited in its current status.",
+      "supplierType": "Supplier type",
+      "supplierTypeDescription": "Change the supplier type if needed",
+      "supplierDetails": "Supplier details",
+      "supplierDetailsDescription": "Fill in the supplier details",
+      "supplierDetailsFilledDescription": "Details filled in by supplier - review and adjust if needed",
+      "companyName": "Company name",
+      "contactName": "Contact person",
+      "address": "Address",
+      "postalCode": "Postal code",
+      "city": "City",
+      "country": "Country",
+      "glnNumber": "GLN number",
+      "phone": "Phone",
+      "contactEmail": "Contact email",
+      "kvkNumber": "Chamber of Commerce number",
+      "vatNumber": "VAT number",
+      "iban": "IBAN",
+      "bank": "Bank",
+      "financialDetails": "Financial details",
+      "invoiceEmail": "Invoice email",
+      "invoiceAddress": "Invoice address",
+      "invoicePostalCode": "Invoice postal code",
+      "invoiceCity": "Invoice city",
+      "currency": "Currency",
+      "director": "Director (ROW)",
+      "directorName": "Director name",
+      "directorFunction": "Function",
+      "directorDob": "Date of birth",
+      "directorPassport": "Passport number",
+      "auctionDetails": "Auction details",
+      "auctionNumberRFH": "Supply number RFH",
+      "salesSheetEmail": "Sales sheet email",
+      "mandateRFH": "Mandate RFH",
+      "apiKeyFloriday": "API key Floriday",
+      "documents": "Documents",
+      "documentsDescription": "Upload Chamber of Commerce extract, passport / ID and bank details screenshot",
+      "existingFiles": "Existing files",
+      "kvkUpload": "Chamber of Commerce extract (replace)",
+      "passportUpload": "Passport / ID (replace)",
+      "bankUpload": "Bank details screenshot (replace)",
+      "fileHint": "PDF, JPG or PNG (max 10MB)",
+      "purchaserDetails": "Additional details (Purchaser)",
+      "purchaserDetailsDescription": "These details must be added by the purchaser",
+      "incoterm": "Incoterm *",
+      "incotermPlaceholder": "Select incoterm",
+      "paymentTerm": "Payment term",
+      "paymentTermPlaceholder": "Select term",
+      "paymentTerm14": "14 days",
+      "paymentTerm30": "30 days",
+      "accountManager": "Account manager",
+      "submitToFinance": "Save and forward to Finance",
+      "successSubmit": "Details saved and forwarded to Finance"
+    },
+    "detail": {
+      "tabs": {
+        "details": "Details",
+        "audit": "Audit Trail"
+      },
+      "basic": {
+        "title": "Basic details",
+        "description": "Details entered when creating the request",
+        "supplier": "Supplier",
+        "email": "Email",
+        "type": "Type",
+        "region": "Region",
+        "createdBy": "Created by",
+        "createdAt": "Created on",
+        "fillMethod": "Fill method",
+        "byPurchaser": "By purchaser",
+        "bySupplier": "By supplier"
+      },
+      "supplier": {
+        "title": "Supplier details",
+        "submittedAt": "Submitted on",
+        "filledByPurchaser": "Filled in by purchaser",
+        "companyName": "Company name",
+        "address": "Address",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "glnNumber": "GLN number",
+        "contactName": "Contact person",
+        "phone": "Phone",
+        "contactEmail": "Contact email"
+      },
+      "financial": {
+        "title": "Financial details",
+        "kvkNumber": "Chamber of Commerce number",
+        "vatNumber": "VAT number",
+        "iban": "IBAN",
+        "bank": "Bank",
+        "invoiceEmail": "Invoice email",
+        "invoiceAddress": "Invoice address",
+        "invoicePostalCode": "Invoice postal code",
+        "invoiceCity": "Invoice city",
+        "currency": "Currency"
+      },
+      "director": {
+        "title": "Director",
+        "name": "Name",
+        "function": "Function",
+        "dob": "Date of birth",
+        "passport": "Passport number"
+      },
+      "auction": {
+        "title": "Auction details",
+        "auctionNumberRFH": "Supply number RFH",
+        "salesSheetEmail": "Sales sheet email",
+        "mandateRFH": "Mandate RFH",
+        "apiKeyFloriday": "API key Floriday"
+      },
+      "files": {
+        "title": "Files"
+      },
+      "purchaser": {
+        "title": "Additional details (Purchaser)",
+        "description": "Details added by purchaser",
+        "incoterm": "Incoterm",
+        "paymentTerm": "Payment term",
+        "accountManager": "Account manager",
+        "commission": "Commission percentage"
+      },
+      "finance": {
+        "title": "Finance",
+        "creditorAssigned": "Creditor number assigned",
+        "creditorNumber": "Creditor number",
+        "waitingForCreditor": "Waiting for creditor number",
+        "enterCreditor": "Enter creditor number",
+        "waiting": "Waiting for Finance"
+      },
+      "erp": {
+        "title": "ERP",
+        "kbtAssigned": "KBT code assigned",
+        "kbtCode": "KBT code",
+        "waitingForKbt": "Waiting for KBT code",
+        "enterKbt": "Enter KBT code",
+        "waiting": "Waiting for ERP"
+      },
+      "audit": {
+        "title": "Audit Trail",
+        "description": "Overview of all actions on this request",
+        "empty": "No actions found",
+        "by": "By",
+        "system": "System"
+      },
+      "actions": {
+        "edit": "Edit",
+        "resendInvitation": "Resend invitation",
+        "sendReminder": "Send reminder",
+        "cancel": "Cancel",
+        "cancelTitle": "Cancel request?",
+        "cancelMessage": "Are you sure you want to cancel this request? You can reopen it later.",
+        "reopen": "Reopen"
+      }
+    }
+  },
+  "supplier": {
+    "form": {
+      "title": "Supplier Onboarding",
+      "welcome": "Welcome {supplierName}. Please fill in your company details below.",
+      "savedNotice": "You previously saved your details on {date}. Your earlier details have been filled in below.",
+      "invalidLink": "Invalid link",
+      "invalidLinkTitle": "Invalid or expired link",
+      "invalidLinkMessage": "The link may have expired or has already been used. Please contact your contact person for a new link.",
+      "thankYou": "Thank you!",
+      "thankYouMessage": "Your details have been successfully submitted. You will receive a confirmation email shortly.",
+      "closeWindow": "You can close this window.",
+      "savedTitle": "Details saved",
+      "savedMessage": "Your details have been saved. You will receive an email with a link to complete the form later.",
+      "company": {
+        "title": "Company details",
+        "description": "Fill in your company details",
+        "companyName": "Company name *",
+        "address": "Address *",
+        "postalCode": "Postal code *",
+        "city": "City *",
+        "country": "Country *",
+        "glnNumber": "GLN number",
+        "contactName": "Contact person *",
+        "phone": "Phone *",
+        "contactEmail": "Contact email *"
+      },
+      "financial": {
+        "title": "Financial details",
+        "description": "Fill in your company and bank details",
+        "kvkNumber": "Chamber of Commerce number *",
+        "vatNumber": "VAT number *",
+        "iban": "IBAN *",
+        "bank": "Bank *",
+        "invoiceEmail": "Invoice email",
+        "invoiceAddress": "Invoice address",
+        "invoiceAddressHint": "Only fill in if different from company address",
+        "invoicePostalCode": "Invoice postal code",
+        "invoiceCity": "Invoice city",
+        "currency": "Currency",
+        "currencyPlaceholder": "Select currency",
+        "currencyEUR": "EUR - Euro",
+        "currencyUSD": "USD - US Dollar",
+        "currencyGBP": "GBP - British Pound"
+      },
+      "director": {
+        "title": "Director",
+        "description": "Director details (required for suppliers outside the EU)",
+        "name": "Director name *",
+        "function": "Function *",
+        "dob": "Date of birth *",
+        "passport": "Passport number *"
+      },
+      "auction": {
+        "title": "Auction details",
+        "description": "Details for the auction",
+        "auctionNumberRFH": "Supply number RFH",
+        "salesSheetEmail": "Sales sheet email",
+        "mandateRFH": "Mandate RFH",
+        "apiKeyFloriday": "API key Floriday"
+      },
+      "documents": {
+        "title": "Documents",
+        "description": "Upload the requested documents",
+        "kvk": "Chamber of Commerce extract",
+        "passport": "Passport / ID",
+        "bank": "Bank details screenshot"
+      },
+      "saveLater": "Save and continue later",
+      "saving": "Saving...",
+      "submit": "Submit",
+      "submittingForm": "Submitting...",
+      "fileHint": "PDF, JPG or PNG (max 10MB)",
+      "savedSuccess": "Details saved! You will receive an email with a link to continue later.",
+      "submitSuccess": "Details successfully submitted!"
+    }
+  },
+  "admin": {
+    "users": {
+      "title": "User management",
+      "description": "Manage users and their permissions",
+      "table": {
+        "searchPlaceholder": "Search by name or email...",
+        "filterRole": "Filter by role",
+        "allRoles": "All roles",
+        "filterStatus": "Filter by status",
+        "allStatuses": "All statuses",
+        "active": "Active",
+        "inactive": "Inactive",
+        "newUser": "New user",
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "receiveEmail": "Receive email",
+        "actions": "Actions",
+        "empty": "No users found",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "statusNotActivated": "Not activated",
+        "edit": "Edit",
+        "deactivate": "Deactivate",
+        "activate": "Activate",
+        "resendActivation": "Activation email",
+        "count": "{filtered} of {total} users",
+        "confirmDeactivate": "Deactivate user",
+        "confirmActivate": "Activate user",
+        "confirmDeactivateMessage": "Are you sure you want to deactivate {name} ({email})? The user will no longer be able to sign in.",
+        "confirmActivateMessage": "Are you sure you want to activate {name} ({email})?"
+      },
+      "form": {
+        "editTitle": "Edit user",
+        "newTitle": "New user",
+        "editDescription": "Edit user details.",
+        "newDescription": "Create a new user. The user will receive an activation email.",
+        "firstName": "First name *",
+        "middleName": "Middle name",
+        "middleNamePlaceholder": "e.g. van, de",
+        "lastName": "Last name *",
+        "email": "Email *",
+        "emailPlaceholder": "user@company.com",
+        "emailReadonly": "Email cannot be changed",
+        "roles": "Roles * (minimum 1)",
+        "receiveEmails": "Receive notification emails",
+        "preferredLanguage": "Preferred language",
+        "cancel": "Cancel",
+        "submitting": "Submitting...",
+        "save": "Save",
+        "create": "Create"
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "message": "The page you are looking for does not exist or has been moved.",
+      "backToDashboard": "Back to dashboard"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "message": "An unexpected error occurred. Please try again or go back to the dashboard.",
+      "retry": "Try again",
+      "backToDashboard": "Go to dashboard"
+    },
+    "globalError": {
+      "title": "Something went wrong",
+      "message": "A critical error occurred. Please try reloading the page.",
+      "retry": "Try again",
+      "backToHome": "Go to home page"
+    }
+  },
+  "emails": {
+    "autoGenerated": "This is an automatically generated email. Please do not reply.",
+    "linkValid": "This link is valid until {date}.",
+    "contactInfo": "If you have any questions, please contact your contact person.",
+    "invitation": {
+      "subject": "Invitation for Supplier Onboarding",
+      "title": "Welcome to Supplier Onboarding",
+      "greeting": "Dear {supplierName},",
+      "body": "You have been invited to fill in your company details for our supplier registration.",
+      "cta": "Click the button below to get started:",
+      "button": "Fill in form"
+    },
+    "supplierSave": {
+      "subject": "Your details have been saved - Supplier Onboarding",
+      "title": "Details saved",
+      "greeting": "Dear {supplierName},",
+      "body": "Your details have been saved. You can continue filling in the form at any time using the link below:",
+      "button": "Continue filling in form"
+    },
+    "supplierConfirmation": {
+      "subject": "Confirmation: Your details have been received",
+      "title": "Details received",
+      "greeting": "Dear {supplierName},",
+      "body": "Thank you for filling in your details. We have received your submission.",
+      "body2": "Your details are now being reviewed by our purchasing department. You will be notified when the process is complete."
+    },
+    "purchaserNotification": {
+      "subject": "Supplier {supplierName} has submitted details",
+      "title": "Action required: Review supplier details",
+      "greeting": "Dear {purchaserName},",
+      "body": "Supplier <strong>{supplierName}</strong> has filled in their details.",
+      "cta": "Click the button below to review and complete the details:",
+      "button": "Review details"
+    },
+    "financeNotification": {
+      "subject": "Supplier {supplierName} - Waiting for Finance",
+      "title": "Action required: Enter creditor number",
+      "greeting": "Dear Finance team,",
+      "body": "The supplier request for <strong>{supplierName}</strong> is ready for processing.",
+      "cta": "Enter the creditor number to proceed:",
+      "button": "Process request"
+    },
+    "erpNotification": {
+      "subject": "Supplier {supplierName} - Waiting for ERP",
+      "title": "Action required: Enter KBT code",
+      "greeting": "Dear ERP team,",
+      "body": "The supplier request for <strong>{supplierName}</strong> is ready for processing in ERP.",
+      "cta": "Enter the KBT code to complete the registration:",
+      "button": "Process request"
+    },
+    "completion": {
+      "subject": "Supplier {supplierName} - Registration completed",
+      "title": "Supplier registration completed",
+      "greetingFinance": "Dear Finance team,",
+      "greetingPurchaser": "Dear {purchaserName},",
+      "bodyFinance": "The supplier registration for <strong>{supplierName}</strong> has been fully completed.",
+      "bodyPurchaser": "The supplier registration for <strong>{supplierName}</strong> that you requested has been fully completed.",
+      "creditorNumber": "Creditor number:",
+      "kbtCode": "KBT code:",
+      "button": "View request"
+    },
+    "activation": {
+      "subject": "Activate your account - Supplier Onboarding",
+      "title": "Welcome to Supplier Onboarding",
+      "greeting": "Dear {firstName},",
+      "body": "An account has been created for you. Click the button below to set your password and activate your account:",
+      "button": "Activate account",
+      "ignoreNotice": "If you do not recognise this request, you can ignore this email."
+    },
+    "passwordReset": {
+      "subject": "Reset password - Supplier Onboarding",
+      "title": "Reset password",
+      "greeting": "Dear {firstName},",
+      "body": "A request has been made to reset your password. Click the button below to set a new password:",
+      "button": "Set new password",
+      "linkValid": "This link is valid until {time} (1 hour).",
+      "ignoreNotice": "If you did not make this request, you can ignore this email."
+    },
+    "reminder": {
+      "subject": "Reminder: Supplier request {supplierName}",
+      "title": "Reminder",
+      "greeting": "Dear {recipientName},",
+      "body": "This is a reminder for the supplier request for <strong>{supplierName}</strong>.",
+      "cta": "Your action is required to continue the process.",
+      "buttonSupplier": "Fill in form",
+      "buttonInternal": "View request"
+    },
+    "demoMode": {
+      "label": "DEMO MODE",
+      "originalRecipient": "Original recipient:",
+      "provider": "Email provider:"
+    }
+  },
+  "enums": {
+    "status": {
+      "INVITATION_SENT": "Waiting for supplier",
+      "AWAITING_PURCHASER": "Waiting for purchaser",
+      "AWAITING_FINANCE": "Waiting for finance",
+      "AWAITING_ERP": "Waiting for ERP",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "role": {
+      "ADMIN": "Admin",
+      "INKOPER": "Purchaser",
+      "FINANCE": "Finance",
+      "ERP": "ERP"
+    },
+    "region": {
+      "EU": "EU",
+      "ROW": "Rest of World"
+    },
+    "supplierType": {
+      "KOOP": "Standard",
+      "X_KWEKER": "Auction",
+      "O_KWEKER": "Direct grower"
+    },
+    "fileType": {
+      "KVK": "Chamber of Commerce extract",
+      "PASSPORT": "Passport",
+      "BANK_DETAILS": "Bank details screenshot",
+      "OTHER": "Other"
+    },
+    "auditAction": {
+      "REQUEST_CREATED": "Request created",
+      "INVITATION_SENT": "Invitation sent",
+      "INVITATION_RESENT": "Invitation resent",
+      "SUPPLIER_SUBMITTED": "Supplier submitted details",
+      "PURCHASER_SUBMITTED": "Purchaser forwarded details",
+      "FINANCE_SUBMITTED": "Finance assigned creditor number",
+      "ERP_SUBMITTED": "ERP assigned KBT code",
+      "STATUS_CHANGED": "Status changed",
+      "REQUEST_CANCELLED": "Request cancelled",
+      "REQUEST_REOPENED": "Request reopened",
+      "FILE_UPLOADED": "File uploaded",
+      "FILE_DELETED": "File deleted",
+      "REMINDER_SENT": "Reminder sent",
+      "SUPPLIER_SAVED": "Supplier saved details",
+      "SUPPLIER_TYPE_CHANGED": "Supplier type changed"
+    }
+  }
+}

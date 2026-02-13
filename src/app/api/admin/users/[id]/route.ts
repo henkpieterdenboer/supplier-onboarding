@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendActivationEmail } from '@/lib/email'
+import type { Language } from '@/lib/i18n'
 
 // PATCH /api/admin/users/[id] - Update user
 export async function PATCH(
@@ -15,7 +16,7 @@ export async function PATCH(
     const { id } = await params
 
     if (!session?.user || !session.user.roles.includes('ADMIN')) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -25,10 +26,10 @@ export async function PATCH(
     if (action === 'resend-activation') {
       const user = await prisma.user.findUnique({ where: { id } })
       if (!user) {
-        return NextResponse.json({ error: 'Gebruiker niet gevonden' }, { status: 404 })
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
       }
       if (user.passwordHash) {
-        return NextResponse.json({ error: 'Account is al geactiveerd' }, { status: 400 })
+        return NextResponse.json({ error: 'Account is already activated' }, { status: 400 })
       }
 
       const activationToken = uuidv4()
@@ -45,6 +46,7 @@ export async function PATCH(
         firstName: user.firstName,
         activationToken,
         expiresAt: activationExpiresAt,
+        language: (user.preferredLanguage || 'nl') as Language,
       })
 
       return NextResponse.json({ success: true })
@@ -54,13 +56,13 @@ export async function PATCH(
     if (action === 'toggle-active') {
       const user = await prisma.user.findUnique({ where: { id } })
       if (!user) {
-        return NextResponse.json({ error: 'Gebruiker niet gevonden' }, { status: 404 })
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
       }
 
       // Prevent deactivating yourself
       if (user.id === session.user.id) {
         return NextResponse.json(
-          { error: 'U kunt uw eigen account niet deactiveren' },
+          { error: 'You cannot deactivate your own account' },
           { status: 400 }
         )
       }
@@ -76,13 +78,14 @@ export async function PATCH(
       })
     }
 
-    // Regular update (name, roles, receiveEmails)
+    // Regular update (name, roles, receiveEmails, preferredLanguage)
     const updateData: Record<string, unknown> = {}
     if (data.firstName !== undefined) updateData.firstName = data.firstName
     if (data.middleName !== undefined) updateData.middleName = data.middleName || null
     if (data.lastName !== undefined) updateData.lastName = data.lastName
     if (data.roles !== undefined) updateData.roles = data.roles
     if (data.receiveEmails !== undefined) updateData.receiveEmails = data.receiveEmails
+    if (data.preferredLanguage !== undefined) updateData.preferredLanguage = data.preferredLanguage
 
     const updated = await prisma.user.update({
       where: { id },
@@ -96,6 +99,7 @@ export async function PATCH(
         roles: true,
         isActive: true,
         receiveEmails: true,
+        preferredLanguage: true,
       },
     })
 
@@ -103,7 +107,7 @@ export async function PATCH(
   } catch (error) {
     console.error('Error updating user:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }
@@ -119,20 +123,20 @@ export async function DELETE(
     const { id } = await params
 
     if (!session?.user || !session.user.roles.includes('ADMIN')) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     // Prevent deleting yourself
     if (id === session.user.id) {
       return NextResponse.json(
-        { error: 'U kunt uw eigen account niet verwijderen' },
+        { error: 'You cannot delete your own account' },
         { status: 400 }
       )
     }
 
     const user = await prisma.user.findUnique({ where: { id } })
     if (!user) {
-      return NextResponse.json({ error: 'Gebruiker niet gevonden' }, { status: 404 })
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Soft delete: set isActive to false
@@ -145,7 +149,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error deleting user:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }

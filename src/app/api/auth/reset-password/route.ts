@@ -10,14 +10,14 @@ export async function POST(request: NextRequest) {
 
     if (!token || !password) {
       return NextResponse.json(
-        { error: 'Token en wachtwoord zijn verplicht' },
+        { error: 'Token and password are required' },
         { status: 400 }
       )
     }
 
     if (password.length < 6) {
       return NextResponse.json(
-        { error: 'Wachtwoord moet minimaal 6 tekens bevatten' },
+        { error: 'Password must be at least 6 characters' },
         { status: 400 }
       )
     }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Ongeldige of verlopen resetlink' },
+        { error: 'Invalid or expired reset link' },
         { status: 400 }
       )
     }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     // Check if token is expired
     if (user.activationExpiresAt && new Date() > new Date(user.activationExpiresAt)) {
       return NextResponse.json(
-        { error: 'Deze resetlink is verlopen. Vraag een nieuwe aan.' },
+        { error: 'This reset link has expired. Please request a new one.' },
         { status: 410 }
       )
     }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error resetting password:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }

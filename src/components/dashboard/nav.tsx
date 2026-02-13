@@ -15,6 +15,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Role, RoleLabels } from '@/types'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
+import { useLanguage } from '@/lib/i18n-context'
+import { LanguageSelector } from '@/components/ui/language-selector'
 
 interface User {
   name?: string | null
@@ -29,6 +31,7 @@ interface DashboardNavProps {
 export function DashboardNav({ user }: DashboardNavProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { t } = useLanguage()
   const [isChangingRole, setIsChangingRole] = useState(false)
   const [emailProvider, setEmailProvider] = useState<'ethereal' | 'resend'>('ethereal')
   const [isChangingProvider, setIsChangingProvider] = useState(false)
@@ -104,17 +107,17 @@ export function DashboardNav({ user }: DashboardNavProps) {
   const availableRoles = Object.values(Role)
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/dashboard', label: t('nav.dashboard') },
   ]
 
   // Show "Nieuwe aanvraag" for INKOPER role
   if (user.roles.includes('INKOPER')) {
-    navItems.push({ href: '/requests/new', label: 'Nieuwe aanvraag' })
+    navItems.push({ href: '/requests/new', label: t('nav.newRequest') })
   }
 
   // Show "Gebruikersbeheer" for ADMIN role
   if (user.roles.includes('ADMIN')) {
-    navItems.push({ href: '/admin/users', label: 'Gebruikersbeheer' })
+    navItems.push({ href: '/admin/users', label: t('nav.userManagement') })
   }
 
   return (
@@ -154,7 +157,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                     className="flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
                     disabled={isChangingRole}
                   >
-                    <span className="text-xs text-yellow-700">Demo:</span>
+                    <span className="text-xs text-yellow-700">{t('demo.label')}</span>
                     <div className="flex gap-1 ml-1">
                       {user.roles.map((role) => (
                         <Badge key={role} variant="outline" className="text-xs">
@@ -179,7 +182,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <div className="px-2 py-1.5 text-xs text-gray-500 font-medium">
-                    Rollen wijzigen
+                    {t('demo.changeRoles')}
                   </div>
                   <DropdownMenuSeparator />
                   {availableRoles.map((role) => (
@@ -216,7 +219,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 onClick={handleEmailProviderToggle}
                 disabled={isChangingProvider}
               >
-                <span className="text-xs text-yellow-700">Mail:</span>
+                <span className="text-xs text-yellow-700">{t('demo.emailLabel')}</span>
                 <Badge
                   variant="outline"
                   className={`text-xs ${
@@ -225,10 +228,12 @@ export function DashboardNav({ user }: DashboardNavProps) {
                       : 'bg-gray-100 text-gray-600 border-gray-300'
                   }`}
                 >
-                  {emailProvider === 'resend' ? 'Demomail' : 'Ethereal'}
+                  {emailProvider === 'resend' ? t('demo.emailResend') : t('demo.emailEthereal')}
                 </Badge>
               </Button>
             </>)}
+
+            <LanguageSelector />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -258,7 +263,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   onClick={() => signOut({ callbackUrl: '/login' })}
                   className="text-red-600 cursor-pointer"
                 >
-                  Uitloggen
+                  {t('auth.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

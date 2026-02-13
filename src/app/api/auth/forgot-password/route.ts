@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendPasswordResetEmail } from '@/lib/email'
+import type { Language } from '@/lib/i18n'
 
 // POST /api/auth/forgot-password - Request password reset
 export async function POST(request: NextRequest) {
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json(
-        { error: 'Email is verplicht' },
+        { error: 'Email is required' },
         { status: 400 }
       )
     }
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
     // Always return success to prevent email enumeration
     const successResponse = NextResponse.json({
       success: true,
-      message: 'Als het emailadres bij ons bekend is, ontvangt u een email met instructies.',
+      message: 'If the email address is registered with us, you will receive an email with instructions.',
     })
 
     // Find active user by email
@@ -50,13 +51,14 @@ export async function POST(request: NextRequest) {
       firstName: user.firstName,
       resetToken,
       expiresAt: resetExpiresAt,
+      language: (user.preferredLanguage || 'nl') as Language,
     })
 
     return successResponse
   } catch (error) {
     console.error('Error requesting password reset:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }

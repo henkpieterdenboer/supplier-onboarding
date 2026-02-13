@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
+import { useLanguage } from '@/lib/i18n-context'
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -30,13 +32,13 @@ export default function ForgotPasswordPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Er is een fout opgetreden')
+        setError(data.error || t('common.error'))
         return
       }
 
       setSuccess(true)
     } catch {
-      setError('Er is een fout opgetreden')
+      setError(t('common.error'))
     } finally {
       setIsLoading(false)
     }
@@ -51,16 +53,16 @@ export default function ForgotPasswordPage() {
               <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">
-              Email verstuurd
+              {t('auth.forgotPassword.success')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
-              Als het emailadres bij ons bekend is, ontvangt u een email met instructies om uw wachtwoord te herstellen.
+              {t('auth.forgotPassword.successMessage')}
             </Alert>
             <div className="text-center">
               <Link href="/login" className="text-sm text-blue-600 hover:underline">
-                Terug naar inloggen
+                {t('auth.forgotPassword.backToLogin')}
               </Link>
             </div>
           </CardContent>
@@ -77,10 +79,10 @@ export default function ForgotPasswordPage() {
             <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            Wachtwoord vergeten
+            {t('auth.forgotPassword.title')}
           </CardTitle>
           <CardDescription className="text-center">
-            Vul uw emailadres in om een resetlink te ontvangen
+            {t('auth.forgotPassword.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -92,11 +94,11 @@ export default function ForgotPasswordPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.forgotPassword.email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="uw@email.nl"
+                placeholder={t('auth.forgotPassword.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -105,13 +107,13 @@ export default function ForgotPasswordPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Bezig...' : 'Resetlink versturen'}
+              {isLoading ? t('auth.forgotPassword.submitting') : t('auth.forgotPassword.submit')}
             </Button>
           </form>
 
           <div className="mt-4 text-center">
             <Link href="/login" className="text-sm text-blue-600 hover:underline">
-              Terug naar inloggen
+              {t('auth.forgotPassword.backToLogin')}
             </Link>
           </div>
         </CardContent>

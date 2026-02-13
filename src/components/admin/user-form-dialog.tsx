@@ -12,8 +12,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
-import { Role, RoleLabels } from '@/types'
+import { useLanguage } from '@/lib/i18n-context'
 
 interface User {
   id: string
@@ -23,6 +30,7 @@ interface User {
   lastName: string
   roles: string[]
   receiveEmails: boolean
+  preferredLanguage?: string
 }
 
 interface UserFormDialogProps {
@@ -33,6 +41,7 @@ interface UserFormDialogProps {
 }
 
 export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserFormDialogProps) {
+  const { t } = useLanguage()
   const isEdit = !!user
   const [firstName, setFirstName] = useState(user?.firstName || '')
   const [middleName, setMiddleName] = useState(user?.middleName || '')
@@ -40,6 +49,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
   const [email, setEmail] = useState(user?.email || '')
   const [roles, setRoles] = useState<string[]>(user?.roles || ['INKOPER'])
   const [receiveEmails, setReceiveEmails] = useState(user?.receiveEmails ?? true)
+  const [preferredLanguage, setPreferredLanguage] = useState(user?.preferredLanguage || 'nl')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -69,6 +79,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
         lastName,
         roles,
         receiveEmails,
+        preferredLanguage,
       }
 
       if (!isEdit) {
@@ -84,13 +95,13 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Er is een fout opgetreden')
+        setError(data.error || t('common.error'))
         return
       }
 
       onSuccess()
     } catch {
-      setError('Er is een fout opgetreden')
+      setError(t('common.error'))
     } finally {
       setIsLoading(false)
     }
@@ -100,11 +111,11 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Gebruiker bewerken' : 'Nieuwe gebruiker'}</DialogTitle>
+          <DialogTitle>{isEdit ? t('admin.users.form.editTitle') : t('admin.users.form.newTitle')}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? 'Wijzig de gegevens van de gebruiker.'
-              : 'Maak een nieuwe gebruiker aan. De gebruiker ontvangt een activatiemail.'}
+              ? t('admin.users.form.editDescription')
+              : t('admin.users.form.newDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -117,7 +128,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">Voornaam *</Label>
+              <Label htmlFor="firstName">{t('admin.users.form.firstName')}</Label>
               <Input
                 id="firstName"
                 value={firstName}
@@ -127,19 +138,19 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="middleName">Tussenvoegsel</Label>
+              <Label htmlFor="middleName">{t('admin.users.form.middleName')}</Label>
               <Input
                 id="middleName"
                 value={middleName}
                 onChange={(e) => setMiddleName(e.target.value)}
                 disabled={isLoading}
-                placeholder="bijv. van, de"
+                placeholder={t('admin.users.form.middleNamePlaceholder')}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lastName">Achternaam *</Label>
+            <Label htmlFor="lastName">{t('admin.users.form.lastName')}</Label>
             <Input
               id="lastName"
               value={lastName}
@@ -150,7 +161,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t('admin.users.form.email')}</Label>
             <Input
               id="email"
               type="email"
@@ -158,28 +169,28 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading || isEdit}
-              placeholder="gebruiker@bedrijf.nl"
+              placeholder={t('admin.users.form.emailPlaceholder')}
             />
             {isEdit && (
-              <p className="text-xs text-gray-500">Email kan niet gewijzigd worden</p>
+              <p className="text-xs text-gray-500">{t('admin.users.form.emailReadonly')}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>Rollen * (minimaal 1)</Label>
+            <Label>{t('admin.users.form.roles')}</Label>
             <div className="space-y-2">
-              {Object.entries(RoleLabels).map(([value, label]) => (
-                <div key={value} className="flex items-center gap-2">
+              {(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
+                <div key={role} className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    id={`role-${value}`}
-                    checked={roles.includes(value)}
-                    onChange={() => handleRoleToggle(value)}
+                    id={`role-${role}`}
+                    checked={roles.includes(role)}
+                    onChange={() => handleRoleToggle(role)}
                     disabled={isLoading}
                     className="h-4 w-4 rounded border-gray-300"
                   />
-                  <Label htmlFor={`role-${value}`} className="font-normal">
-                    {label}
+                  <Label htmlFor={`role-${role}`} className="font-normal">
+                    {t(`enums.role.${role}`)}
                   </Label>
                 </div>
               ))}
@@ -196,8 +207,21 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
               className="h-4 w-4 rounded border-gray-300"
             />
             <Label htmlFor="receiveEmails" className="font-normal">
-              Notificatie-emails ontvangen
+              {t('admin.users.form.receiveEmails')}
             </Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t('admin.users.form.preferredLanguage')}</Label>
+            <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nl">Nederlands</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter>
@@ -207,10 +231,10 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Annuleren
+              {t('admin.users.form.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Bezig...' : isEdit ? 'Opslaan' : 'Aanmaken'}
+              {isLoading ? t('admin.users.form.submitting') : isEdit ? t('admin.users.form.save') : t('admin.users.form.create')}
             </Button>
           </DialogFooter>
         </form>

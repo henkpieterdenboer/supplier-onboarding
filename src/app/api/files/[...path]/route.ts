@@ -25,7 +25,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { path: pathSegments } = await params
@@ -39,7 +39,7 @@ export async function GET(
     })
 
     if (!file) {
-      return NextResponse.json({ error: 'Bestand niet gevonden' }, { status: 404 })
+      return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
 
     // Vercel Blob: fetch content server-side and proxy it (blob URLs never exposed to browser)
@@ -51,7 +51,7 @@ export async function GET(
         const blobUrl = blobs[0].url
         const response = await fetch(blobUrl)
         if (!response.ok) {
-          return NextResponse.json({ error: 'Bestand niet gevonden in storage' }, { status: 404 })
+          return NextResponse.json({ error: 'File not found in storage' }, { status: 404 })
         }
 
         const blobData = await response.arrayBuffer()
@@ -68,7 +68,7 @@ export async function GET(
         })
       }
 
-      return NextResponse.json({ error: 'Bestand niet gevonden in storage' }, { status: 404 })
+      return NextResponse.json({ error: 'File not found in storage' }, { status: 404 })
     }
 
     // Local development: serve from filesystem
@@ -78,7 +78,7 @@ export async function GET(
     const resolvedPath = path.resolve(filePath)
     const uploadsDir = path.resolve(path.join(process.cwd(), 'uploads'))
     if (!resolvedPath.startsWith(uploadsDir)) {
-      return NextResponse.json({ error: 'Ongeldig pad' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid path' }, { status: 400 })
     }
 
     const fileBuffer = await readFile(resolvedPath)
@@ -93,9 +93,9 @@ export async function GET(
     })
   } catch (error: unknown) {
     if (error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return NextResponse.json({ error: 'Bestand niet gevonden' }, { status: 404 })
+      return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
     console.error('Error serving file:', error)
-    return NextResponse.json({ error: 'Er is een fout opgetreden' }, { status: 500 })
+    return NextResponse.json({ error: 'An error occurred' }, { status: 500 })
   }
 }

@@ -40,25 +40,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500">Overzicht van alle leveranciersaanvragen</p>
-      </div>
-
       <DashboardContent stats={stats} requests={requests} userRoles={session.user.roles} />
-
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <p className="text-sm text-gray-600 font-medium mb-2">Om verstuurde mails te kunnen zien:</p>
-        <p className="text-sm text-gray-500 mb-1">
-          <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-            https://ethereal.email/login
-          </a>
-        </p>
-        <ul className="text-sm text-gray-500 space-y-1">
-          <li><strong>Email:</strong> dxubywxljl4roleu@ethereal.email</li>
-          <li><strong>Wachtwoord:</strong> SbGwM71ZJusSNSQWr3</li>
-        </ul>
-      </div>
     </div>
   )
 }

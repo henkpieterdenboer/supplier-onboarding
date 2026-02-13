@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useLanguage } from '@/lib/i18n-context'
 
 interface StatsProps {
   stats: {
@@ -17,14 +18,16 @@ interface StatsProps {
 }
 
 export function DashboardStats({ stats, selectedStatus, onStatusClick }: StatsProps) {
+  const { t } = useLanguage()
+
   const statItems = [
-    { label: 'Totaal', value: stats.total, color: 'text-gray-900', status: null },
-    { label: 'Wachten op leverancier', value: stats.waitingSupplier, color: 'text-yellow-600', status: 'INVITATION_SENT' },
-    { label: 'Wachten op inkoper', value: stats.waitingPurchaser, color: 'text-orange-600', status: 'AWAITING_PURCHASER' },
-    { label: 'Wachten op finance', value: stats.waitingFinance, color: 'text-blue-600', status: 'AWAITING_FINANCE' },
-    { label: 'Wachten op ERP', value: stats.waitingERP, color: 'text-purple-600', status: 'AWAITING_ERP' },
-    { label: 'Compleet', value: stats.completed, color: 'text-green-600', status: 'COMPLETED' },
-    { label: 'Afgebroken', value: stats.cancelled, color: 'text-red-600', status: 'CANCELLED' },
+    { label: t('dashboard.stats.total'), value: stats.total, color: 'text-gray-900', status: null },
+    { label: t('dashboard.stats.waitingSupplier'), value: stats.waitingSupplier, color: 'text-yellow-600', status: 'INVITATION_SENT' },
+    { label: t('dashboard.stats.waitingPurchaser'), value: stats.waitingPurchaser, color: 'text-orange-600', status: 'AWAITING_PURCHASER' },
+    { label: t('dashboard.stats.waitingFinance'), value: stats.waitingFinance, color: 'text-blue-600', status: 'AWAITING_FINANCE' },
+    { label: t('dashboard.stats.waitingERP'), value: stats.waitingERP, color: 'text-purple-600', status: 'AWAITING_ERP' },
+    { label: t('dashboard.stats.completed'), value: stats.completed, color: 'text-green-600', status: 'COMPLETED' },
+    { label: t('dashboard.stats.cancelled'), value: stats.cancelled, color: 'text-red-600', status: 'CANCELLED' },
   ]
 
   const handleClick = (status: string | null) => {

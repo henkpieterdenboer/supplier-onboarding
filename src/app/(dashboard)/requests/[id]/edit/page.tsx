@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
-import { FileTypeLabels, SupplierType, SupplierTypeLabels } from '@/types'
+import { SupplierTypeLabels } from '@/types'
 import {
   showFinancialSection,
   showDirectorSection,
@@ -27,6 +27,8 @@ import {
   showBankUpload,
   requiresIncoterm,
 } from '@/lib/supplier-type-utils'
+import { useLanguage } from '@/lib/i18n-context'
+import { getDateLocale } from '@/lib/i18n'
 
 interface SupplierFile {
   id: string
@@ -81,6 +83,7 @@ export default function EditRequestPage() {
   const router = useRouter()
   const params = useParams()
   const { data: session } = useSession()
+  const { t, language } = useLanguage()
   const [request, setRequest] = useState<Request | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -131,7 +134,7 @@ export default function EditRequestPage() {
     const fetchRequest = async () => {
       try {
         const response = await fetch(`/api/requests/${params.id}`)
-        if (!response.ok) throw new Error('Aanvraag niet gevonden')
+        if (!response.ok) throw new Error(t('requests.edit.notFound'))
         const data = await response.json()
         setRequest(data)
         setSupplierType(data.supplierType || 'KOOP')
@@ -170,7 +173,7 @@ export default function EditRequestPage() {
           accountManager: data.accountManager || '',
         })
       } catch {
-        setError('Aanvraag niet gevonden')
+        setError(t('requests.edit.notFound'))
       } finally {
         setIsLoading(false)
       }
@@ -184,20 +187,20 @@ export default function EditRequestPage() {
     return (
       <div className="max-w-3xl mx-auto">
         <Alert variant="destructive">
-          U heeft geen toestemming om deze aanvraag te bewerken.
+          {t('requests.edit.noPermission')}
         </Alert>
       </div>
     )
   }
 
   if (isLoading) {
-    return <div className="text-center py-8">Laden...</div>
+    return <div className="text-center py-8">{t('common.loading')}</div>
   }
 
   if (error || !request) {
     return (
       <div className="max-w-3xl mx-auto">
-        <Alert variant="destructive">{error || 'Aanvraag niet gevonden'}</Alert>
+        <Alert variant="destructive">{error || t('requests.edit.notFound')}</Alert>
       </div>
     )
   }
@@ -206,7 +209,7 @@ export default function EditRequestPage() {
     return (
       <div className="max-w-3xl mx-auto">
         <Alert variant="destructive">
-          Deze aanvraag kan niet worden bewerkt in de huidige status.
+          {t('requests.edit.cannotEdit')}
         </Alert>
       </div>
     )
@@ -266,13 +269,13 @@ export default function EditRequestPage() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Er is een fout opgetreden')
+        throw new Error(result.error || t('common.error'))
       }
 
-      toast.success('Gegevens opgeslagen en doorgestuurd naar Finance')
+      toast.success(t('requests.edit.successSubmit'))
       router.push(`/requests/${params.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Er is een fout opgetreden')
+      setError(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setIsSaving(false)
     }
@@ -286,9 +289,9 @@ export default function EditRequestPage() {
         {/* Type Selector */}
         <Card>
           <CardHeader>
-            <CardTitle>Type leverancier</CardTitle>
+            <CardTitle>{t('requests.edit.supplierType')}</CardTitle>
             <CardDescription>
-              Wijzig het type leverancier indien nodig
+              {t('requests.edit.supplierTypeDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -301,9 +304,9 @@ export default function EditRequestPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(SupplierTypeLabels).map(([value, label]) => (
+                {Object.entries(SupplierTypeLabels).map(([value]) => (
                   <SelectItem key={value} value={value}>
-                    {label}
+                    {t(`enums.supplierType.${value}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -314,17 +317,17 @@ export default function EditRequestPage() {
         {/* Supplier Details Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Leveranciersgegevens</CardTitle>
+            <CardTitle>{t('requests.edit.supplierDetails')}</CardTitle>
             <CardDescription>
               {request.selfFill
-                ? 'Vul de gegevens van de leverancier in'
-                : 'Gegevens ingevuld door leverancier - controleer en pas aan indien nodig'}
+                ? t('requests.edit.supplierDetailsDescription')
+                : t('requests.edit.supplierDetailsFilledDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="companyName">Bedrijfsnaam</Label>
+                <Label htmlFor="companyName">{t('requests.edit.companyName')}</Label>
                 <Input
                   id="companyName"
                   value={formData.companyName}
@@ -333,7 +336,7 @@ export default function EditRequestPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contactName">Contactpersoon</Label>
+                <Label htmlFor="contactName">{t('requests.edit.contactName')}</Label>
                 <Input
                   id="contactName"
                   value={formData.contactName}
@@ -344,7 +347,7 @@ export default function EditRequestPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Adres</Label>
+              <Label htmlFor="address">{t('requests.edit.address')}</Label>
               <Input
                 id="address"
                 value={formData.address}
@@ -355,7 +358,7 @@ export default function EditRequestPage() {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="postalCode">Postcode</Label>
+                <Label htmlFor="postalCode">{t('requests.edit.postalCode')}</Label>
                 <Input
                   id="postalCode"
                   value={formData.postalCode}
@@ -364,7 +367,7 @@ export default function EditRequestPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="city">Plaats</Label>
+                <Label htmlFor="city">{t('requests.edit.city')}</Label>
                 <Input
                   id="city"
                   value={formData.city}
@@ -373,7 +376,7 @@ export default function EditRequestPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country">Land</Label>
+                <Label htmlFor="country">{t('requests.edit.country')}</Label>
                 <Input
                   id="country"
                   value={formData.country}
@@ -385,7 +388,7 @@ export default function EditRequestPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="contactPhone">Telefoon</Label>
+                <Label htmlFor="contactPhone">{t('requests.edit.phone')}</Label>
                 <Input
                   id="contactPhone"
                   value={formData.contactPhone}
@@ -394,7 +397,7 @@ export default function EditRequestPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact email</Label>
+                <Label htmlFor="contactEmail">{t('requests.edit.contactEmail')}</Label>
                 <Input
                   id="contactEmail"
                   type="email"
@@ -406,7 +409,7 @@ export default function EditRequestPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="glnNumber">GLN-nummer</Label>
+              <Label htmlFor="glnNumber">{t('requests.edit.glnNumber')}</Label>
               <Input
                 id="glnNumber"
                 value={formData.glnNumber}
@@ -421,7 +424,7 @@ export default function EditRequestPage() {
                 <Separator />
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="chamberOfCommerceNumber">KvK nummer</Label>
+                    <Label htmlFor="chamberOfCommerceNumber">{t('requests.edit.kvkNumber')}</Label>
                     <Input
                       id="chamberOfCommerceNumber"
                       value={formData.chamberOfCommerceNumber}
@@ -432,7 +435,7 @@ export default function EditRequestPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="vatNumber">BTW nummer</Label>
+                    <Label htmlFor="vatNumber">{t('requests.edit.vatNumber')}</Label>
                     <Input
                       id="vatNumber"
                       value={formData.vatNumber}
@@ -444,7 +447,7 @@ export default function EditRequestPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="iban">IBAN</Label>
+                    <Label htmlFor="iban">{t('requests.edit.iban')}</Label>
                     <Input
                       id="iban"
                       value={formData.iban}
@@ -453,7 +456,7 @@ export default function EditRequestPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bankName">Bank</Label>
+                    <Label htmlFor="bankName">{t('requests.edit.bank')}</Label>
                     <Input
                       id="bankName"
                       value={formData.bankName}
@@ -464,7 +467,7 @@ export default function EditRequestPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="invoiceEmail">Factuur email</Label>
+                  <Label htmlFor="invoiceEmail">{t('requests.edit.invoiceEmail')}</Label>
                   <Input
                     id="invoiceEmail"
                     type="email"
@@ -475,7 +478,7 @@ export default function EditRequestPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="invoiceAddress">Factuuradres</Label>
+                  <Label htmlFor="invoiceAddress">{t('requests.edit.invoiceAddress')}</Label>
                   <Input
                     id="invoiceAddress"
                     value={formData.invoiceAddress}
@@ -486,7 +489,7 @@ export default function EditRequestPage() {
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="invoicePostalCode">Factuur postcode</Label>
+                    <Label htmlFor="invoicePostalCode">{t('requests.edit.invoicePostalCode')}</Label>
                     <Input
                       id="invoicePostalCode"
                       value={formData.invoicePostalCode}
@@ -495,7 +498,7 @@ export default function EditRequestPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="invoiceCity">Factuur plaats</Label>
+                    <Label htmlFor="invoiceCity">{t('requests.edit.invoiceCity')}</Label>
                     <Input
                       id="invoiceCity"
                       value={formData.invoiceCity}
@@ -504,14 +507,14 @@ export default function EditRequestPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="invoiceCurrency">Valuta</Label>
+                    <Label htmlFor="invoiceCurrency">{t('requests.edit.currency')}</Label>
                     <Select
                       value={formData.invoiceCurrency}
                       onValueChange={(value) => setFormData({ ...formData, invoiceCurrency: value })}
                       disabled={isSaving}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Valuta" />
+                        <SelectValue placeholder={t('requests.edit.currency')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="EUR">EUR</SelectItem>
@@ -528,10 +531,10 @@ export default function EditRequestPage() {
             {showDirector && (
               <>
                 <Separator />
-                <p className="text-sm font-medium text-gray-700">Bestuurder (ROW)</p>
+                <p className="text-sm font-medium text-gray-700">{t('requests.edit.director')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="directorName">Naam bestuurder</Label>
+                    <Label htmlFor="directorName">{t('requests.edit.directorName')}</Label>
                     <Input
                       id="directorName"
                       value={formData.directorName}
@@ -540,7 +543,7 @@ export default function EditRequestPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="directorFunction">Functie</Label>
+                    <Label htmlFor="directorFunction">{t('requests.edit.directorFunction')}</Label>
                     <Input
                       id="directorFunction"
                       value={formData.directorFunction}
@@ -551,7 +554,7 @@ export default function EditRequestPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="directorDateOfBirth">Geboortedatum</Label>
+                    <Label htmlFor="directorDateOfBirth">{t('requests.edit.directorDob')}</Label>
                     <Input
                       id="directorDateOfBirth"
                       type="date"
@@ -561,7 +564,7 @@ export default function EditRequestPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="directorPassportNumber">Paspoortnummer</Label>
+                    <Label htmlFor="directorPassportNumber">{t('requests.edit.directorPassport')}</Label>
                     <Input
                       id="directorPassportNumber"
                       value={formData.directorPassportNumber}
@@ -577,10 +580,10 @@ export default function EditRequestPage() {
             {showAuction && (
               <>
                 <Separator />
-                <p className="text-sm font-medium text-gray-700">Veilinggegevens</p>
+                <p className="text-sm font-medium text-gray-700">{t('requests.edit.auctionDetails')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="auctionNumberRFH">Aanvoernummer RFH</Label>
+                    <Label htmlFor="auctionNumberRFH">{t('requests.edit.auctionNumberRFH')}</Label>
                     <Input
                       id="auctionNumberRFH"
                       value={formData.auctionNumberRFH}
@@ -589,7 +592,7 @@ export default function EditRequestPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="salesSheetEmail">Salessheet email</Label>
+                    <Label htmlFor="salesSheetEmail">{t('requests.edit.salesSheetEmail')}</Label>
                     <Input
                       id="salesSheetEmail"
                       type="email"
@@ -608,10 +611,10 @@ export default function EditRequestPage() {
                     }
                     disabled={isSaving}
                   />
-                  <Label htmlFor="mandateRFH">Mandaat RFH</Label>
+                  <Label htmlFor="mandateRFH">{t('requests.edit.mandateRFH')}</Label>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="apiKeyFloriday">API key Floriday</Label>
+                  <Label htmlFor="apiKeyFloriday">{t('requests.edit.apiKeyFloriday')}</Label>
                   <Input
                     id="apiKeyFloriday"
                     value={formData.apiKeyFloriday}
@@ -627,21 +630,21 @@ export default function EditRequestPage() {
         {/* Documents Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Documenten</CardTitle>
+            <CardTitle>{t('requests.edit.documents')}</CardTitle>
             <CardDescription>
-              Upload KvK uittreksel, paspoort / ID{showBank ? ' en screenshot bankgegevens' : ''}
+              {t('requests.edit.documentsDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Existing files */}
             {request.files.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Bestaande bestanden</Label>
+                <Label className="text-sm font-medium">{t('requests.edit.existingFiles')}</Label>
                 <ul className="space-y-2">
                   {request.files.map((file) => (
                     <li key={file.id} className="flex items-center gap-3">
                       <Badge variant="outline">
-                        {FileTypeLabels[file.fileType as keyof typeof FileTypeLabels] || file.fileType}
+                        {t(`enums.fileType.${file.fileType}`)}
                       </Badge>
                       <a
                         href={file.filePath}
@@ -652,7 +655,7 @@ export default function EditRequestPage() {
                         {file.fileName}
                       </a>
                       <span className="text-xs text-gray-500">
-                        {new Date(file.uploadedAt).toLocaleDateString('nl-NL')}
+                        {new Date(file.uploadedAt).toLocaleDateString(getDateLocale(language))}
                       </span>
                     </li>
                   ))}
@@ -665,7 +668,7 @@ export default function EditRequestPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="kvk">
-                  KvK uittreksel {request.files.some(f => f.fileType === 'KVK') ? '(vervangen)' : ''}
+                  {t('requests.edit.kvkUpload')}
                 </Label>
                 <Input
                   id="kvk"
@@ -674,11 +677,11 @@ export default function EditRequestPage() {
                   onChange={(e) => setKvkFile(e.target.files?.[0] || null)}
                   disabled={isSaving}
                 />
-                <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+                <p className="text-xs text-gray-500">{t('requests.edit.fileHint')}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="passport">
-                  Paspoort / ID {request.files.some(f => f.fileType === 'PASSPORT') ? '(vervangen)' : ''}
+                  {t('requests.edit.passportUpload')}
                 </Label>
                 <Input
                   id="passport"
@@ -687,14 +690,14 @@ export default function EditRequestPage() {
                   onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
                   disabled={isSaving}
                 />
-                <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+                <p className="text-xs text-gray-500">{t('requests.edit.fileHint')}</p>
               </div>
             </div>
 
             {showBank && (
               <div className="space-y-2">
                 <Label htmlFor="bankDetails">
-                  Screenshot bankgegevens {request.files.some(f => f.fileType === 'BANK_DETAILS') ? '(vervangen)' : ''}
+                  {t('requests.edit.bankUpload')}
                 </Label>
                 <Input
                   id="bankDetails"
@@ -703,7 +706,7 @@ export default function EditRequestPage() {
                   onChange={(e) => setBankDetailsFile(e.target.files?.[0] || null)}
                   disabled={isSaving}
                 />
-                <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+                <p className="text-xs text-gray-500">{t('requests.edit.fileHint')}</p>
               </div>
             )}
           </CardContent>
@@ -712,16 +715,16 @@ export default function EditRequestPage() {
         {/* Additional Purchaser Data */}
         <Card>
           <CardHeader>
-            <CardTitle>Aanvullende gegevens (Inkoper)</CardTitle>
+            <CardTitle>{t('requests.edit.purchaserDetails')}</CardTitle>
             <CardDescription>
-              Deze gegevens moeten door de inkoper worden toegevoegd
+              {t('requests.edit.purchaserDetailsDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               {incotermRequired && (
                 <div className="space-y-2">
-                  <Label htmlFor="incoterm">Incoterm *</Label>
+                  <Label htmlFor="incoterm">{t('requests.edit.incoterm')}</Label>
                   <Select
                     value={formData.incoterm}
                     onValueChange={(value: 'CIF' | 'FOB') =>
@@ -730,7 +733,7 @@ export default function EditRequestPage() {
                     disabled={isSaving}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecteer incoterm" />
+                      <SelectValue placeholder={t('requests.edit.incotermPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="CIF">CIF</SelectItem>
@@ -740,25 +743,25 @@ export default function EditRequestPage() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="paymentTerm">Betalingstermijn</Label>
+                <Label htmlFor="paymentTerm">{t('requests.edit.paymentTerm')}</Label>
                 <Select
                   value={formData.paymentTerm}
                   onValueChange={(value) => setFormData({ ...formData, paymentTerm: value })}
                   disabled={isSaving}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecteer termijn" />
+                    <SelectValue placeholder={t('requests.edit.paymentTermPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="14">14 dagen</SelectItem>
-                    <SelectItem value="30">30 dagen</SelectItem>
+                    <SelectItem value="14">{t('requests.edit.paymentTerm14')}</SelectItem>
+                    <SelectItem value="30">{t('requests.edit.paymentTerm30')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="accountManager">Accountmanager</Label>
+              <Label htmlFor="accountManager">{t('requests.edit.accountManager')}</Label>
               <Input
                 id="accountManager"
                 value={formData.accountManager}
@@ -777,13 +780,13 @@ export default function EditRequestPage() {
             onClick={() => router.back()}
             disabled={isSaving}
           >
-            Annuleren
+            {t('common.cancel')}
           </Button>
           <Button
             type="submit"
             disabled={isSaving || !canSubmit}
           >
-            {isSaving ? 'Bezig...' : 'Opslaan en doorsturen naar Finance'}
+            {isSaving ? t('common.submitting') : t('requests.edit.submitToFinance')}
           </Button>
         </div>
       </form>

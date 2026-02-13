@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendActivationEmail } from '@/lib/email'
+import type { Language } from '@/lib/i18n'
 
 // GET /api/admin/users - List all users
 export async function GET() {
@@ -11,7 +12,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
 
     if (!session?.user || !session.user.roles.includes('ADMIN')) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const users = await prisma.user.findMany({
@@ -24,6 +25,7 @@ export async function GET() {
         roles: true,
         isActive: true,
         receiveEmails: true,
+        preferredLanguage: true,
         createdAt: true,
         passwordHash: true,
         activationToken: true,
@@ -42,7 +44,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching users:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }
@@ -54,15 +56,15 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user || !session.user.roles.includes('ADMIN')) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 403 })
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const body = await request.json()
-    const { email, firstName, middleName, lastName, roles, receiveEmails } = body
+    const { email, firstName, middleName, lastName, roles, receiveEmails, preferredLanguage } = body
 
     if (!email || !firstName || !lastName || !roles || !Array.isArray(roles) || roles.length === 0) {
       return NextResponse.json(
-        { error: 'Email, voornaam, achternaam en minimaal één rol zijn verplicht' },
+        { error: 'Email, first name, last name and at least one role are required' },
         { status: 400 }
       )
     }
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Er bestaat al een gebruiker met dit emailadres' },
+        { error: 'A user with this email address already exists' },
         { status: 400 }
       )
     }
@@ -92,6 +94,7 @@ export async function POST(request: NextRequest) {
         lastName,
         roles,
         receiveEmails: receiveEmails ?? true,
+        preferredLanguage: preferredLanguage || 'nl',
         isActive: false,
         activationToken,
         activationExpiresAt,
@@ -104,6 +107,7 @@ export async function POST(request: NextRequest) {
       firstName,
       activationToken,
       expiresAt: activationExpiresAt,
+      language: (preferredLanguage || 'nl') as Language,
     })
 
     return NextResponse.json({
@@ -119,7 +123,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating user:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }

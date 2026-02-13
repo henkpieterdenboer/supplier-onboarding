@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendInvitationEmail } from '@/lib/email'
 import { AuditAction, Status, SupplierType } from '@/types'
+import type { Language } from '@/lib/i18n'
 
 // POST /api/requests - Create new request
 export async function POST(request: NextRequest) {
@@ -12,23 +13,23 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     if (!session.user.roles.includes('INKOPER')) {
       return NextResponse.json(
-        { error: 'Alleen inkopers kunnen aanvragen aanmaken' },
+        { error: 'Only purchasers can create requests' },
         { status: 403 }
       )
     }
 
     const body = await request.json()
-    const { supplierName, supplierEmail, region, selfFill, supplierType } = body
+    const { supplierName, supplierEmail, region, selfFill, supplierType, supplierLanguage } = body
 
     // Validate required fields
     if (!supplierName || !supplierEmail || !region) {
       return NextResponse.json(
-        { error: 'Naam, email en regio zijn verplicht' },
+        { error: 'Name, email and region are required' },
         { status: 400 }
       )
     }
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
     // Validate supplier type
     const validTypes = Object.values(SupplierType)
     const resolvedType = supplierType && validTypes.includes(supplierType) ? supplierType : 'KOOP'
+    const resolvedLanguage = supplierLanguage === 'en' ? 'en' : 'nl'
 
     // Check for duplicate supplier (name or email)
     const existing = await prisma.supplierRequest.findFirst({
@@ -50,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Er bestaat al een aanvraag voor deze leverancier (naam of email)' },
+        { error: 'A request already exists for this supplier (name or email)' },
         { status: 400 }
       )
     }
@@ -71,6 +73,7 @@ export async function POST(request: NextRequest) {
         region,
         selfFill,
         supplierType: resolvedType,
+        supplierLanguage: resolvedLanguage,
         status,
         createdById: session.user.id,
         invitationToken: selfFill ? null : invitationToken,
@@ -103,6 +106,7 @@ export async function POST(request: NextRequest) {
         supplierName,
         invitationToken,
         expiresAt: invitationExpiresAt,
+        language: resolvedLanguage as Language,
       })
 
       // Create audit log for invitation sent
@@ -123,7 +127,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating request:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }
@@ -135,7 +139,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const requests = await prisma.supplierRequest.findMany({
@@ -158,7 +162,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching requests:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden' },
+      { error: 'An error occurred' },
       { status: 500 }
     )
   }

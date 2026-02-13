@@ -20,13 +20,14 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Status, StatusLabels, RegionLabels, FileTypeLabels, SupplierTypeLabels, SupplierType } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
 import {
   showFinancialSection,
   showDirectorSection,
   showAuctionSection,
 } from '@/lib/supplier-type-utils'
+import { useLanguage } from '@/lib/i18n-context'
+import { getDateLocale } from '@/lib/i18n'
 
 interface AuditLog {
   id: string
@@ -139,6 +140,7 @@ const supplierTypeColors: Record<string, string> = {
 
 export function RequestDetail({ request, userRoles, userId }: RequestDetailProps) {
   const router = useRouter()
+  const { t, language } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
   const [creditorNumber, setCreditorNumber] = useState('')
   const [kbtCode, setKbtCode] = useState('')
@@ -161,10 +163,10 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Er is een fout opgetreden')
+        throw new Error(result.error || t('common.error'))
       }
 
-      toast.success('Actie succesvol uitgevoerd')
+      toast.success(t('common.success'))
 
       // Redirect to dashboard after ERP submit (completion)
       if (action === 'erp-submit') {
@@ -173,7 +175,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
         router.refresh()
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Er is een fout opgetreden')
+      toast.error(error instanceof Error ? error.message : t('common.error'))
     } finally {
       setIsLoading(false)
     }
@@ -198,10 +200,10 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-gray-900">{request.supplierName}</h1>
             <Badge className={statusColors[request.status]}>
-              {StatusLabels[request.status as Status] || request.status}
+              {t(`enums.status.${request.status}`)}
             </Badge>
             <Badge className={supplierTypeColors[supplierType] || 'bg-gray-100 text-gray-800'}>
-              {SupplierTypeLabels[supplierType as SupplierType] || supplierType}
+              {t(`enums.supplierType.${supplierType}`)}
             </Badge>
           </div>
           <p className="text-gray-500">{request.supplierEmail}</p>
@@ -210,7 +212,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
         <div className="flex gap-2">
           {canEdit && (
             <Link href={`/requests/${request.id}/edit`}>
-              <Button>Bewerken</Button>
+              <Button>{t('requests.detail.actions.edit')}</Button>
             </Link>
           )}
 
@@ -220,7 +222,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
               onClick={() => handleAction('resend-invitation')}
               disabled={isLoading}
             >
-              Uitnodiging opnieuw versturen
+              {t('requests.detail.actions.resendInvitation')}
             </Button>
           )}
 
@@ -230,21 +232,20 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
               onClick={() => handleAction('send-reminder')}
               disabled={isLoading}
             >
-              Herinnering versturen
+              {t('requests.detail.actions.sendReminder')}
             </Button>
           )}
 
           {canCancel && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="destructive">Afbreken</Button>
+                <Button variant="destructive">{t('requests.detail.actions.cancel')}</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Aanvraag afbreken?</DialogTitle>
+                  <DialogTitle>{t('requests.detail.actions.cancelTitle')}</DialogTitle>
                   <DialogDescription>
-                    Weet u zeker dat u deze aanvraag wilt afbreken? U kunt de aanvraag
-                    later weer heropenen.
+                    {t('requests.detail.actions.cancelMessage')}
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -253,7 +254,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                     onClick={() => handleAction('cancel')}
                     disabled={isLoading}
                   >
-                    Afbreken
+                    {t('requests.detail.actions.cancel')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -266,7 +267,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
               onClick={() => handleAction('reopen')}
               disabled={isLoading}
             >
-              Heropenen
+              {t('requests.detail.actions.reopen')}
             </Button>
           )}
         </div>
@@ -274,54 +275,54 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
 
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="details">Gegevens</TabsTrigger>
-          <TabsTrigger value="audit">Audit Trail</TabsTrigger>
+          <TabsTrigger value="details">{t('requests.detail.tabs.details')}</TabsTrigger>
+          <TabsTrigger value="audit">{t('requests.detail.tabs.audit')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="space-y-4">
           {/* Basic Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Basisgegevens</CardTitle>
-              <CardDescription>Gegevens ingevuld bij aanmaken aanvraag</CardDescription>
+              <CardTitle>{t('requests.detail.basic.title')}</CardTitle>
+              <CardDescription>{t('requests.detail.basic.description')}</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-gray-500">Leverancier</Label>
+                <Label className="text-gray-500">{t('requests.detail.basic.supplier')}</Label>
                 <p className="font-medium">{request.supplierName}</p>
               </div>
               <div>
-                <Label className="text-gray-500">Email</Label>
+                <Label className="text-gray-500">{t('requests.detail.basic.email')}</Label>
                 <p className="font-medium">{request.supplierEmail}</p>
               </div>
               <div>
-                <Label className="text-gray-500">Type</Label>
+                <Label className="text-gray-500">{t('requests.detail.basic.type')}</Label>
                 <p className="font-medium">
-                  {SupplierTypeLabels[supplierType as SupplierType] || supplierType}
+                  {t(`enums.supplierType.${supplierType}`)}
                 </p>
               </div>
               <div>
-                <Label className="text-gray-500">Regio</Label>
+                <Label className="text-gray-500">{t('requests.detail.basic.region')}</Label>
                 <p className="font-medium">
-                  {RegionLabels[request.region as keyof typeof RegionLabels] || request.region}
+                  {t(`enums.region.${request.region}`)}
                 </p>
               </div>
               <div>
-                <Label className="text-gray-500">Aangemaakt door</Label>
+                <Label className="text-gray-500">{t('requests.detail.basic.createdBy')}</Label>
                 <p className="font-medium">
                   {formatUserName(request.createdBy) || request.createdBy.email}
                 </p>
               </div>
               <div>
-                <Label className="text-gray-500">Aangemaakt op</Label>
+                <Label className="text-gray-500">{t('requests.detail.basic.createdAt')}</Label>
                 <p className="font-medium">
-                  {new Date(request.createdAt).toLocaleString('nl-NL')}
+                  {new Date(request.createdAt).toLocaleString(getDateLocale(language))}
                 </p>
               </div>
               <div>
-                <Label className="text-gray-500">Invulmethode</Label>
+                <Label className="text-gray-500">{t('requests.detail.basic.fillMethod')}</Label>
                 <p className="font-medium">
-                  {request.selfFill ? 'Door inkoper' : 'Door leverancier'}
+                  {request.selfFill ? t('requests.detail.basic.byPurchaser') : t('requests.detail.basic.bySupplier')}
                 </p>
               </div>
             </CardContent>
@@ -331,51 +332,51 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           {(request.companyName || request.supplierSubmittedAt) && (
             <Card>
               <CardHeader>
-                <CardTitle>Leveranciersgegevens</CardTitle>
+                <CardTitle>{t('requests.detail.supplier.title')}</CardTitle>
                 <CardDescription>
                   {request.supplierSubmittedAt
-                    ? `Ingevuld op ${new Date(request.supplierSubmittedAt).toLocaleString('nl-NL')}`
-                    : 'Ingevuld door inkoper'}
+                    ? `${t('requests.detail.supplier.submittedAt')} ${new Date(request.supplierSubmittedAt).toLocaleString(getDateLocale(language))}`
+                    : t('requests.detail.supplier.filledByPurchaser')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-gray-500">Bedrijfsnaam</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.companyName')}</Label>
                     <p className="font-medium">{request.companyName || '-'}</p>
                   </div>
                   <div>
-                    <Label className="text-gray-500">Adres</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.address')}</Label>
                     <p className="font-medium">{request.address || '-'}</p>
                   </div>
                   <div>
-                    <Label className="text-gray-500">Postcode</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.postalCode')}</Label>
                     <p className="font-medium">{request.postalCode || '-'}</p>
                   </div>
                   <div>
-                    <Label className="text-gray-500">Plaats</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.city')}</Label>
                     <p className="font-medium">{request.city || '-'}</p>
                   </div>
                   <div>
-                    <Label className="text-gray-500">Land</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.country')}</Label>
                     <p className="font-medium">{request.country || '-'}</p>
                   </div>
                   {request.glnNumber && (
                     <div>
-                      <Label className="text-gray-500">GLN-nummer</Label>
+                      <Label className="text-gray-500">{t('requests.detail.supplier.glnNumber')}</Label>
                       <p className="font-medium">{request.glnNumber}</p>
                     </div>
                   )}
                   <div>
-                    <Label className="text-gray-500">Contactpersoon</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.contactName')}</Label>
                     <p className="font-medium">{request.contactName || '-'}</p>
                   </div>
                   <div>
-                    <Label className="text-gray-500">Telefoon</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.phone')}</Label>
                     <p className="font-medium">{request.contactPhone || '-'}</p>
                   </div>
                   <div>
-                    <Label className="text-gray-500">Contact email</Label>
+                    <Label className="text-gray-500">{t('requests.detail.supplier.contactEmail')}</Label>
                     <p className="font-medium">{request.contactEmail || '-'}</p>
                   </div>
                 </div>
@@ -384,51 +385,51 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                 {showFinancial && (request.chamberOfCommerceNumber || request.iban) && (
                   <>
                     <Separator />
-                    <p className="text-sm font-medium text-gray-700">Financi&euml;le gegevens</p>
+                    <p className="text-sm font-medium text-gray-700">{t('requests.detail.financial.title')}</p>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-gray-500">KvK nummer</Label>
+                        <Label className="text-gray-500">{t('requests.detail.financial.kvkNumber')}</Label>
                         <p className="font-medium">{request.chamberOfCommerceNumber || '-'}</p>
                       </div>
                       <div>
-                        <Label className="text-gray-500">BTW nummer</Label>
+                        <Label className="text-gray-500">{t('requests.detail.financial.vatNumber')}</Label>
                         <p className="font-medium">{request.vatNumber || '-'}</p>
                       </div>
                       <div>
-                        <Label className="text-gray-500">IBAN</Label>
+                        <Label className="text-gray-500">{t('requests.detail.financial.iban')}</Label>
                         <p className="font-medium">{request.iban || '-'}</p>
                       </div>
                       <div>
-                        <Label className="text-gray-500">Bank</Label>
+                        <Label className="text-gray-500">{t('requests.detail.financial.bank')}</Label>
                         <p className="font-medium">{request.bankName || '-'}</p>
                       </div>
                       {request.invoiceEmail && (
                         <div>
-                          <Label className="text-gray-500">Factuur email</Label>
+                          <Label className="text-gray-500">{t('requests.detail.financial.invoiceEmail')}</Label>
                           <p className="font-medium">{request.invoiceEmail}</p>
                         </div>
                       )}
                       {request.invoiceAddress && (
                         <div>
-                          <Label className="text-gray-500">Factuuradres</Label>
+                          <Label className="text-gray-500">{t('requests.detail.financial.invoiceAddress')}</Label>
                           <p className="font-medium">{request.invoiceAddress}</p>
                         </div>
                       )}
                       {request.invoicePostalCode && (
                         <div>
-                          <Label className="text-gray-500">Factuur postcode</Label>
+                          <Label className="text-gray-500">{t('requests.detail.financial.invoicePostalCode')}</Label>
                           <p className="font-medium">{request.invoicePostalCode}</p>
                         </div>
                       )}
                       {request.invoiceCity && (
                         <div>
-                          <Label className="text-gray-500">Factuur plaats</Label>
+                          <Label className="text-gray-500">{t('requests.detail.financial.invoiceCity')}</Label>
                           <p className="font-medium">{request.invoiceCity}</p>
                         </div>
                       )}
                       {request.invoiceCurrency && (
                         <div>
-                          <Label className="text-gray-500">Valuta</Label>
+                          <Label className="text-gray-500">{t('requests.detail.financial.currency')}</Label>
                           <p className="font-medium">{request.invoiceCurrency}</p>
                         </div>
                       )}
@@ -440,27 +441,27 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                 {showDirector && request.directorName && (
                   <>
                     <Separator />
-                    <p className="text-sm font-medium text-gray-700">Bestuurder</p>
+                    <p className="text-sm font-medium text-gray-700">{t('requests.detail.director.title')}</p>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-gray-500">Naam</Label>
+                        <Label className="text-gray-500">{t('requests.detail.director.name')}</Label>
                         <p className="font-medium">{request.directorName}</p>
                       </div>
                       {request.directorFunction && (
                         <div>
-                          <Label className="text-gray-500">Functie</Label>
+                          <Label className="text-gray-500">{t('requests.detail.director.function')}</Label>
                           <p className="font-medium">{request.directorFunction}</p>
                         </div>
                       )}
                       {request.directorDateOfBirth && (
                         <div>
-                          <Label className="text-gray-500">Geboortedatum</Label>
+                          <Label className="text-gray-500">{t('requests.detail.director.dob')}</Label>
                           <p className="font-medium">{request.directorDateOfBirth}</p>
                         </div>
                       )}
                       {request.directorPassportNumber && (
                         <div>
-                          <Label className="text-gray-500">Paspoortnummer</Label>
+                          <Label className="text-gray-500">{t('requests.detail.director.passport')}</Label>
                           <p className="font-medium">{request.directorPassportNumber}</p>
                         </div>
                       )}
@@ -472,27 +473,27 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                 {showAuction && (request.auctionNumberRFH || request.salesSheetEmail) && (
                   <>
                     <Separator />
-                    <p className="text-sm font-medium text-gray-700">Veilinggegevens</p>
+                    <p className="text-sm font-medium text-gray-700">{t('requests.detail.auction.title')}</p>
                     <div className="grid grid-cols-2 gap-4">
                       {request.auctionNumberRFH && (
                         <div>
-                          <Label className="text-gray-500">Aanvoernummer RFH</Label>
+                          <Label className="text-gray-500">{t('requests.detail.auction.auctionNumberRFH')}</Label>
                           <p className="font-medium">{request.auctionNumberRFH}</p>
                         </div>
                       )}
                       {request.salesSheetEmail && (
                         <div>
-                          <Label className="text-gray-500">Salessheet email</Label>
+                          <Label className="text-gray-500">{t('requests.detail.auction.salesSheetEmail')}</Label>
                           <p className="font-medium">{request.salesSheetEmail}</p>
                         </div>
                       )}
                       <div>
-                        <Label className="text-gray-500">Mandaat RFH</Label>
-                        <p className="font-medium">{request.mandateRFH ? 'Ja' : 'Nee'}</p>
+                        <Label className="text-gray-500">{t('requests.detail.auction.mandateRFH')}</Label>
+                        <p className="font-medium">{request.mandateRFH ? t('common.yes') : t('common.no')}</p>
                       </div>
                       {request.apiKeyFloriday && (
                         <div>
-                          <Label className="text-gray-500">API key Floriday</Label>
+                          <Label className="text-gray-500">{t('requests.detail.auction.apiKeyFloriday')}</Label>
                           <p className="font-medium">{request.apiKeyFloriday}</p>
                         </div>
                       )}
@@ -507,15 +508,14 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           {request.files.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Bestanden</CardTitle>
+                <CardTitle>{t('requests.detail.files.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {request.files.map((file) => (
                     <li key={file.id} className="flex items-center gap-4">
                       <Badge variant="outline">
-                        {FileTypeLabels[file.fileType as keyof typeof FileTypeLabels] ||
-                          file.fileType}
+                        {t(`enums.fileType.${file.fileType}`)}
                       </Badge>
                       <a
                         href={file.filePath}
@@ -526,7 +526,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                         {file.fileName}
                       </a>
                       <span className="text-sm text-gray-500">
-                        {new Date(file.uploadedAt).toLocaleDateString('nl-NL')}
+                        {new Date(file.uploadedAt).toLocaleDateString(getDateLocale(language))}
                       </span>
                     </li>
                   ))}
@@ -539,33 +539,33 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           {(request.incoterm || request.paymentTerm || request.accountManager) && (
             <Card>
               <CardHeader>
-                <CardTitle>Aanvullende gegevens (Inkoper)</CardTitle>
+                <CardTitle>{t('requests.detail.purchaser.title')}</CardTitle>
                 <CardDescription>
-                  Gegevens toegevoegd door inkoper
+                  {t('requests.detail.purchaser.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 {request.incoterm && (
                   <div>
-                    <Label className="text-gray-500">Incoterm</Label>
+                    <Label className="text-gray-500">{t('requests.detail.purchaser.incoterm')}</Label>
                     <p className="font-medium">{request.incoterm}</p>
                   </div>
                 )}
                 {request.paymentTerm && (
                   <div>
-                    <Label className="text-gray-500">Betalingstermijn</Label>
-                    <p className="font-medium">{request.paymentTerm} dagen</p>
+                    <Label className="text-gray-500">{t('requests.detail.purchaser.paymentTerm')}</Label>
+                    <p className="font-medium">{request.paymentTerm} {t('common.days')}</p>
                   </div>
                 )}
                 {request.accountManager && (
                   <div>
-                    <Label className="text-gray-500">Accountmanager</Label>
+                    <Label className="text-gray-500">{t('requests.detail.purchaser.accountManager')}</Label>
                     <p className="font-medium">{request.accountManager}</p>
                   </div>
                 )}
                 {request.commissionPercentage !== null && request.commissionPercentage !== undefined && (
                   <div>
-                    <Label className="text-gray-500">Commissiepercentage</Label>
+                    <Label className="text-gray-500">{t('requests.detail.purchaser.commission')}</Label>
                     <p className="font-medium">{request.commissionPercentage}%</p>
                   </div>
                 )}
@@ -577,39 +577,39 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           {(request.creditorNumber || request.status === 'AWAITING_FINANCE') && (
             <Card>
               <CardHeader>
-                <CardTitle>Finance</CardTitle>
+                <CardTitle>{t('requests.detail.finance.title')}</CardTitle>
                 <CardDescription>
                   {request.creditorNumber
-                    ? 'Crediteurnummer toegewezen'
-                    : 'Wachten op crediteurnummer'}
+                    ? t('requests.detail.finance.creditorAssigned')
+                    : t('requests.detail.finance.waitingForCreditor')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {request.creditorNumber ? (
                   <div>
-                    <Label className="text-gray-500">Crediteurnummer</Label>
+                    <Label className="text-gray-500">{t('requests.detail.finance.creditorNumber')}</Label>
                     <p className="font-medium">{request.creditorNumber}</p>
                   </div>
                 ) : userRoles.includes('FINANCE') ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="creditorNumber">Crediteurnummer *</Label>
+                      <Label htmlFor="creditorNumber">{t('requests.detail.finance.creditorNumber')} *</Label>
                       <Input
                         id="creditorNumber"
                         value={creditorNumber}
                         onChange={(e) => setCreditorNumber(e.target.value)}
-                        placeholder="Voer crediteurnummer in"
+                        placeholder={t('requests.detail.finance.enterCreditor')}
                       />
                     </div>
                     <Button
                       onClick={() => handleAction('finance-submit', { creditorNumber })}
                       disabled={isLoading || !creditorNumber}
                     >
-                      Opslaan
+                      {t('common.save')}
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-gray-500">Wachten op Finance</p>
+                  <p className="text-gray-500">{t('requests.detail.finance.waiting')}</p>
                 )}
               </CardContent>
             </Card>
@@ -619,37 +619,37 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           {(request.kbtCode || request.status === 'AWAITING_ERP') && (
             <Card>
               <CardHeader>
-                <CardTitle>ERP</CardTitle>
+                <CardTitle>{t('requests.detail.erp.title')}</CardTitle>
                 <CardDescription>
-                  {request.kbtCode ? 'KBT-code toegewezen' : 'Wachten op KBT-code'}
+                  {request.kbtCode ? t('requests.detail.erp.kbtAssigned') : t('requests.detail.erp.waitingForKbt')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {request.kbtCode ? (
                   <div>
-                    <Label className="text-gray-500">KBT-code</Label>
+                    <Label className="text-gray-500">{t('requests.detail.erp.kbtCode')}</Label>
                     <p className="font-medium">{request.kbtCode}</p>
                   </div>
                 ) : userRoles.includes('ERP') ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="kbtCode">KBT-code *</Label>
+                      <Label htmlFor="kbtCode">{t('requests.detail.erp.kbtCode')} *</Label>
                       <Input
                         id="kbtCode"
                         value={kbtCode}
                         onChange={(e) => setKbtCode(e.target.value)}
-                        placeholder="Voer KBT-code in"
+                        placeholder={t('requests.detail.erp.enterKbt')}
                       />
                     </div>
                     <Button
                       onClick={() => handleAction('erp-submit', { kbtCode })}
                       disabled={isLoading || !kbtCode}
                     >
-                      Opslaan
+                      {t('common.save')}
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-gray-500">Wachten op ERP</p>
+                  <p className="text-gray-500">{t('requests.detail.erp.waiting')}</p>
                 )}
               </CardContent>
             </Card>
@@ -659,22 +659,22 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
         <TabsContent value="audit">
           <Card>
             <CardHeader>
-              <CardTitle>Audit Trail</CardTitle>
-              <CardDescription>Overzicht van alle acties op deze aanvraag</CardDescription>
+              <CardTitle>{t('requests.detail.audit.title')}</CardTitle>
+              <CardDescription>{t('requests.detail.audit.description')}</CardDescription>
             </CardHeader>
             <CardContent>
               {request.auditLogs.length === 0 ? (
-                <p className="text-gray-500">Geen acties gevonden</p>
+                <p className="text-gray-500">{t('requests.detail.audit.empty')}</p>
               ) : (
                 <div className="space-y-4">
                   {request.auditLogs.map((log) => (
                     <div key={log.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
                       <div className="flex-1">
-                        <p className="font-medium">{log.action.replace(/_/g, ' ')}</p>
+                        <p className="font-medium">{t(`enums.auditAction.${log.action}`)}</p>
                         <p className="text-sm text-gray-500">
                           {log.user
-                            ? `Door ${formatUserName(log.user) || log.user.email}`
-                            : 'Systeem'}
+                            ? `${t('requests.detail.audit.by')} ${formatUserName(log.user) || log.user.email}`
+                            : t('requests.detail.audit.system')}
                         </p>
                         {log.details && (
                           <pre className="text-xs text-gray-400 mt-1 bg-gray-50 p-2 rounded">
@@ -683,7 +683,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                         )}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {new Date(log.createdAt).toLocaleString('nl-NL')}
+                        {new Date(log.createdAt).toLocaleString(getDateLocale(language))}
                       </div>
                     </div>
                   ))}

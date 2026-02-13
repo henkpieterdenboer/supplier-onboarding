@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email en wachtwoord zijn verplicht')
+          throw new Error('Email and password are required')
         }
 
         const user = await prisma.user.findUnique({
@@ -23,21 +23,21 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!user) {
-          throw new Error('Gebruiker niet gevonden')
+          throw new Error('User not found')
         }
 
         if (!user.passwordHash) {
-          throw new Error('Account nog niet geactiveerd. Gebruik de activatielink uit uw email.')
+          throw new Error('Account not yet activated. Use the activation link from your email.')
         }
 
         if (!user.isActive) {
-          throw new Error('Account is gedeactiveerd')
+          throw new Error('Account is deactivated')
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
 
         if (!isValid) {
-          throw new Error('Ongeldig wachtwoord')
+          throw new Error('Invalid password')
         }
 
         // Reset demo user roles to their default on login (only in demo mode)
@@ -69,6 +69,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: formatUserName(user),
           roles: effectiveRoles,
+          language: user.preferredLanguage || 'nl',
         }
       },
     }),
@@ -122,16 +123,18 @@ export const authOptions: NextAuthOptions = {
       if (user && account?.provider === 'credentials') {
         token.id = user.id
         token.roles = user.roles
+        token.language = user.language || 'nl'
       }
 
       if (account?.provider === 'azure-ad') {
         const dbUser = await prisma.user.findFirst({
           where: { email: { equals: user.email!, mode: 'insensitive' } },
-          select: { id: true, roles: true },
+          select: { id: true, roles: true, preferredLanguage: true },
         })
         if (dbUser) {
           token.id = dbUser.id
           token.roles = dbUser.roles
+          token.language = dbUser.preferredLanguage || 'nl'
         }
       }
       // Always fetch the latest roles and isActive from database
@@ -139,7 +142,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { roles: true, isActive: true, firstName: true, middleName: true, lastName: true },
+            select: { roles: true, isActive: true, firstName: true, middleName: true, lastName: true, preferredLanguage: true },
           })
           if (dbUser) {
             if (!dbUser.isActive) {
@@ -148,6 +151,7 @@ export const authOptions: NextAuthOptions = {
             }
             token.roles = dbUser.roles
             token.name = formatUserName(dbUser)
+            token.language = dbUser.preferredLanguage || 'nl'
           }
         } catch {
           // Database not available during build, use cached roles
@@ -159,6 +163,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string
         session.user.roles = token.roles as string[]
+        session.user.language = (token.language as string) || 'nl'
       }
       return session
     },

@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
+import { useLanguage } from '@/lib/i18n-context'
 
 export default function ActivatePage() {
+  const { t } = useLanguage()
   const router = useRouter()
   const params = useParams()
   const token = params.token as string
@@ -25,12 +27,12 @@ export default function ActivatePage() {
     setError('')
 
     if (password.length < 6) {
-      setError('Wachtwoord moet minimaal 6 tekens bevatten')
+      setError(t('auth.activate.errorMinLength'))
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Wachtwoorden komen niet overeen')
+      setError(t('auth.activate.errorMismatch'))
       return
     }
 
@@ -46,7 +48,7 @@ export default function ActivatePage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Er is een fout opgetreden')
+        setError(data.error || t('auth.activate.errorGeneric'))
         return
       }
 
@@ -55,7 +57,7 @@ export default function ActivatePage() {
         router.push('/login')
       }, 3000)
     } catch {
-      setError('Er is een fout opgetreden')
+      setError(t('auth.activate.errorGeneric'))
     } finally {
       setIsLoading(false)
     }
@@ -70,12 +72,12 @@ export default function ActivatePage() {
               <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">
-              Account geactiveerd
+              {t('auth.activate.success')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Alert>
-              Uw account is succesvol geactiveerd. U wordt doorgestuurd naar de loginpagina...
+              {t('auth.activate.successMessage')}
             </Alert>
           </CardContent>
         </Card>
@@ -91,10 +93,10 @@ export default function ActivatePage() {
             <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            Account activeren
+            {t('auth.activate.title')}
           </CardTitle>
           <CardDescription className="text-center">
-            Stel uw wachtwoord in om uw account te activeren
+            {t('auth.activate.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -106,11 +108,11 @@ export default function ActivatePage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="password">Wachtwoord</Label>
+              <Label htmlFor="password">{t('auth.activate.password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Minimaal 6 tekens"
+                placeholder={t('auth.activate.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -119,11 +121,11 @@ export default function ActivatePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Bevestig wachtwoord</Label>
+              <Label htmlFor="confirmPassword">{t('auth.activate.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Herhaal uw wachtwoord"
+                placeholder={t('auth.activate.confirmPlaceholder')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -132,7 +134,7 @@ export default function ActivatePage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Bezig...' : 'Account activeren'}
+              {isLoading ? t('auth.activate.submitting') : t('auth.activate.submit')}
             </Button>
           </form>
         </CardContent>

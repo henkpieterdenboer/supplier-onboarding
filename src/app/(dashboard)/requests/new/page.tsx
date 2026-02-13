@@ -17,13 +17,15 @@ import {
 } from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
 import { toast } from 'sonner'
-import { Region, RegionLabels, SupplierType, SupplierTypeLabels } from '@/types'
+import { Region, SupplierType, SupplierTypeLabels } from '@/types'
+import { useLanguage } from '@/lib/i18n-context'
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 
 export default function NewRequestPage() {
   const router = useRouter()
   const { data: session } = useSession()
+  const { t } = useLanguage()
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -35,6 +37,7 @@ export default function NewRequestPage() {
     region: 'EU' as Region,
     selfFill: false,
     supplierType: 'KOOP' as SupplierType,
+    supplierLanguage: 'nl',
   })
 
   // Only INKOPER can create new requests
@@ -42,7 +45,7 @@ export default function NewRequestPage() {
     return (
       <div className="max-w-2xl mx-auto">
         <Alert variant="destructive">
-          U heeft geen toestemming om nieuwe aanvragen aan te maken.
+          {t('requests.new.noPermission')}
         </Alert>
       </div>
     )
@@ -63,13 +66,13 @@ export default function NewRequestPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Er is een fout opgetreden')
+        throw new Error(data.error || t('common.error'))
       }
 
       toast.success(
         formData.selfFill
-          ? 'Aanvraag aangemaakt. U kunt nu de gegevens invullen.'
-          : 'Uitnodiging verstuurd naar de leverancier.'
+          ? t('requests.new.successSelfFill')
+          : t('requests.new.successInvitation')
       )
 
       // Redirect to the request detail page or edit page if self-fill
@@ -82,7 +85,7 @@ export default function NewRequestPage() {
         router.push(`/requests/${data.id}`)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Er is een fout opgetreden')
+      setError(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setIsLoading(false)
     }
@@ -94,17 +97,16 @@ export default function NewRequestPage() {
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Uitnodiging verstuurd</CardTitle>
+            <CardTitle>{t('requests.new.successTitle')}</CardTitle>
             <CardDescription>
-              De uitnodiging is aangemaakt en de email is verstuurd via de test SMTP-server.
+              {t('requests.new.successEtherealTitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
-              <p className="font-medium text-amber-900">Test SMTP-server (Ethereal)</p>
+              <p className="font-medium text-amber-900">{t('requests.new.successEtherealLabel')}</p>
               <p className="text-sm text-amber-800">
-                In demo-modus worden emails verstuurd via Ethereal, een test SMTP-server.
-                Klik op de onderstaande link om het verstuurde bericht te bekijken:
+                {t('requests.new.successEtherealDescription')}
               </p>
               <a
                 href={successData.emailPreviewUrl!}
@@ -117,10 +119,10 @@ export default function NewRequestPage() {
             </div>
             <div className="flex gap-4 pt-2">
               <Link href={`/requests/${successData.id}`}>
-                <Button>Naar aanvraag</Button>
+                <Button>{t('requests.new.goToRequest')}</Button>
               </Link>
               <Link href="/dashboard">
-                <Button variant="outline">Naar dashboard</Button>
+                <Button variant="outline">{t('requests.new.goToDashboard')}</Button>
               </Link>
             </div>
           </CardContent>
@@ -133,9 +135,9 @@ export default function NewRequestPage() {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Nieuwe leveranciersaanvraag</CardTitle>
+          <CardTitle>{t('requests.new.title')}</CardTitle>
           <CardDescription>
-            Vul de basisgegevens in om een nieuwe leverancier te onboarden
+            {t('requests.new.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -146,9 +148,9 @@ export default function NewRequestPage() {
 
             {/* Supplier Type Selector */}
             <div className="space-y-4">
-              <Label>Type leverancier *</Label>
+              <Label>{t('requests.new.supplierType')}</Label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {Object.entries(SupplierTypeLabels).map(([value, label]) => (
+                {Object.entries(SupplierTypeLabels).map(([value]) => (
                   <button
                     key={value}
                     type="button"
@@ -160,11 +162,11 @@ export default function NewRequestPage() {
                     }`}
                     disabled={isLoading}
                   >
-                    <div className="font-medium">{label}</div>
+                    <div className="font-medium">{t(`enums.supplierType.${value}`)}</div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {value === 'KOOP' && 'Standaard leverancier'}
-                      {value === 'X_KWEKER' && 'Veilingleverancier'}
-                      {value === 'O_KWEKER' && 'Directe kweker'}
+                      {value === 'KOOP' && t('requests.new.typeKoop')}
+                      {value === 'X_KWEKER' && t('requests.new.typeXKweker')}
+                      {value === 'O_KWEKER' && t('requests.new.typeOKweker')}
                     </div>
                   </button>
                 ))}
@@ -172,21 +174,21 @@ export default function NewRequestPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="supplierName">Naam leverancier *</Label>
+              <Label htmlFor="supplierName">{t('requests.new.supplierName')}</Label>
               <Input
                 id="supplierName"
                 value={formData.supplierName}
                 onChange={(e) =>
                   setFormData({ ...formData, supplierName: e.target.value })
                 }
-                placeholder="Bedrijfsnaam leverancier"
+                placeholder={t('requests.new.supplierNamePlaceholder')}
                 required
                 disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="supplierEmail">Email leverancier *</Label>
+              <Label htmlFor="supplierEmail">{t('requests.new.supplierEmail')}</Label>
               <Input
                 id="supplierEmail"
                 type="email"
@@ -194,14 +196,14 @@ export default function NewRequestPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, supplierEmail: e.target.value })
                 }
-                placeholder="contact@leverancier.com"
+                placeholder={t('requests.new.supplierEmailPlaceholder')}
                 required
                 disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="region">Regio *</Label>
+              <Label htmlFor="region">{t('requests.new.region')}</Label>
               <Select
                 value={formData.region}
                 onValueChange={(value: Region) =>
@@ -210,20 +212,36 @@ export default function NewRequestPage() {
                 disabled={isLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecteer regio" />
+                  <SelectValue placeholder={t('requests.new.regionPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(RegionLabels).map(([value, label]) => (
+                  {(['EU', 'ROW'] as Region[]).map((value) => (
                     <SelectItem key={value} value={value}>
-                      {label}
+                      {t(`enums.region.${value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
+            {!formData.selfFill && (
+              <div className="space-y-2">
+                <Label>{t('requests.new.supplierLanguage')}</Label>
+                <p className="text-sm text-muted-foreground">{t('requests.new.supplierLanguageDescription')}</p>
+                <Select value={formData.supplierLanguage} onValueChange={(value) => setFormData({...formData, supplierLanguage: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nl">{t('requests.new.languageNl')}</SelectItem>
+                    <SelectItem value="en">{t('requests.new.languageEn')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-4 pt-4 border-t">
-              <Label>Hoe wilt u doorgaan?</Label>
+              <Label>{t('requests.new.howToContinue')}</Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   type="button"
@@ -235,9 +253,9 @@ export default function NewRequestPage() {
                   }`}
                   disabled={isLoading}
                 >
-                  <div className="font-medium">Uitnodiging versturen</div>
+                  <div className="font-medium">{t('requests.new.sendInvitation')}</div>
                   <div className="text-sm text-gray-500 mt-1">
-                    De leverancier ontvangt een email om zelf het formulier in te vullen
+                    {t('requests.new.sendInvitationDescription')}
                   </div>
                 </button>
 
@@ -251,9 +269,9 @@ export default function NewRequestPage() {
                   }`}
                   disabled={isLoading}
                 >
-                  <div className="font-medium">Zelf invullen</div>
+                  <div className="font-medium">{t('requests.new.selfFill')}</div>
                   <div className="text-sm text-gray-500 mt-1">
-                    U vult de gegevens namens de leverancier in
+                    {t('requests.new.selfFillDescription')}
                   </div>
                 </button>
               </div>
@@ -266,14 +284,14 @@ export default function NewRequestPage() {
                 onClick={() => router.back()}
                 disabled={isLoading}
               >
-                Annuleren
+                {t('requests.new.cancel')}
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading
-                  ? 'Bezig...'
+                  ? t('requests.new.submitting')
                   : formData.selfFill
-                  ? 'Aanmaken en invullen'
-                  : 'Uitnodiging versturen'}
+                  ? t('requests.new.submit')
+                  : t('requests.new.sendInvitation')}
               </Button>
             </div>
           </form>

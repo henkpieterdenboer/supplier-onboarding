@@ -24,6 +24,9 @@ import {
   showAuctionSection,
   showBankUpload,
 } from '@/lib/supplier-type-utils'
+import { useLanguage } from '@/lib/i18n-context'
+import { getDateLocale } from '@/lib/i18n'
+import type { Language } from '@/lib/i18n'
 
 interface Request {
   id: string
@@ -31,6 +34,7 @@ interface Request {
   supplierEmail: string
   region: string
   supplierType: string
+  supplierLanguage: string
   supplierSavedAt: string | null
   companyName: string | null
   address: string | null
@@ -62,6 +66,7 @@ interface Request {
 
 export default function SupplierFormPage() {
   const params = useParams()
+  const { t, language, setLanguage } = useLanguage()
   const [request, setRequest] = useState<Request | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -120,7 +125,7 @@ export default function SupplierFormPage() {
         const data = await response.json()
 
         if (!response.ok) {
-          throw new Error(data.error || 'Ongeldige of verlopen link')
+          throw new Error(data.error || t('supplier.form.invalidLinkTitle'))
         }
 
         setRequest(data)
@@ -157,7 +162,7 @@ export default function SupplierFormPage() {
           })
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ongeldige of verlopen link')
+        setError(err instanceof Error ? err.message : t('supplier.form.invalidLinkTitle'))
       } finally {
         setIsLoading(false)
       }
@@ -165,6 +170,13 @@ export default function SupplierFormPage() {
 
     validateToken()
   }, [params.token])
+
+  // Set language based on supplier's preferred language
+  useEffect(() => {
+    if (request?.supplierLanguage) {
+      setLanguage(request.supplierLanguage as Language)
+    }
+  }, [request?.supplierLanguage, setLanguage])
 
   const handleFileChange = (type: 'kvk' | 'passport' | 'bankDetails', file: File | null) => {
     setFiles({ ...files, [type]: file })
@@ -194,18 +206,18 @@ export default function SupplierFormPage() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Er is een fout opgetreden')
+        throw new Error(result.error || t('common.error'))
       }
 
       if (action === 'save') {
         setIsSaved(true)
-        toast.success('Gegevens opgeslagen! U ontvangt een email met de link om later verder te gaan.')
+        toast.success(t('supplier.form.savedSuccess'))
       } else {
         setIsSubmitted(true)
-        toast.success('Gegevens succesvol verstuurd!')
+        toast.success(t('supplier.form.submitSuccess'))
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Er is een fout opgetreden')
+      setError(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setIsSaving(false)
       setIsSubmitting(false)
@@ -228,7 +240,7 @@ export default function SupplierFormPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-500">Laden...</p>
+          <p className="mt-4 text-gray-500">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -239,13 +251,12 @@ export default function SupplierFormPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-red-600">Link ongeldig</CardTitle>
+            <CardTitle className="text-red-600">{t('supplier.form.invalidLink')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">{error}</p>
             <p className="mt-4 text-sm text-gray-500">
-              De link is mogelijk verlopen of al gebruikt. Neem contact op met uw
-              contactpersoon voor een nieuwe link.
+              {t('supplier.form.invalidLinkMessage')}
             </p>
           </CardContent>
         </Card>
@@ -265,14 +276,13 @@ export default function SupplierFormPage() {
                 className="h-16 w-auto"
               />
             </div>
-            <CardTitle className="text-green-600">Bedankt!</CardTitle>
+            <CardTitle className="text-green-600">{t('supplier.form.thankYou')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Uw gegevens zijn succesvol verstuurd. U ontvangt binnenkort een
-              bevestigingsmail.
+              {t('supplier.form.thankYouMessage')}
             </p>
-            <p className="mt-4 text-sm text-gray-500">U kunt dit venster sluiten.</p>
+            <p className="mt-4 text-sm text-gray-500">{t('supplier.form.closeWindow')}</p>
           </CardContent>
         </Card>
       </div>
@@ -291,14 +301,13 @@ export default function SupplierFormPage() {
                 className="h-16 w-auto"
               />
             </div>
-            <CardTitle className="text-blue-600">Gegevens opgeslagen</CardTitle>
+            <CardTitle className="text-blue-600">{t('supplier.form.savedTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Uw gegevens zijn tussentijds opgeslagen. U ontvangt een email met een link
-              om het formulier later af te ronden.
+              {t('supplier.form.savedMessage')}
             </p>
-            <p className="mt-4 text-sm text-gray-500">U kunt dit venster sluiten.</p>
+            <p className="mt-4 text-sm text-gray-500">{t('supplier.form.closeWindow')}</p>
           </CardContent>
         </Card>
       </div>
@@ -316,24 +325,24 @@ export default function SupplierFormPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Supplier Onboarding</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('supplier.form.title')}</h1>
           <p className="text-gray-500 mt-2">
-            Welkom {request?.supplierName}. Vul hieronder uw bedrijfsgegevens in.
+            {t('supplier.form.welcome', { supplierName: request?.supplierName || '' })}
           </p>
         </div>
 
         {/* Saved before notice */}
         {request?.supplierSavedAt && (
           <Alert className="mb-6">
-            U heeft eerder gegevens opgeslagen op{' '}
-            {new Date(request.supplierSavedAt).toLocaleDateString('nl-NL', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
+            {t('supplier.form.savedNotice', {
+              date: new Date(request.supplierSavedAt).toLocaleDateString(getDateLocale(language), {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })
             })}
-            . Uw eerdere gegevens zijn hieronder ingevuld.
           </Alert>
         )}
 
@@ -347,12 +356,12 @@ export default function SupplierFormPage() {
           {/* Company details - always shown */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Bedrijfsgegevens</CardTitle>
-              <CardDescription>Vul de gegevens van uw bedrijf in</CardDescription>
+              <CardTitle>{t('supplier.form.company.title')}</CardTitle>
+              <CardDescription>{t('supplier.form.company.description')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="companyName">Bedrijfsnaam *</Label>
+                <Label htmlFor="companyName">{t('supplier.form.company.companyName')}</Label>
                 <Input
                   id="companyName"
                   value={formData.companyName}
@@ -363,7 +372,7 @@ export default function SupplierFormPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Adres *</Label>
+                <Label htmlFor="address">{t('supplier.form.company.address')}</Label>
                 <Input
                   id="address"
                   value={formData.address}
@@ -375,7 +384,7 @@ export default function SupplierFormPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="postalCode">Postcode *</Label>
+                  <Label htmlFor="postalCode">{t('supplier.form.company.postalCode')}</Label>
                   <Input
                     id="postalCode"
                     value={formData.postalCode}
@@ -385,7 +394,7 @@ export default function SupplierFormPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city">Plaats *</Label>
+                  <Label htmlFor="city">{t('supplier.form.company.city')}</Label>
                   <Input
                     id="city"
                     value={formData.city}
@@ -395,7 +404,7 @@ export default function SupplierFormPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="country">Land *</Label>
+                  <Label htmlFor="country">{t('supplier.form.company.country')}</Label>
                   <Input
                     id="country"
                     value={formData.country}
@@ -407,7 +416,7 @@ export default function SupplierFormPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="glnNumber">GLN-nummer</Label>
+                <Label htmlFor="glnNumber">{t('supplier.form.company.glnNumber')}</Label>
                 <Input
                   id="glnNumber"
                   value={formData.glnNumber}
@@ -420,7 +429,7 @@ export default function SupplierFormPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contactName">Contactpersoon *</Label>
+                  <Label htmlFor="contactName">{t('supplier.form.company.contactName')}</Label>
                   <Input
                     id="contactName"
                     value={formData.contactName}
@@ -430,7 +439,7 @@ export default function SupplierFormPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contactPhone">Telefoon *</Label>
+                  <Label htmlFor="contactPhone">{t('supplier.form.company.phone')}</Label>
                   <Input
                     id="contactPhone"
                     value={formData.contactPhone}
@@ -442,7 +451,7 @@ export default function SupplierFormPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact email *</Label>
+                <Label htmlFor="contactEmail">{t('supplier.form.company.contactEmail')}</Label>
                 <Input
                   id="contactEmail"
                   type="email"
@@ -459,15 +468,15 @@ export default function SupplierFormPage() {
           {showFinancial && (
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Financi&euml;le gegevens</CardTitle>
+                <CardTitle>{t('supplier.form.financial.title')}</CardTitle>
                 <CardDescription>
-                  Vul uw bedrijfs- en bankgegevens in
+                  {t('supplier.form.financial.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="chamberOfCommerceNumber">KvK nummer *</Label>
+                    <Label htmlFor="chamberOfCommerceNumber">{t('supplier.form.financial.kvkNumber')}</Label>
                     <Input
                       id="chamberOfCommerceNumber"
                       value={formData.chamberOfCommerceNumber}
@@ -479,7 +488,7 @@ export default function SupplierFormPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="vatNumber">BTW nummer *</Label>
+                    <Label htmlFor="vatNumber">{t('supplier.form.financial.vatNumber')}</Label>
                     <Input
                       id="vatNumber"
                       value={formData.vatNumber}
@@ -492,7 +501,7 @@ export default function SupplierFormPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="iban">IBAN *</Label>
+                    <Label htmlFor="iban">{t('supplier.form.financial.iban')}</Label>
                     <Input
                       id="iban"
                       value={formData.iban}
@@ -502,7 +511,7 @@ export default function SupplierFormPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bankName">Bank *</Label>
+                    <Label htmlFor="bankName">{t('supplier.form.financial.bank')}</Label>
                     <Input
                       id="bankName"
                       value={formData.bankName}
@@ -516,7 +525,7 @@ export default function SupplierFormPage() {
                 <Separator />
 
                 <div className="space-y-2">
-                  <Label htmlFor="invoiceEmail">Factuur email</Label>
+                  <Label htmlFor="invoiceEmail">{t('supplier.form.financial.invoiceEmail')}</Label>
                   <Input
                     id="invoiceEmail"
                     type="email"
@@ -527,19 +536,19 @@ export default function SupplierFormPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="invoiceAddress">Factuuradres</Label>
+                  <Label htmlFor="invoiceAddress">{t('supplier.form.financial.invoiceAddress')}</Label>
                   <Input
                     id="invoiceAddress"
                     value={formData.invoiceAddress}
                     onChange={(e) => setFormData({ ...formData, invoiceAddress: e.target.value })}
-                    placeholder="Alleen invullen als dit afwijkt van het bedrijfsadres"
+                    placeholder={t('supplier.form.financial.invoiceAddressHint')}
                     disabled={isDisabled}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="invoicePostalCode">Factuur postcode</Label>
+                    <Label htmlFor="invoicePostalCode">{t('supplier.form.financial.invoicePostalCode')}</Label>
                     <Input
                       id="invoicePostalCode"
                       value={formData.invoicePostalCode}
@@ -548,7 +557,7 @@ export default function SupplierFormPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="invoiceCity">Factuur plaats</Label>
+                    <Label htmlFor="invoiceCity">{t('supplier.form.financial.invoiceCity')}</Label>
                     <Input
                       id="invoiceCity"
                       value={formData.invoiceCity}
@@ -559,19 +568,19 @@ export default function SupplierFormPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="invoiceCurrency">Valuta</Label>
+                  <Label htmlFor="invoiceCurrency">{t('supplier.form.financial.currency')}</Label>
                   <Select
                     value={formData.invoiceCurrency}
                     onValueChange={(value) => setFormData({ ...formData, invoiceCurrency: value })}
                     disabled={isDisabled}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecteer valuta" />
+                      <SelectValue placeholder={t('supplier.form.financial.currencyPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="EUR">EUR - Euro</SelectItem>
-                      <SelectItem value="USD">USD - US Dollar</SelectItem>
-                      <SelectItem value="GBP">GBP - Brits Pond</SelectItem>
+                      <SelectItem value="EUR">{t('supplier.form.financial.currencyEUR')}</SelectItem>
+                      <SelectItem value="USD">{t('supplier.form.financial.currencyUSD')}</SelectItem>
+                      <SelectItem value="GBP">{t('supplier.form.financial.currencyGBP')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -583,15 +592,15 @@ export default function SupplierFormPage() {
           {showDirector && (
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Bestuurder</CardTitle>
+                <CardTitle>{t('supplier.form.director.title')}</CardTitle>
                 <CardDescription>
-                  Gegevens van de bestuurder (verplicht voor leveranciers buiten de EU)
+                  {t('supplier.form.director.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="directorName">Naam bestuurder *</Label>
+                    <Label htmlFor="directorName">{t('supplier.form.director.name')}</Label>
                     <Input
                       id="directorName"
                       value={formData.directorName}
@@ -601,7 +610,7 @@ export default function SupplierFormPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="directorFunction">Functie *</Label>
+                    <Label htmlFor="directorFunction">{t('supplier.form.director.function')}</Label>
                     <Input
                       id="directorFunction"
                       value={formData.directorFunction}
@@ -614,7 +623,7 @@ export default function SupplierFormPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="directorDateOfBirth">Geboortedatum *</Label>
+                    <Label htmlFor="directorDateOfBirth">{t('supplier.form.director.dob')}</Label>
                     <Input
                       id="directorDateOfBirth"
                       type="date"
@@ -625,7 +634,7 @@ export default function SupplierFormPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="directorPassportNumber">Paspoortnummer *</Label>
+                    <Label htmlFor="directorPassportNumber">{t('supplier.form.director.passport')}</Label>
                     <Input
                       id="directorPassportNumber"
                       value={formData.directorPassportNumber}
@@ -643,15 +652,15 @@ export default function SupplierFormPage() {
           {showAuction && (
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Veilinggegevens</CardTitle>
+                <CardTitle>{t('supplier.form.auction.title')}</CardTitle>
                 <CardDescription>
-                  Gegevens voor de veiling
+                  {t('supplier.form.auction.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="auctionNumberRFH">Aanvoernummer RFH</Label>
+                    <Label htmlFor="auctionNumberRFH">{t('supplier.form.auction.auctionNumberRFH')}</Label>
                     <Input
                       id="auctionNumberRFH"
                       value={formData.auctionNumberRFH}
@@ -660,7 +669,7 @@ export default function SupplierFormPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="salesSheetEmail">Salessheet email</Label>
+                    <Label htmlFor="salesSheetEmail">{t('supplier.form.auction.salesSheetEmail')}</Label>
                     <Input
                       id="salesSheetEmail"
                       type="email"
@@ -680,11 +689,11 @@ export default function SupplierFormPage() {
                     }
                     disabled={isDisabled}
                   />
-                  <Label htmlFor="mandateRFH">Mandaat RFH</Label>
+                  <Label htmlFor="mandateRFH">{t('supplier.form.auction.mandateRFH')}</Label>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="apiKeyFloriday">API key Floriday</Label>
+                  <Label htmlFor="apiKeyFloriday">{t('supplier.form.auction.apiKeyFloriday')}</Label>
                   <Input
                     id="apiKeyFloriday"
                     value={formData.apiKeyFloriday}
@@ -699,12 +708,12 @@ export default function SupplierFormPage() {
           {/* Documents */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Documenten</CardTitle>
-              <CardDescription>Upload de gevraagde documenten</CardDescription>
+              <CardTitle>{t('supplier.form.documents.title')}</CardTitle>
+              <CardDescription>{t('supplier.form.documents.description')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="kvk">KvK uittreksel</Label>
+                <Label htmlFor="kvk">{t('supplier.form.documents.kvk')}</Label>
                 <Input
                   id="kvk"
                   type="file"
@@ -712,11 +721,11 @@ export default function SupplierFormPage() {
                   onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
                   disabled={isDisabled}
                 />
-                <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+                <p className="text-xs text-gray-500">{t('supplier.form.fileHint')}</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="passport">Paspoort / ID</Label>
+                <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
                 <Input
                   id="passport"
                   type="file"
@@ -724,12 +733,12 @@ export default function SupplierFormPage() {
                   onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
                   disabled={isDisabled}
                 />
-                <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+                <p className="text-xs text-gray-500">{t('supplier.form.fileHint')}</p>
               </div>
 
               {showBank && (
                 <div className="space-y-2">
-                  <Label htmlFor="bankDetails">Screenshot bankgegevens</Label>
+                  <Label htmlFor="bankDetails">{t('supplier.form.documents.bank')}</Label>
                   <Input
                     id="bankDetails"
                     type="file"
@@ -737,7 +746,7 @@ export default function SupplierFormPage() {
                     onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
                     disabled={isDisabled}
                   />
-                  <p className="text-xs text-gray-500">PDF, JPG of PNG (max 10MB)</p>
+                  <p className="text-xs text-gray-500">{t('supplier.form.fileHint')}</p>
                 </div>
               )}
             </CardContent>
@@ -757,10 +766,10 @@ export default function SupplierFormPage() {
               disabled={isDisabled}
               className="flex-1"
             >
-              {isSaving ? 'Bezig met opslaan...' : 'Opslaan en later verder'}
+              {isSaving ? t('supplier.form.saving') : t('supplier.form.saveLater')}
             </Button>
             <Button type="submit" disabled={isDisabled} className="flex-1">
-              {isSubmitting ? 'Bezig met verzenden...' : 'Definitief versturen'}
+              {isSubmitting ? t('supplier.form.submittingForm') : t('supplier.form.submit')}
             </Button>
           </div>
         </form>

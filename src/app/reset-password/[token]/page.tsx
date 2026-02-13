@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
+import { useLanguage } from '@/lib/i18n-context'
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage()
   const router = useRouter()
   const params = useParams()
   const token = params.token as string
@@ -26,12 +28,12 @@ export default function ResetPasswordPage() {
     setError('')
 
     if (password.length < 6) {
-      setError('Wachtwoord moet minimaal 6 tekens bevatten')
+      setError(t('auth.resetPassword.errorMinLength'))
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Wachtwoorden komen niet overeen')
+      setError(t('auth.resetPassword.errorMismatch'))
       return
     }
 
@@ -47,7 +49,7 @@ export default function ResetPasswordPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Er is een fout opgetreden')
+        setError(data.error || t('auth.resetPassword.errorGeneric'))
         return
       }
 
@@ -56,7 +58,7 @@ export default function ResetPasswordPage() {
         router.push('/login')
       }, 3000)
     } catch {
-      setError('Er is een fout opgetreden')
+      setError(t('auth.resetPassword.errorGeneric'))
     } finally {
       setIsLoading(false)
     }
@@ -71,12 +73,12 @@ export default function ResetPasswordPage() {
               <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">
-              Wachtwoord gewijzigd
+              {t('auth.resetPassword.success')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Alert>
-              Uw wachtwoord is succesvol gewijzigd. U wordt doorgestuurd naar de loginpagina...
+              {t('auth.resetPassword.successMessage')}
             </Alert>
           </CardContent>
         </Card>
@@ -92,10 +94,10 @@ export default function ResetPasswordPage() {
             <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            Nieuw wachtwoord instellen
+            {t('auth.resetPassword.title')}
           </CardTitle>
           <CardDescription className="text-center">
-            Kies een nieuw wachtwoord voor uw account
+            {t('auth.resetPassword.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -107,11 +109,11 @@ export default function ResetPasswordPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="password">Nieuw wachtwoord</Label>
+              <Label htmlFor="password">{t('auth.resetPassword.password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Minimaal 6 tekens"
+                placeholder={t('auth.resetPassword.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -120,11 +122,11 @@ export default function ResetPasswordPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Bevestig wachtwoord</Label>
+              <Label htmlFor="confirmPassword">{t('auth.resetPassword.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Herhaal uw wachtwoord"
+                placeholder={t('auth.resetPassword.confirmPlaceholder')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -133,13 +135,13 @@ export default function ResetPasswordPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Bezig...' : 'Wachtwoord opslaan'}
+              {isLoading ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submit')}
             </Button>
           </form>
 
           <div className="mt-4 text-center">
             <Link href="/login" className="text-sm text-blue-600 hover:underline">
-              Terug naar inloggen
+              {t('auth.forgotPassword.backToLogin')}
             </Link>
           </div>
         </CardContent>

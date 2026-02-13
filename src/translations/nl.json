@@ -1,0 +1,627 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "confirm": "Bevestigen",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "loading": "Laden...",
+    "submitting": "Bezig...",
+    "error": "Er is een fout opgetreden",
+    "success": "Actie succesvol uitgevoerd",
+    "yes": "Ja",
+    "no": "Nee",
+    "back": "Terug",
+    "next": "Volgende",
+    "close": "Sluiten",
+    "search": "Zoeken",
+    "filter": "Filteren",
+    "export": "Exporteren",
+    "download": "Downloaden",
+    "upload": "Uploaden",
+    "view": "Bekijken",
+    "days": "dagen",
+    "or": "of",
+    "of": "van",
+    "all": "Alle"
+  },
+  "demo": {
+    "banner": "Test / Demo omgeving",
+    "label": "Demo:",
+    "accounts": "Demo accounts:",
+    "emailLabel": "Mail:",
+    "emailResend": "Demomail",
+    "emailEthereal": "Ethereal",
+    "changeRoles": "Rollen wijzigen",
+    "viewEmails": "Om verstuurde mails te kunnen zien:",
+    "emailCreds": "Email: dxubywxljl4roleu@ethereal.email",
+    "passwordCreds": "Wachtwoord: SbGwM71ZJusSNSQWr3"
+  },
+  "auth": {
+    "login": {
+      "title": "Supplier Onboarding",
+      "subtitle": "Log in om door te gaan",
+      "email": "Email",
+      "emailPlaceholder": "uw@email.nl",
+      "password": "Wachtwoord",
+      "submit": "Inloggen",
+      "submitting": "Bezig...",
+      "forgotPassword": "Wachtwoord vergeten?",
+      "ssoButton": "Inloggen met Microsoft",
+      "ssoLoading": "Bezig...",
+      "errorGeneric": "Er is een fout opgetreden",
+      "ssoErrors": {
+        "AccountNotFound": "Account niet gevonden. Neem contact op met uw beheerder.",
+        "NoEmail": "Geen e-mailadres ontvangen van Microsoft.",
+        "OAuthCallback": "Er is een fout opgetreden bij het inloggen met Microsoft. Probeer het opnieuw.",
+        "OAuthSignin": "Er is een fout opgetreden bij het inloggen met Microsoft. Probeer het opnieuw."
+      }
+    },
+    "activate": {
+      "title": "Account activeren",
+      "subtitle": "Stel uw wachtwoord in om uw account te activeren",
+      "password": "Wachtwoord",
+      "passwordPlaceholder": "Minimaal 6 tekens",
+      "confirmPassword": "Bevestig wachtwoord",
+      "confirmPlaceholder": "Herhaal uw wachtwoord",
+      "submit": "Account activeren",
+      "submitting": "Bezig...",
+      "success": "Account geactiveerd",
+      "successMessage": "Uw account is succesvol geactiveerd. U wordt doorgestuurd naar de loginpagina...",
+      "errorMinLength": "Wachtwoord moet minimaal 6 tekens bevatten",
+      "errorMismatch": "Wachtwoorden komen niet overeen",
+      "errorGeneric": "Er is een fout opgetreden"
+    },
+    "forgotPassword": {
+      "title": "Wachtwoord vergeten",
+      "subtitle": "Vul uw emailadres in om een resetlink te ontvangen",
+      "email": "Email",
+      "emailPlaceholder": "uw@email.nl",
+      "submit": "Resetlink versturen",
+      "submitting": "Bezig...",
+      "success": "Email verstuurd",
+      "successMessage": "Als het emailadres bij ons bekend is, ontvangt u een email met instructies om uw wachtwoord te herstellen.",
+      "backToLogin": "Terug naar inloggen"
+    },
+    "resetPassword": {
+      "title": "Nieuw wachtwoord instellen",
+      "subtitle": "Kies een nieuw wachtwoord voor uw account",
+      "password": "Nieuw wachtwoord",
+      "passwordPlaceholder": "Minimaal 6 tekens",
+      "confirmPassword": "Bevestig wachtwoord",
+      "confirmPlaceholder": "Herhaal uw wachtwoord",
+      "submit": "Wachtwoord opslaan",
+      "submitting": "Bezig...",
+      "success": "Wachtwoord gewijzigd",
+      "successMessage": "Uw wachtwoord is succesvol gewijzigd. U wordt doorgestuurd naar de loginpagina...",
+      "errorMinLength": "Wachtwoord moet minimaal 6 tekens bevatten",
+      "errorMismatch": "Wachtwoorden komen niet overeen",
+      "errorGeneric": "Er is een fout opgetreden"
+    },
+    "logout": "Uitloggen"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "newRequest": "Nieuwe aanvraag",
+    "userManagement": "Gebruikersbeheer"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Overzicht van alle leveranciersaanvragen",
+    "stats": {
+      "total": "Totaal",
+      "waitingSupplier": "Wachten op leverancier",
+      "waitingPurchaser": "Wachten op inkoper",
+      "waitingFinance": "Wachten op finance",
+      "waitingERP": "Wachten op ERP",
+      "completed": "Compleet",
+      "cancelled": "Afgebroken"
+    }
+  },
+  "requests": {
+    "table": {
+      "searchPlaceholder": "Zoeken op naam of email...",
+      "filterStatus": "Filter op status",
+      "allStatuses": "Alle statussen",
+      "filterType": "Filter op type",
+      "allTypes": "Alle typen",
+      "export": "Export naar Excel",
+      "supplier": "Leverancier",
+      "type": "Type",
+      "email": "Email",
+      "status": "Status",
+      "createdBy": "Aangemaakt door",
+      "date": "Datum",
+      "actions": "Acties",
+      "view": "Bekijken",
+      "empty": "Geen aanvragen gevonden",
+      "count": "{filtered} van {total} aanvragen",
+      "sheetName": "Aanvragen"
+    },
+    "new": {
+      "title": "Nieuwe leveranciersaanvraag",
+      "description": "Vul de basisgegevens in om een nieuwe leverancier te onboarden",
+      "supplierType": "Type leverancier *",
+      "typeKoop": "Standaard leverancier",
+      "typeXKweker": "Veilingleverancier",
+      "typeOKweker": "Directe kweker",
+      "supplierName": "Naam leverancier *",
+      "supplierNamePlaceholder": "Bedrijfsnaam leverancier",
+      "supplierEmail": "Email leverancier *",
+      "supplierEmailPlaceholder": "contact@leverancier.com",
+      "region": "Regio *",
+      "regionPlaceholder": "Selecteer regio",
+      "supplierLanguage": "Taal voor leverancier",
+      "supplierLanguageDescription": "De taal waarin het formulier en emails naar de leverancier worden verstuurd",
+      "languageNl": "Nederlands",
+      "languageEn": "Engels",
+      "howToContinue": "Hoe wilt u doorgaan?",
+      "sendInvitation": "Uitnodiging versturen",
+      "sendInvitationDescription": "De leverancier ontvangt een email om zelf het formulier in te vullen",
+      "selfFill": "Zelf invullen",
+      "selfFillDescription": "U vult de gegevens namens de leverancier in",
+      "cancel": "Annuleren",
+      "submit": "Aanmaken en invullen",
+      "submitting": "Bezig...",
+      "noPermission": "U heeft geen toestemming om nieuwe aanvragen aan te maken.",
+      "successSelfFill": "Aanvraag aangemaakt. U kunt nu de gegevens invullen.",
+      "successInvitation": "Uitnodiging verstuurd naar de leverancier.",
+      "successTitle": "Uitnodiging verstuurd",
+      "successEtherealTitle": "De uitnodiging is aangemaakt en de email is verstuurd via de test SMTP-server.",
+      "successEtherealLabel": "Test SMTP-server (Ethereal)",
+      "successEtherealDescription": "In demo-modus worden emails verstuurd via Ethereal, een test SMTP-server. Klik op de onderstaande link om het verstuurde bericht te bekijken:",
+      "goToRequest": "Naar aanvraag",
+      "goToDashboard": "Naar dashboard"
+    },
+    "edit": {
+      "notFound": "Aanvraag niet gevonden",
+      "noPermission": "U heeft geen toestemming om deze aanvraag te bewerken.",
+      "cannotEdit": "Deze aanvraag kan niet worden bewerkt in de huidige status.",
+      "supplierType": "Type leverancier",
+      "supplierTypeDescription": "Wijzig het type leverancier indien nodig",
+      "supplierDetails": "Leveranciersgegevens",
+      "supplierDetailsDescription": "Vul de gegevens van de leverancier in",
+      "supplierDetailsFilledDescription": "Gegevens ingevuld door leverancier - controleer en pas aan indien nodig",
+      "companyName": "Bedrijfsnaam",
+      "contactName": "Contactpersoon",
+      "address": "Adres",
+      "postalCode": "Postcode",
+      "city": "Plaats",
+      "country": "Land",
+      "glnNumber": "GLN-nummer",
+      "phone": "Telefoon",
+      "contactEmail": "Contact email",
+      "kvkNumber": "KvK nummer",
+      "vatNumber": "BTW nummer",
+      "iban": "IBAN",
+      "bank": "Bank",
+      "financialDetails": "Financiële gegevens",
+      "invoiceEmail": "Factuur email",
+      "invoiceAddress": "Factuuradres",
+      "invoicePostalCode": "Factuur postcode",
+      "invoiceCity": "Factuur plaats",
+      "currency": "Valuta",
+      "director": "Bestuurder (ROW)",
+      "directorName": "Naam bestuurder",
+      "directorFunction": "Functie",
+      "directorDob": "Geboortedatum",
+      "directorPassport": "Paspoortnummer",
+      "auctionDetails": "Veilinggegevens",
+      "auctionNumberRFH": "Aanvoernummer RFH",
+      "salesSheetEmail": "Salessheet email",
+      "mandateRFH": "Mandaat RFH",
+      "apiKeyFloriday": "API key Floriday",
+      "documents": "Documenten",
+      "documentsDescription": "Upload KvK uittreksel, paspoort / ID en screenshot bankgegevens",
+      "existingFiles": "Bestaande bestanden",
+      "kvkUpload": "KvK uittreksel (vervangen)",
+      "passportUpload": "Paspoort / ID (vervangen)",
+      "bankUpload": "Screenshot bankgegevens (vervangen)",
+      "fileHint": "PDF, JPG of PNG (max 10MB)",
+      "purchaserDetails": "Aanvullende gegevens (Inkoper)",
+      "purchaserDetailsDescription": "Deze gegevens moeten door de inkoper worden toegevoegd",
+      "incoterm": "Incoterm *",
+      "incotermPlaceholder": "Selecteer incoterm",
+      "paymentTerm": "Betalingstermijn",
+      "paymentTermPlaceholder": "Selecteer termijn",
+      "paymentTerm14": "14 dagen",
+      "paymentTerm30": "30 dagen",
+      "accountManager": "Accountmanager",
+      "submitToFinance": "Opslaan en doorsturen naar Finance",
+      "successSubmit": "Gegevens opgeslagen en doorgestuurd naar Finance"
+    },
+    "detail": {
+      "tabs": {
+        "details": "Gegevens",
+        "audit": "Audit Trail"
+      },
+      "basic": {
+        "title": "Basisgegevens",
+        "description": "Gegevens ingevuld bij aanmaken aanvraag",
+        "supplier": "Leverancier",
+        "email": "Email",
+        "type": "Type",
+        "region": "Regio",
+        "createdBy": "Aangemaakt door",
+        "createdAt": "Aangemaakt op",
+        "fillMethod": "Invulmethode",
+        "byPurchaser": "Door inkoper",
+        "bySupplier": "Door leverancier"
+      },
+      "supplier": {
+        "title": "Leveranciersgegevens",
+        "submittedAt": "Ingevuld op",
+        "filledByPurchaser": "Ingevuld door inkoper",
+        "companyName": "Bedrijfsnaam",
+        "address": "Adres",
+        "postalCode": "Postcode",
+        "city": "Plaats",
+        "country": "Land",
+        "glnNumber": "GLN-nummer",
+        "contactName": "Contactpersoon",
+        "phone": "Telefoon",
+        "contactEmail": "Contact email"
+      },
+      "financial": {
+        "title": "Financiële gegevens",
+        "kvkNumber": "KvK nummer",
+        "vatNumber": "BTW nummer",
+        "iban": "IBAN",
+        "bank": "Bank",
+        "invoiceEmail": "Factuur email",
+        "invoiceAddress": "Factuuradres",
+        "invoicePostalCode": "Factuur postcode",
+        "invoiceCity": "Factuur plaats",
+        "currency": "Valuta"
+      },
+      "director": {
+        "title": "Bestuurder",
+        "name": "Naam",
+        "function": "Functie",
+        "dob": "Geboortedatum",
+        "passport": "Paspoortnummer"
+      },
+      "auction": {
+        "title": "Veilinggegevens",
+        "auctionNumberRFH": "Aanvoernummer RFH",
+        "salesSheetEmail": "Salessheet email",
+        "mandateRFH": "Mandaat RFH",
+        "apiKeyFloriday": "API key Floriday"
+      },
+      "files": {
+        "title": "Bestanden"
+      },
+      "purchaser": {
+        "title": "Aanvullende gegevens (Inkoper)",
+        "description": "Gegevens toegevoegd door inkoper",
+        "incoterm": "Incoterm",
+        "paymentTerm": "Betalingstermijn",
+        "accountManager": "Accountmanager",
+        "commission": "Commissiepercentage"
+      },
+      "finance": {
+        "title": "Finance",
+        "creditorAssigned": "Crediteurnummer toegewezen",
+        "creditorNumber": "Crediteurnummer",
+        "waitingForCreditor": "Wachten op crediteurnummer",
+        "enterCreditor": "Voer crediteurnummer in",
+        "waiting": "Wachten op Finance"
+      },
+      "erp": {
+        "title": "ERP",
+        "kbtAssigned": "KBT-code toegewezen",
+        "kbtCode": "KBT-code",
+        "waitingForKbt": "Wachten op KBT-code",
+        "enterKbt": "Voer KBT-code in",
+        "waiting": "Wachten op ERP"
+      },
+      "audit": {
+        "title": "Audit Trail",
+        "description": "Overzicht van alle acties op deze aanvraag",
+        "empty": "Geen acties gevonden",
+        "by": "Door",
+        "system": "Systeem"
+      },
+      "actions": {
+        "edit": "Bewerken",
+        "resendInvitation": "Uitnodiging opnieuw versturen",
+        "sendReminder": "Herinnering versturen",
+        "cancel": "Afbreken",
+        "cancelTitle": "Aanvraag afbreken?",
+        "cancelMessage": "Weet u zeker dat u deze aanvraag wilt afbreken? U kunt de aanvraag later weer heropenen.",
+        "reopen": "Heropenen"
+      }
+    }
+  },
+  "supplier": {
+    "form": {
+      "title": "Supplier Onboarding",
+      "welcome": "Welkom {supplierName}. Vul hieronder uw bedrijfsgegevens in.",
+      "savedNotice": "U heeft eerder gegevens opgeslagen op {date}. Uw eerdere gegevens zijn hieronder ingevuld.",
+      "invalidLink": "Link ongeldig",
+      "invalidLinkTitle": "Ongeldige of verlopen link",
+      "invalidLinkMessage": "De link is mogelijk verlopen of al gebruikt. Neem contact op met uw contactpersoon voor een nieuwe link.",
+      "thankYou": "Bedankt!",
+      "thankYouMessage": "Uw gegevens zijn succesvol verstuurd. U ontvangt binnenkort een bevestigingsmail.",
+      "closeWindow": "U kunt dit venster sluiten.",
+      "savedTitle": "Gegevens opgeslagen",
+      "savedMessage": "Uw gegevens zijn tussentijds opgeslagen. U ontvangt een email met een link om het formulier later af te ronden.",
+      "company": {
+        "title": "Bedrijfsgegevens",
+        "description": "Vul de gegevens van uw bedrijf in",
+        "companyName": "Bedrijfsnaam *",
+        "address": "Adres *",
+        "postalCode": "Postcode *",
+        "city": "Plaats *",
+        "country": "Land *",
+        "glnNumber": "GLN-nummer",
+        "contactName": "Contactpersoon *",
+        "phone": "Telefoon *",
+        "contactEmail": "Contact email *"
+      },
+      "financial": {
+        "title": "Financiële gegevens",
+        "description": "Vul uw bedrijfs- en bankgegevens in",
+        "kvkNumber": "KvK nummer *",
+        "vatNumber": "BTW nummer *",
+        "iban": "IBAN *",
+        "bank": "Bank *",
+        "invoiceEmail": "Factuur email",
+        "invoiceAddress": "Factuuradres",
+        "invoiceAddressHint": "Alleen invullen als dit afwijkt van het bedrijfsadres",
+        "invoicePostalCode": "Factuur postcode",
+        "invoiceCity": "Factuur plaats",
+        "currency": "Valuta",
+        "currencyPlaceholder": "Selecteer valuta",
+        "currencyEUR": "EUR - Euro",
+        "currencyUSD": "USD - US Dollar",
+        "currencyGBP": "GBP - Brits Pond"
+      },
+      "director": {
+        "title": "Bestuurder",
+        "description": "Gegevens van de bestuurder (verplicht voor leveranciers buiten de EU)",
+        "name": "Naam bestuurder *",
+        "function": "Functie *",
+        "dob": "Geboortedatum *",
+        "passport": "Paspoortnummer *"
+      },
+      "auction": {
+        "title": "Veilinggegevens",
+        "description": "Gegevens voor de veiling",
+        "auctionNumberRFH": "Aanvoernummer RFH",
+        "salesSheetEmail": "Salessheet email",
+        "mandateRFH": "Mandaat RFH",
+        "apiKeyFloriday": "API key Floriday"
+      },
+      "documents": {
+        "title": "Documenten",
+        "description": "Upload de gevraagde documenten",
+        "kvk": "KvK uittreksel",
+        "passport": "Paspoort / ID",
+        "bank": "Screenshot bankgegevens"
+      },
+      "saveLater": "Opslaan en later verder",
+      "saving": "Bezig met opslaan...",
+      "submit": "Definitief versturen",
+      "submittingForm": "Bezig met verzenden...",
+      "fileHint": "PDF, JPG of PNG (max 10MB)",
+      "savedSuccess": "Gegevens opgeslagen! U ontvangt een email met de link om later verder te gaan.",
+      "submitSuccess": "Gegevens succesvol verstuurd!"
+    }
+  },
+  "admin": {
+    "users": {
+      "title": "Gebruikersbeheer",
+      "description": "Beheer gebruikers en hun rechten",
+      "table": {
+        "searchPlaceholder": "Zoeken op naam of email...",
+        "filterRole": "Filter op rol",
+        "allRoles": "Alle rollen",
+        "filterStatus": "Filter op status",
+        "allStatuses": "Alle statussen",
+        "active": "Actief",
+        "inactive": "Inactief",
+        "newUser": "Nieuwe gebruiker",
+        "name": "Naam",
+        "email": "Email",
+        "role": "Rol",
+        "status": "Status",
+        "receiveEmail": "Email ontvangen",
+        "actions": "Acties",
+        "empty": "Geen gebruikers gevonden",
+        "statusActive": "Actief",
+        "statusInactive": "Inactief",
+        "statusNotActivated": "Niet geactiveerd",
+        "edit": "Bewerken",
+        "deactivate": "Deactiveren",
+        "activate": "Activeren",
+        "resendActivation": "Activatiemail",
+        "count": "{filtered} van {total} gebruikers",
+        "confirmDeactivate": "Gebruiker deactiveren",
+        "confirmActivate": "Gebruiker activeren",
+        "confirmDeactivateMessage": "Weet u zeker dat u {name} ({email}) wilt deactiveren? De gebruiker kan dan niet meer inloggen.",
+        "confirmActivateMessage": "Weet u zeker dat u {name} ({email}) wilt activeren?"
+      },
+      "form": {
+        "editTitle": "Gebruiker bewerken",
+        "newTitle": "Nieuwe gebruiker",
+        "editDescription": "Wijzig de gegevens van de gebruiker.",
+        "newDescription": "Maak een nieuwe gebruiker aan. De gebruiker ontvangt een activatiemail.",
+        "firstName": "Voornaam *",
+        "middleName": "Tussenvoegsel",
+        "middleNamePlaceholder": "bijv. van, de",
+        "lastName": "Achternaam *",
+        "email": "Email *",
+        "emailPlaceholder": "gebruiker@bedrijf.nl",
+        "emailReadonly": "Email kan niet gewijzigd worden",
+        "roles": "Rollen * (minimaal 1)",
+        "receiveEmails": "Notificatie-emails ontvangen",
+        "preferredLanguage": "Voorkeurstaal",
+        "cancel": "Annuleren",
+        "submitting": "Bezig...",
+        "save": "Opslaan",
+        "create": "Aanmaken"
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Pagina niet gevonden",
+      "message": "De pagina die u zoekt bestaat niet of is verplaatst.",
+      "backToDashboard": "Terug naar dashboard"
+    },
+    "error": {
+      "title": "Er ging iets mis",
+      "message": "Er is een onverwachte fout opgetreden. Probeer het opnieuw of ga terug naar het dashboard.",
+      "retry": "Opnieuw proberen",
+      "backToDashboard": "Naar dashboard"
+    },
+    "globalError": {
+      "title": "Er ging iets mis",
+      "message": "Er is een kritieke fout opgetreden. Probeer de pagina opnieuw te laden.",
+      "retry": "Opnieuw proberen",
+      "backToHome": "Naar startpagina"
+    }
+  },
+  "emails": {
+    "autoGenerated": "Dit is een automatisch gegenereerde email. Niet op reageren.",
+    "linkValid": "Deze link is geldig tot {date}.",
+    "contactInfo": "Als u vragen heeft, neem dan contact op met uw contactpersoon.",
+    "invitation": {
+      "subject": "Uitnodiging voor Supplier Onboarding",
+      "title": "Welkom bij Supplier Onboarding",
+      "greeting": "Beste {supplierName},",
+      "body": "U bent uitgenodigd om uw bedrijfsgegevens in te vullen voor onze leveranciersregistratie.",
+      "cta": "Klik op de onderstaande knop om te beginnen:",
+      "button": "Formulier invullen"
+    },
+    "supplierSave": {
+      "subject": "Uw gegevens zijn opgeslagen - Supplier Onboarding",
+      "title": "Gegevens opgeslagen",
+      "greeting": "Beste {supplierName},",
+      "body": "Uw gegevens zijn tussentijds opgeslagen. U kunt het formulier op elk moment verder invullen via onderstaande link:",
+      "button": "Formulier verder invullen"
+    },
+    "supplierConfirmation": {
+      "subject": "Bevestiging: Uw gegevens zijn ontvangen",
+      "title": "Gegevens ontvangen",
+      "greeting": "Beste {supplierName},",
+      "body": "Bedankt voor het invullen van uw gegevens. Wij hebben uw aanvraag ontvangen.",
+      "body2": "Uw gegevens worden nu beoordeeld door onze inkoopafdeling. U ontvangt bericht wanneer het proces is afgerond."
+    },
+    "purchaserNotification": {
+      "subject": "Leverancier {supplierName} heeft gegevens ingevuld",
+      "title": "Actie vereist: Leveranciergegevens reviewen",
+      "greeting": "Beste {purchaserName},",
+      "body": "Leverancier <strong>{supplierName}</strong> heeft zijn gegevens ingevuld.",
+      "cta": "Klik op de onderstaande knop om de gegevens te bekijken en aan te vullen:",
+      "button": "Gegevens bekijken"
+    },
+    "financeNotification": {
+      "subject": "Leverancier {supplierName} - Wachten op Finance",
+      "title": "Actie vereist: Crediteurnummer invullen",
+      "greeting": "Beste Finance team,",
+      "body": "De leveranciersaanvraag voor <strong>{supplierName}</strong> is klaar voor verwerking.",
+      "cta": "Vul het crediteurnummer in om door te gaan:",
+      "button": "Aanvraag verwerken"
+    },
+    "erpNotification": {
+      "subject": "Leverancier {supplierName} - Wachten op ERP",
+      "title": "Actie vereist: KBT-code invullen",
+      "greeting": "Beste ERP team,",
+      "body": "De leveranciersaanvraag voor <strong>{supplierName}</strong> is klaar voor verwerking in ERP.",
+      "cta": "Vul de KBT-code in om de registratie af te ronden:",
+      "button": "Aanvraag verwerken"
+    },
+    "completion": {
+      "subject": "Leverancier {supplierName} - Registratie voltooid",
+      "title": "Leveranciersregistratie voltooid",
+      "greetingFinance": "Beste Finance team,",
+      "greetingPurchaser": "Beste {purchaserName},",
+      "bodyFinance": "De leveranciersregistratie voor <strong>{supplierName}</strong> is volledig afgerond.",
+      "bodyPurchaser": "De leveranciersregistratie voor <strong>{supplierName}</strong> die u heeft aangevraagd, is volledig afgerond.",
+      "creditorNumber": "Crediteurnummer:",
+      "kbtCode": "KBT-code:",
+      "button": "Aanvraag bekijken"
+    },
+    "activation": {
+      "subject": "Activeer uw account - Supplier Onboarding",
+      "title": "Welkom bij Supplier Onboarding",
+      "greeting": "Beste {firstName},",
+      "body": "Er is een account voor u aangemaakt. Klik op de onderstaande knop om uw wachtwoord in te stellen en uw account te activeren:",
+      "button": "Account activeren",
+      "ignoreNotice": "Als u deze aanvraag niet herkent, kunt u deze email negeren."
+    },
+    "passwordReset": {
+      "subject": "Wachtwoord herstellen - Supplier Onboarding",
+      "title": "Wachtwoord herstellen",
+      "greeting": "Beste {firstName},",
+      "body": "Er is een verzoek ingediend om uw wachtwoord te herstellen. Klik op de onderstaande knop om een nieuw wachtwoord in te stellen:",
+      "button": "Nieuw wachtwoord instellen",
+      "linkValid": "Deze link is geldig tot {time} (1 uur).",
+      "ignoreNotice": "Als u dit verzoek niet heeft gedaan, kunt u deze email negeren."
+    },
+    "reminder": {
+      "subject": "Herinnering: Leveranciersaanvraag {supplierName}",
+      "title": "Herinnering",
+      "greeting": "Beste {recipientName},",
+      "body": "Dit is een herinnering voor de leveranciersaanvraag van <strong>{supplierName}</strong>.",
+      "cta": "Er is actie van u vereist om het proces voort te zetten.",
+      "buttonSupplier": "Formulier invullen",
+      "buttonInternal": "Aanvraag bekijken"
+    },
+    "demoMode": {
+      "label": "DEMO MODUS",
+      "originalRecipient": "Oorspronkelijke ontvanger:",
+      "provider": "E-mailprovider:"
+    }
+  },
+  "enums": {
+    "status": {
+      "INVITATION_SENT": "Wachten op leverancier",
+      "AWAITING_PURCHASER": "Wachten op inkoper",
+      "AWAITING_FINANCE": "Wachten op finance",
+      "AWAITING_ERP": "Wachten op ERP",
+      "COMPLETED": "Compleet",
+      "CANCELLED": "Afgebroken"
+    },
+    "role": {
+      "ADMIN": "Admin",
+      "INKOPER": "Inkoper",
+      "FINANCE": "Finance",
+      "ERP": "ERP"
+    },
+    "region": {
+      "EU": "EU",
+      "ROW": "Rest of World"
+    },
+    "supplierType": {
+      "KOOP": "Koop",
+      "X_KWEKER": "X-kweker",
+      "O_KWEKER": "O-kweker"
+    },
+    "fileType": {
+      "KVK": "KvK Uittreksel",
+      "PASSPORT": "Paspoort",
+      "BANK_DETAILS": "Screenshot bankgegevens",
+      "OTHER": "Overig"
+    },
+    "auditAction": {
+      "REQUEST_CREATED": "Aanvraag aangemaakt",
+      "INVITATION_SENT": "Uitnodiging verstuurd",
+      "INVITATION_RESENT": "Uitnodiging opnieuw verstuurd",
+      "SUPPLIER_SUBMITTED": "Leverancier heeft gegevens ingevuld",
+      "PURCHASER_SUBMITTED": "Inkoper heeft gegevens doorgestuurd",
+      "FINANCE_SUBMITTED": "Finance heeft crediteurnummer toegewezen",
+      "ERP_SUBMITTED": "ERP heeft KBT-code toegewezen",
+      "STATUS_CHANGED": "Status gewijzigd",
+      "REQUEST_CANCELLED": "Aanvraag afgebroken",
+      "REQUEST_REOPENED": "Aanvraag heropend",
+      "FILE_UPLOADED": "Bestand geüpload",
+      "FILE_DELETED": "Bestand verwijderd",
+      "REMINDER_SENT": "Herinnering verstuurd",
+      "SUPPLIER_SAVED": "Leverancier heeft gegevens opgeslagen",
+      "SUPPLIER_TYPE_CHANGED": "Leverancierstype gewijzigd"
+    }
+  }
+}

@@ -1,13 +1,25 @@
 'use client'
 
+import { getTranslation, Language } from '@/lib/i18n'
+
+function getLanguageFromCookie(): Language {
+  if (typeof document === 'undefined') return 'nl'
+  const match = document.cookie.match(/(^| )NEXT_LOCALE=([^;]+)/)
+  const lang = match ? match[2] : 'nl'
+  return lang === 'en' ? 'en' : 'nl'
+}
+
 export default function GlobalError({
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const lang = getLanguageFromCookie()
+  const t = (key: string) => getTranslation(lang, key)
+
   return (
-    <html lang="nl">
+    <html lang={lang}>
       <body>
         <div style={{
           minHeight: '100vh',
@@ -23,10 +35,10 @@ export default function GlobalError({
               500
             </h1>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937', marginBottom: '0.5rem' }}>
-              Er ging iets mis
+              {t('errors.globalError.title')}
             </h2>
             <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-              Er is een kritieke fout opgetreden. Probeer de pagina opnieuw te laden.
+              {t('errors.globalError.message')}
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <button
@@ -42,7 +54,7 @@ export default function GlobalError({
                   cursor: 'pointer',
                 }}
               >
-                Opnieuw proberen
+                {t('errors.globalError.retry')}
               </button>
               <a
                 href="/"
@@ -57,7 +69,7 @@ export default function GlobalError({
                   textDecoration: 'none',
                 }}
               >
-                Naar startpagina
+                {t('errors.globalError.backToHome')}
               </a>
             </div>
           </div>

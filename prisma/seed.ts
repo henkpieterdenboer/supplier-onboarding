@@ -17,6 +17,7 @@ async function main() {
       roles: ['ADMIN'],
       passwordHash,
       isActive: true,
+      preferredLanguage: 'nl',
     },
     {
       email: 'inkoper@demo.nl',
@@ -25,6 +26,7 @@ async function main() {
       roles: ['INKOPER'],
       passwordHash,
       isActive: true,
+      preferredLanguage: 'nl',
     },
     {
       email: 'finance@demo.nl',
@@ -33,6 +35,7 @@ async function main() {
       roles: ['FINANCE'],
       passwordHash,
       isActive: true,
+      preferredLanguage: 'nl',
     },
     {
       email: 'erp@demo.nl',
@@ -41,6 +44,7 @@ async function main() {
       roles: ['ERP'],
       passwordHash,
       isActive: true,
+      preferredLanguage: 'nl',
     },
   ]
 
@@ -75,6 +79,7 @@ async function main() {
         supplierEmail: 'koop@demo-supplier.nl',
         region: 'EU',
         supplierType: 'KOOP',
+        supplierLanguage: 'nl',
         selfFill: true,
         status: 'AWAITING_PURCHASER',
         createdById: inkoper.id,
@@ -84,6 +89,7 @@ async function main() {
         supplierEmail: 'xkweker@demo-supplier.nl',
         region: 'EU',
         supplierType: 'X_KWEKER',
+        supplierLanguage: 'nl',
         selfFill: true,
         status: 'AWAITING_PURCHASER',
         createdById: inkoper.id,
@@ -93,6 +99,7 @@ async function main() {
         supplierEmail: 'okweker@demo-supplier.nl',
         region: 'ROW',
         supplierType: 'O_KWEKER',
+        supplierLanguage: 'nl',
         selfFill: true,
         status: 'AWAITING_PURCHASER',
         createdById: inkoper.id,
