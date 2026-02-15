@@ -23,6 +23,7 @@ export async function GET() {
         middleName: true,
         lastName: true,
         roles: true,
+        labels: true,
         isActive: true,
         receiveEmails: true,
         preferredLanguage: true,
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { email, firstName, middleName, lastName, roles, receiveEmails, preferredLanguage } = body
+    const { email, firstName, middleName, lastName, roles, labels, receiveEmails, preferredLanguage } = body
 
     if (!email || !firstName || !lastName || !roles || !Array.isArray(roles) || roles.length === 0) {
       return NextResponse.json(
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
         middleName: middleName || null,
         lastName,
         roles,
+        labels: Array.isArray(labels) && labels.length > 0 ? labels : ['COLORIGINZ'],
         receiveEmails: receiveEmails ?? true,
         preferredLanguage: preferredLanguage || 'nl',
         isActive: false,

@@ -226,6 +226,7 @@ export async function PATCH(
           invitationToken,
           expiresAt: invitationExpiresAt,
           language: (existingRequest.supplierLanguage || 'nl') as Language,
+          label: existingRequest.label,
         })
 
         await prisma.auditLog.create({
@@ -290,6 +291,7 @@ export async function PATCH(
             role: reminderRole,
             invitationToken: existingRequest.invitationToken || undefined,
             language: recipient.language,
+            label: existingRequest.label,
           })
         }
 
@@ -426,6 +428,7 @@ export async function PATCH(
             supplierName: existingRequest.supplierName,
             requestId: id,
             language: (fu.preferredLanguage || 'nl') as Language,
+            label: existingRequest.label,
           })
         }
 
@@ -491,6 +494,7 @@ export async function PATCH(
             supplierName: existingRequest.supplierName,
             requestId: id,
             language: (eu.preferredLanguage || 'nl') as Language,
+            label: existingRequest.label,
           })
         }
 
@@ -559,6 +563,7 @@ export async function PATCH(
           creditorNumber: existingRequest.creditorNumber || '',
           kbtCode: data.kbtCode as string,
           language: (existingRequest.createdBy.preferredLanguage || 'nl') as Language,
+          label: existingRequest.label,
         })
 
         return NextResponse.json(updated)

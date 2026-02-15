@@ -1,0 +1,29 @@
+import { Label } from '@/types'
+
+interface LabelConfig {
+  name: string
+  shortName: string
+  logoPath: string
+}
+
+export const labelConfigs: Record<Label, LabelConfig> = {
+  COLORIGINZ: {
+    name: 'Coloriginz',
+    shortName: 'COL',
+    logoPath: '/logo.png',
+  },
+  PFC: {
+    name: 'Parfum Flower Company',
+    shortName: 'PFC',
+    logoPath: '/pfc.png',
+  },
+}
+
+export function getLabelConfig(label: string): LabelConfig {
+  return labelConfigs[label as Label] ?? labelConfigs.COLORIGINZ
+}
+
+export function getLabelLogoUrl(label: string): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
+  return `${appUrl}${getLabelConfig(label).logoPath}`
+}

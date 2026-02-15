@@ -125,8 +125,11 @@
       "allStatuses": "Alle statussen",
       "filterType": "Filter op type",
       "allTypes": "Alle typen",
+      "filterLabel": "Filter op label",
+      "allLabels": "Alle labels",
       "export": "Export naar Excel",
       "supplier": "Leverancier",
+      "label": "Label",
       "type": "Type",
       "email": "Email",
       "status": "Status",
@@ -141,6 +144,8 @@
     "new": {
       "title": "Nieuwe leveranciersaanvraag",
       "description": "Vul de basisgegevens in om een nieuwe leverancier te onboarden",
+      "label": "Label *",
+      "labelDescription": "Het merk waarvoor deze aanvraag wordt aangemaakt",
       "supplierType": "Type leverancier *",
       "typeKoop": "Standaard leverancier",
       "typeXKweker": "Veilingleverancier",
@@ -241,6 +246,7 @@
         "supplier": "Leverancier",
         "email": "Email",
         "type": "Type",
+        "label": "Label",
         "region": "Regio",
         "createdBy": "Aangemaakt door",
         "createdAt": "Aangemaakt op",
@@ -425,6 +431,7 @@
         "name": "Naam",
         "email": "Email",
         "role": "Rol",
+        "labels": "Labels",
         "status": "Status",
         "receiveEmail": "Email ontvangen",
         "actions": "Acties",
@@ -455,6 +462,7 @@
         "emailPlaceholder": "gebruiker@bedrijf.nl",
         "emailReadonly": "Email kan niet gewijzigd worden",
         "roles": "Rollen * (minimaal 1)",
+        "labels": "Labels (merken)",
         "receiveEmails": "Notificatie-emails ontvangen",
         "preferredLanguage": "Voorkeurstaal",
         "cancel": "Annuleren",
@@ -599,6 +607,10 @@
       "KOOP": "Koop",
       "X_KWEKER": "X-kweker",
       "O_KWEKER": "O-kweker"
+    },
+    "label": {
+      "COLORIGINZ": "Coloriginz",
+      "PFC": "Parfum Flower Company"
     },
     "fileType": {
       "KVK": "KvK Uittreksel",

@@ -19,6 +19,7 @@ export default async function AdminUsersPage() {
       middleName: true,
       lastName: true,
       roles: true,
+      labels: true,
       isActive: true,
       receiveEmails: true,
       preferredLanguage: true,

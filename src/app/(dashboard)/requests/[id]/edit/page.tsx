@@ -46,6 +46,7 @@ interface Request {
   region: string
   selfFill: boolean
   supplierType: string
+  label: string
   companyName: string | null
   address: string | null
   postalCode: string | null
@@ -285,6 +286,16 @@ export default function EditRequestPage() {
     <div className="max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && <Alert variant="destructive">{error}</Alert>}
+
+        {/* Label (read-only) */}
+        {request.label && (
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>{t('requests.detail.basic.label')}:</span>
+            <Badge className={request.label === 'PFC' ? 'bg-pink-100 text-pink-800' : 'bg-indigo-100 text-indigo-800'}>
+              {t(`enums.label.${request.label}`)}
+            </Badge>
+          </div>
+        )}
 
         {/* Type Selector */}
         <Card>

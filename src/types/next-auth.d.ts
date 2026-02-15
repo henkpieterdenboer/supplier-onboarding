@@ -7,6 +7,7 @@ declare module 'next-auth' {
     email: string
     name: string
     roles: string[]
+    labels: string[]
     language: string
   }
 
@@ -14,6 +15,7 @@ declare module 'next-auth' {
     user: User & {
       id: string
       roles: string[]
+      labels: string[]
       language: string
     }
   }
@@ -23,6 +25,7 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string
     roles: string[]
+    labels: string[]
     language: string
   }
 }

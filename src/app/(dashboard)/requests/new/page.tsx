@@ -31,6 +31,8 @@ export default function NewRequestPage() {
   const [error, setError] = useState('')
   const [successData, setSuccessData] = useState<{ id: string; emailPreviewUrl: string | null } | null>(null)
 
+  const userLabels = session?.user?.labels || ['COLORIGINZ']
+
   const [formData, setFormData] = useState({
     supplierName: '',
     supplierEmail: '',
@@ -38,6 +40,7 @@ export default function NewRequestPage() {
     selfFill: false,
     supplierType: 'KOOP' as SupplierType,
     supplierLanguage: 'nl',
+    label: userLabels[0] || 'COLORIGINZ',
   })
 
   // Only INKOPER can create new requests
@@ -144,6 +147,30 @@ export default function NewRequestPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <Alert variant="destructive">{error}</Alert>
+            )}
+
+            {/* Label Selector (only if user has multiple labels) */}
+            {userLabels.length > 1 && (
+              <div className="space-y-2">
+                <Label>{t('requests.new.label')}</Label>
+                <p className="text-sm text-muted-foreground">{t('requests.new.labelDescription')}</p>
+                <Select
+                  value={formData.label}
+                  onValueChange={(value) => setFormData({ ...formData, label: value })}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userLabels.map((label) => (
+                      <SelectItem key={label} value={label}>
+                        {t(`enums.label.${label}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
 
             {/* Supplier Type Selector */}

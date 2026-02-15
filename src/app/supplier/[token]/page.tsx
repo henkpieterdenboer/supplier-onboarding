@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { LOGO_BASE64 } from '@/lib/logo-base64'
+import { getLabelConfig } from '@/lib/label-config'
 import {
   showFinancialSection,
   showDirectorSection,
@@ -34,6 +34,7 @@ interface Request {
   supplierEmail: string
   region: string
   supplierType: string
+  label: string
   supplierLanguage: string
   supplierSavedAt: string | null
   companyName: string | null
@@ -264,6 +265,8 @@ export default function SupplierFormPage() {
     )
   }
 
+  const labelConfig = getLabelConfig(request?.label || 'COLORIGINZ')
+
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -271,8 +274,8 @@ export default function SupplierFormPage() {
           <CardHeader>
             <div className="flex justify-center mb-4">
               <img
-                src={LOGO_BASE64}
-                alt="Coloriginz Logo"
+                src={labelConfig.logoPath}
+                alt={`${labelConfig.name} Logo`}
                 className="h-16 w-auto"
               />
             </div>
@@ -296,8 +299,8 @@ export default function SupplierFormPage() {
           <CardHeader>
             <div className="flex justify-center mb-4">
               <img
-                src={LOGO_BASE64}
-                alt="Coloriginz Logo"
+                src={labelConfig.logoPath}
+                alt={`${labelConfig.name} Logo`}
                 className="h-16 w-auto"
               />
             </div>
@@ -325,6 +328,13 @@ export default function SupplierFormPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
+          <div className="flex justify-center mb-4">
+            <img
+              src={labelConfig.logoPath}
+              alt={`${labelConfig.name} Logo`}
+              className="h-16 w-auto"
+            />
+          </div>
           <h1 className="text-2xl font-bold text-gray-900">{t('supplier.form.title')}</h1>
           <p className="text-gray-500 mt-2">
             {t('supplier.form.welcome', { supplierName: request?.supplierName || '' })}

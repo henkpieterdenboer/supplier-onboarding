@@ -84,6 +84,7 @@ export async function PATCH(
     if (data.middleName !== undefined) updateData.middleName = data.middleName || null
     if (data.lastName !== undefined) updateData.lastName = data.lastName
     if (data.roles !== undefined) updateData.roles = data.roles
+    if (data.labels !== undefined) updateData.labels = data.labels
     if (data.receiveEmails !== undefined) updateData.receiveEmails = data.receiveEmails
     if (data.preferredLanguage !== undefined) updateData.preferredLanguage = data.preferredLanguage
 
@@ -97,6 +98,7 @@ export async function PATCH(
         middleName: true,
         lastName: true,
         roles: true,
+        labels: true,
         isActive: true,
         receiveEmails: true,
         preferredLanguage: true,

@@ -39,6 +39,7 @@ interface User {
   middleName: string | null
   lastName: string
   roles: string[]
+  labels: string[]
   isActive: boolean
   receiveEmails: boolean
   preferredLanguage?: string
@@ -219,6 +220,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
               <TableHead>{t('admin.users.table.name')}</TableHead>
               <TableHead>{t('admin.users.table.email')}</TableHead>
               <TableHead>{t('admin.users.table.role')}</TableHead>
+              <TableHead>{t('admin.users.table.labels')}</TableHead>
               <TableHead>{t('admin.users.table.status')}</TableHead>
               <TableHead>{t('admin.users.table.receiveEmail')}</TableHead>
               <TableHead>{t('admin.users.table.actions')}</TableHead>
@@ -227,7 +229,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   {t('admin.users.table.empty')}
                 </TableCell>
               </TableRow>
@@ -243,6 +245,15 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                       {user.roles.map((role) => (
                         <Badge key={role} variant="outline">
                           {t(`enums.role.${role}`)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {(user.labels || []).map((label) => (
+                        <Badge key={label} variant="outline">
+                          {t(`enums.label.${label}`)}
                         </Badge>
                       ))}
                     </div>

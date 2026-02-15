@@ -61,10 +61,10 @@ async function upsertDemoUsers(db: PrismaClient) {
   const passwordHash = await bcrypt.hash('demo123', 10)
 
   const users = [
-    { email: 'admin@demo.nl', firstName: 'Demo', lastName: 'Admin', roles: ['ADMIN'], passwordHash, isActive: true },
-    { email: 'inkoper@demo.nl', firstName: 'Demo', lastName: 'Inkoper', roles: ['INKOPER'], passwordHash, isActive: true },
-    { email: 'finance@demo.nl', firstName: 'Demo', lastName: 'Finance', roles: ['FINANCE'], passwordHash, isActive: true },
-    { email: 'erp@demo.nl', firstName: 'Demo', lastName: 'ERP', roles: ['ERP'], passwordHash, isActive: true },
+    { email: 'admin@demo.nl', firstName: 'Demo', lastName: 'Admin', roles: ['ADMIN'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
+    { email: 'inkoper@demo.nl', firstName: 'Demo', lastName: 'Inkoper', roles: ['INKOPER'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
+    { email: 'finance@demo.nl', firstName: 'Demo', lastName: 'Finance', roles: ['FINANCE'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
+    { email: 'erp@demo.nl', firstName: 'Demo', lastName: 'ERP', roles: ['ERP'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
   ]
 
   for (const user of users) {
@@ -74,6 +74,7 @@ async function upsertDemoUsers(db: PrismaClient) {
         firstName: user.firstName,
         lastName: user.lastName,
         roles: user.roles,
+        labels: user.labels,
         passwordHash: user.passwordHash,
         isActive: user.isActive,
       },
@@ -136,6 +137,7 @@ async function main() {
         middleName: u.middleName,
         lastName: u.lastName,
         roles: u.roles,
+        labels: u.labels,
         passwordHash: u.passwordHash,
         isActive: u.isActive,
         receiveEmails: u.receiveEmails,
@@ -162,6 +164,7 @@ async function main() {
         region: r.region,
         selfFill: r.selfFill,
         supplierType: r.supplierType,
+        label: r.label,
         supplierLanguage: r.supplierLanguage,
         companyName: r.companyName,
         address: r.address,

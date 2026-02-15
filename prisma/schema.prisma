@@ -21,6 +21,7 @@ model User {
   middleName   String?
   lastName     String
   roles        String[] @default([])
+  labels       String[] @default(["COLORIGINZ"])
   passwordHash String?
   isActive     Boolean  @default(false)
   receiveEmails     Boolean @default(true)
@@ -58,6 +59,7 @@ model SupplierRequest {
   region        String  // EU or ROW
   selfFill      Boolean @default(false) // If true, Inkoper fills form themselves
   supplierType     String  @default("KOOP") // KOOP, X_KWEKER, O_KWEKER
+  label            String  @default("COLORIGINZ") // COLORIGINZ, PFC
   supplierLanguage String  @default("nl")  // Language for supplier form/emails
 
   // Supplier/Inkoper fills these fields

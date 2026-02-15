@@ -125,8 +125,11 @@
       "allStatuses": "All statuses",
       "filterType": "Filter by type",
       "allTypes": "All types",
+      "filterLabel": "Filter by label",
+      "allLabels": "All labels",
       "export": "Export to Excel",
       "supplier": "Supplier",
+      "label": "Label",
       "type": "Type",
       "email": "Email",
       "status": "Status",
@@ -141,6 +144,8 @@
     "new": {
       "title": "New supplier request",
       "description": "Enter the basic details to onboard a new supplier",
+      "label": "Label *",
+      "labelDescription": "The brand for which this request is being created",
       "supplierType": "Supplier type *",
       "typeKoop": "Standard supplier",
       "typeXKweker": "X-grower",
@@ -241,6 +246,7 @@
         "supplier": "Supplier",
         "email": "Email",
         "type": "Type",
+        "label": "Label",
         "region": "Region",
         "createdBy": "Created by",
         "createdAt": "Created on",
@@ -425,6 +431,7 @@
         "name": "Name",
         "email": "Email",
         "role": "Role",
+        "labels": "Labels",
         "status": "Status",
         "receiveEmail": "Receive email",
         "actions": "Actions",
@@ -455,6 +462,7 @@
         "emailPlaceholder": "user@company.com",
         "emailReadonly": "Email cannot be changed",
         "roles": "Roles * (minimum 1)",
+        "labels": "Labels (brands)",
         "receiveEmails": "Receive notification emails",
         "preferredLanguage": "Preferred language",
         "cancel": "Cancel",
@@ -599,6 +607,10 @@
       "KOOP": "Standard",
       "X_KWEKER": "X-grower",
       "O_KWEKER": "O-grower"
+    },
+    "label": {
+      "COLORIGINZ": "Coloriginz",
+      "PFC": "Parfum Flower Company"
     },
     "fileType": {
       "KVK": "Chamber of Commerce extract",

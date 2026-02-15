@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendInvitationEmail } from '@/lib/email'
-import { AuditAction, Status, SupplierType } from '@/types'
+import { AuditAction, Label, Status, SupplierType } from '@/types'
 import type { Language } from '@/lib/i18n'
 
 // POST /api/requests - Create new request
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { supplierName, supplierEmail, region, selfFill, supplierType, supplierLanguage } = body
+    const { supplierName, supplierEmail, region, selfFill, supplierType, supplierLanguage, label } = body
 
     // Validate required fields
     if (!supplierName || !supplierEmail || !region) {
@@ -38,6 +38,13 @@ export async function POST(request: NextRequest) {
     const validTypes = Object.values(SupplierType)
     const resolvedType = supplierType && validTypes.includes(supplierType) ? supplierType : 'KOOP'
     const resolvedLanguage = supplierLanguage === 'en' ? 'en' : 'nl'
+
+    // Validate label (must be in user's labels)
+    const validLabels = Object.values(Label)
+    const userLabels = session.user.labels || ['COLORIGINZ']
+    const resolvedLabel = label && validLabels.includes(label) && userLabels.includes(label)
+      ? label
+      : userLabels[0] || 'COLORIGINZ'
 
     // Check for duplicate supplier (name or email)
     const existing = await prisma.supplierRequest.findFirst({
@@ -74,6 +81,7 @@ export async function POST(request: NextRequest) {
         selfFill,
         supplierType: resolvedType,
         supplierLanguage: resolvedLanguage,
+        label: resolvedLabel,
         status,
         createdById: session.user.id,
         invitationToken: selfFill ? null : invitationToken,
@@ -94,6 +102,7 @@ export async function POST(request: NextRequest) {
           region,
           selfFill,
           supplierType: resolvedType,
+          label: resolvedLabel,
         }),
       },
     })
@@ -107,6 +116,7 @@ export async function POST(request: NextRequest) {
         invitationToken,
         expiresAt: invitationExpiresAt,
         language: resolvedLanguage as Language,
+        label: resolvedLabel,
       })
 
       // Create audit log for invitation sent
@@ -142,7 +152,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Filter by user's labels
+    const userLabels = session.user.labels || ['COLORIGINZ']
     const requests = await prisma.supplierRequest.findMany({
+      where: {
+        label: { in: userLabels },
+      },
       include: {
         createdBy: {
           select: {

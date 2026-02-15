@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
 import { useLanguage } from '@/lib/i18n-context'
+import { Label as LabelEnum } from '@/types'
 
 interface User {
   id: string
@@ -29,6 +30,7 @@ interface User {
   middleName: string | null
   lastName: string
   roles: string[]
+  labels: string[]
   receiveEmails: boolean
   preferredLanguage?: string
 }
@@ -48,6 +50,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
   const [lastName, setLastName] = useState(user?.lastName || '')
   const [email, setEmail] = useState(user?.email || '')
   const [roles, setRoles] = useState<string[]>(user?.roles || ['INKOPER'])
+  const [labels, setLabels] = useState<string[]>(user?.labels || ['COLORIGINZ'])
   const [receiveEmails, setReceiveEmails] = useState(user?.receiveEmails ?? true)
   const [preferredLanguage, setPreferredLanguage] = useState(user?.preferredLanguage || 'nl')
   const [error, setError] = useState('')
@@ -61,6 +64,17 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
         return prev.filter((r) => r !== role)
       }
       return [...prev, role]
+    })
+  }
+
+  const handleLabelToggle = (label: string) => {
+    setLabels((prev) => {
+      if (prev.includes(label)) {
+        // Don't allow removing the last label
+        if (prev.length <= 1) return prev
+        return prev.filter((l) => l !== label)
+      }
+      return [...prev, label]
     })
   }
 
@@ -78,6 +92,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
         middleName: middleName || null,
         lastName,
         roles,
+        labels,
         receiveEmails,
         preferredLanguage,
       }
@@ -191,6 +206,27 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
                   />
                   <Label htmlFor={`role-${role}`} className="font-normal">
                     {t(`enums.role.${role}`)}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t('admin.users.form.labels')}</Label>
+            <div className="space-y-2">
+              {Object.values(LabelEnum).map((label) => (
+                <div key={label} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`label-${label}`}
+                    checked={labels.includes(label)}
+                    onChange={() => handleLabelToggle(label)}
+                    disabled={isLoading}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <Label htmlFor={`label-${label}`} className="font-normal">
+                    {t(`enums.label.${label}`)}
                   </Label>
                 </div>
               ))}

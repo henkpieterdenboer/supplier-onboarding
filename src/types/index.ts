@@ -104,3 +104,15 @@ export const RoleLabels: Record<string, string> = {
   FINANCE: 'Finance',
   ERP: 'ERP',
 }
+
+// Label enum (merken/brands)
+export const Label = {
+  COLORIGINZ: 'COLORIGINZ',
+  PFC: 'PFC',
+} as const
+export type Label = (typeof Label)[keyof typeof Label]
+
+export const LabelLabels: Record<Label, string> = {
+  COLORIGINZ: 'Coloriginz',
+  PFC: 'Parfum Flower Company',
+}

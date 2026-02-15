@@ -1,14 +1,19 @@
 import nodemailer from 'nodemailer'
 import { cookies } from 'next/headers'
-import { LOGO_BASE64 } from './logo-base64'
 import { getTranslation, Language, formatDate, formatTime } from './i18n'
+import { getLabelConfig } from './label-config'
 
-// Email header with logo
-const EMAIL_HEADER = `
-  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px;">
-    <img src="${LOGO_BASE64}" alt="Logo" style="height: 60px; width: auto;" />
-  </div>
-`
+// Generate email header with label-specific logo
+function getEmailHeader(label?: string): string {
+  const config = getLabelConfig(label || 'COLORIGINZ')
+  const appUrl = process.env.APP_URL || 'http://localhost:3000'
+  const logoUrl = `${appUrl}${config.logoPath}`
+  return `
+    <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px;">
+      <img src="${logoUrl}" alt="${config.name}" style="height: 60px; width: auto;" />
+    </div>
+  `
+}
 
 // In demo mode, all emails go to a single address
 const DEMO_EMAIL = process.env.DEMO_EMAIL
@@ -82,9 +87,10 @@ interface SendEmailOptions {
   subject: string
   html: string
   language?: Language
+  label?: string
 }
 
-async function sendEmail({ to, subject, html, language }: SendEmailOptions): Promise<string | null> {
+async function sendEmail({ to, subject, html, language, label }: SendEmailOptions): Promise<string | null> {
   try {
     const provider = await getEmailProvider()
     const transporter = createTransporter(provider)
@@ -99,7 +105,7 @@ async function sendEmail({ to, subject, html, language }: SendEmailOptions): Pro
           ${getTranslation(language || 'nl', 'emails.demoMode.originalRecipient')} <strong>${to}</strong><br>
           ${getTranslation(language || 'nl', 'emails.demoMode.provider')} <strong>${providerLabel}</strong>
         </div>
-        ${EMAIL_HEADER}
+        ${getEmailHeader(label)}
         ${html}
       `
 
@@ -119,7 +125,7 @@ async function sendEmail({ to, subject, html, language }: SendEmailOptions): Pro
       return null
     } else {
       // Production: send to actual recipient
-      const fullHtml = `${EMAIL_HEADER}${html}`
+      const fullHtml = `${getEmailHeader(label)}${html}`
 
       await transporter.sendMail({
         from: fromAddress,
@@ -144,6 +150,7 @@ interface InvitationEmailOptions {
   invitationToken: string
   expiresAt: Date
   language: Language
+  label?: string
 }
 
 export async function sendInvitationEmail({
@@ -152,6 +159,7 @@ export async function sendInvitationEmail({
   invitationToken,
   expiresAt,
   language,
+  label,
 }: InvitationEmailOptions): Promise<string | null> {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const invitationUrl = `${APP_URL}/supplier/${invitationToken}`
@@ -160,6 +168,7 @@ export async function sendInvitationEmail({
     to,
     subject: t('emails.invitation.subject'),
     language,
+    label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.invitation.title')}</h2>
@@ -190,6 +199,7 @@ interface SupplierSaveEmailOptions {
   invitationToken: string
   expiresAt: Date
   language: Language
+  label?: string
 }
 
 export async function sendSupplierSaveEmail({
@@ -198,6 +208,7 @@ export async function sendSupplierSaveEmail({
   invitationToken,
   expiresAt,
   language,
+  label,
 }: SupplierSaveEmailOptions): Promise<string | null> {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const invitationUrl = `${APP_URL}/supplier/${invitationToken}`
@@ -206,6 +217,7 @@ export async function sendSupplierSaveEmail({
     to,
     subject: t('emails.supplierSave.subject'),
     language,
+    label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.supplierSave.title')}</h2>
@@ -233,12 +245,14 @@ interface ConfirmationEmailOptions {
   to: string
   supplierName: string
   language: Language
+  label?: string
 }
 
 export async function sendSupplierConfirmationEmail({
   to,
   supplierName,
   language,
+  label,
 }: ConfirmationEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
 
@@ -246,6 +260,7 @@ export async function sendSupplierConfirmationEmail({
     to,
     subject: t('emails.supplierConfirmation.subject'),
     language,
+    label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.supplierConfirmation.title')}</h2>
@@ -268,6 +283,7 @@ interface PurchaserNotificationEmailOptions {
   supplierName: string
   requestId: string
   language: Language
+  label?: string
 }
 
 export async function sendPurchaserNotificationEmail({
@@ -276,6 +292,7 @@ export async function sendPurchaserNotificationEmail({
   supplierName,
   requestId,
   language,
+  label,
 }: PurchaserNotificationEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const requestUrl = `${APP_URL}/requests/${requestId}/edit`
@@ -284,6 +301,7 @@ export async function sendPurchaserNotificationEmail({
     to,
     subject: t('emails.purchaserNotification.subject', { supplierName }),
     language,
+    label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.purchaserNotification.title')}</h2>
@@ -311,6 +329,7 @@ interface FinanceNotificationEmailOptions {
   supplierName: string
   requestId: string
   language: Language
+  label?: string
 }
 
 export async function sendFinanceNotificationEmail({
@@ -318,6 +337,7 @@ export async function sendFinanceNotificationEmail({
   supplierName,
   requestId,
   language,
+  label,
 }: FinanceNotificationEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const requestUrl = `${APP_URL}/requests/${requestId}`
@@ -326,6 +346,7 @@ export async function sendFinanceNotificationEmail({
     to,
     subject: t('emails.financeNotification.subject', { supplierName }),
     language,
+    label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.financeNotification.title')}</h2>
@@ -353,6 +374,7 @@ interface ERPNotificationEmailOptions {
   supplierName: string
   requestId: string
   language: Language
+  label?: string
 }
 
 export async function sendERPNotificationEmail({
@@ -360,6 +382,7 @@ export async function sendERPNotificationEmail({
   supplierName,
   requestId,
   language,
+  label,
 }: ERPNotificationEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const requestUrl = `${APP_URL}/requests/${requestId}`
@@ -368,6 +391,7 @@ export async function sendERPNotificationEmail({
     to,
     subject: t('emails.erpNotification.subject', { supplierName }),
     language,
+    label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.erpNotification.title')}</h2>
@@ -399,6 +423,7 @@ interface CompletionEmailOptions {
   creditorNumber: string
   kbtCode: string
   language: Language
+  label?: string
 }
 
 export async function sendCompletionEmail({
@@ -410,6 +435,7 @@ export async function sendCompletionEmail({
   creditorNumber,
   kbtCode,
   language,
+  label,
 }: CompletionEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const requestUrl = `${APP_URL}/requests/${requestId}`
@@ -420,6 +446,7 @@ export async function sendCompletionEmail({
       to: financeEmail,
       subject: t('emails.completion.subject', { supplierName }),
       language,
+      label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.completion.title')}</h2>
@@ -450,6 +477,7 @@ export async function sendCompletionEmail({
       to: purchaserEmail,
       subject: t('emails.completion.subject', { supplierName }),
       language,
+      label,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">${t('emails.completion.title')}</h2>
@@ -574,6 +602,7 @@ interface ReminderEmailOptions {
   role: 'supplier' | 'purchaser' | 'finance' | 'erp'
   invitationToken?: string
   language: Language
+  label?: string
 }
 
 export async function sendReminderEmail({
@@ -584,6 +613,7 @@ export async function sendReminderEmail({
   role,
   invitationToken,
   language,
+  label,
 }: ReminderEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   let actionUrl: string
@@ -601,6 +631,7 @@ export async function sendReminderEmail({
     to,
     subject: t('emails.reminder.subject', { supplierName }),
     language,
+    label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">${t('emails.reminder.title')}</h2>

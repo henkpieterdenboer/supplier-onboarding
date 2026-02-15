@@ -12,6 +12,7 @@ interface Request {
   status: string
   region: string
   supplierType: string
+  label: string
   createdAt: Date
   createdBy: {
     firstName: string
@@ -35,9 +36,10 @@ interface DashboardContentProps {
   stats: Stats
   requests: Request[]
   userRoles: string[]
+  userLabels: string[]
 }
 
-export function DashboardContent({ stats, requests, userRoles }: DashboardContentProps) {
+export function DashboardContent({ stats, requests, userRoles, userLabels }: DashboardContentProps) {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const { t } = useLanguage()
 
@@ -57,6 +59,7 @@ export function DashboardContent({ stats, requests, userRoles }: DashboardConten
       <RequestsTable
         requests={requests}
         userRoles={userRoles}
+        userLabels={userLabels}
         externalStatusFilter={selectedStatus}
       />
 

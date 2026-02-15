@@ -58,6 +58,7 @@ interface Request {
   region: string
   selfFill: boolean
   supplierType: string
+  label: string
   createdAt: Date
   updatedAt: Date
   createdBy: {
@@ -138,6 +139,11 @@ const supplierTypeColors: Record<string, string> = {
   O_KWEKER: 'bg-cyan-100 text-cyan-800',
 }
 
+const labelColors: Record<string, string> = {
+  COLORIGINZ: 'bg-indigo-100 text-indigo-800',
+  PFC: 'bg-pink-100 text-pink-800',
+}
+
 export function RequestDetail({ request, userRoles, userId }: RequestDetailProps) {
   const router = useRouter()
   const { t, language } = useLanguage()
@@ -204,6 +210,9 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
             </Badge>
             <Badge className={supplierTypeColors[supplierType] || 'bg-gray-100 text-gray-800'}>
               {t(`enums.supplierType.${supplierType}`)}
+            </Badge>
+            <Badge className={labelColors[request.label] || 'bg-gray-100 text-gray-800'}>
+              {t(`enums.label.${request.label}`)}
             </Badge>
           </div>
           <p className="text-gray-500">{request.supplierEmail}</p>
@@ -299,6 +308,12 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                 <Label className="text-gray-500">{t('requests.detail.basic.type')}</Label>
                 <p className="font-medium">
                   {t(`enums.supplierType.${supplierType}`)}
+                </p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.label')}</Label>
+                <p className="font-medium">
+                  {t(`enums.label.${request.label}`)}
                 </p>
               </div>
               <div>

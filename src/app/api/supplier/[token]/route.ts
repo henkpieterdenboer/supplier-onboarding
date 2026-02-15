@@ -38,6 +38,7 @@ export async function GET(
         region: true,
         status: true,
         supplierType: true,
+        label: true,
         invitationExpiresAt: true,
         supplierSavedAt: true,
         companyName: true,
@@ -302,6 +303,7 @@ export async function POST(
           invitationToken: token,
           expiresAt: new Date(supplierRequest.invitationExpiresAt),
           language: (supplierRequest.supplierLanguage || 'nl') as Language,
+          label: supplierRequest.label,
         })
       }
 
@@ -343,6 +345,7 @@ export async function POST(
         to: supplierRequest.supplierEmail,
         supplierName: supplierRequest.supplierName,
         language: (supplierRequest.supplierLanguage || 'nl') as Language,
+        label: supplierRequest.label,
       })
 
       // Notify purchaser (only if they want to receive emails)
@@ -353,6 +356,7 @@ export async function POST(
           supplierName: supplierRequest.supplierName,
           requestId: supplierRequest.id,
           language: (supplierRequest.createdBy.preferredLanguage || 'nl') as Language,
+          label: supplierRequest.label,
         })
       }
 
