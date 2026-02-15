@@ -17,6 +17,15 @@ import { v4 as uuidv4 } from 'uuid'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
+
+function validateFile(file: File): string | null {
+  if (file.size > MAX_FILE_SIZE) return `File "${file.name}" exceeds 10MB limit`
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) return `File "${file.name}" has invalid type (allowed: PDF, JPG, PNG)`
+  return null
+}
+
 const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     const { put } = await import('@vercel/blob')
@@ -72,6 +81,12 @@ export async function GET(
 
     if (!supplierRequest) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 })
+    }
+
+    // Check label authorization
+    const userLabels = session.user.labels || ['COLORIGINZ']
+    if (!userLabels.includes(supplierRequest.label)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     return NextResponse.json(supplierRequest)
@@ -319,6 +334,13 @@ export async function PATCH(
           )
         }
 
+        if (existingRequest.status !== Status.AWAITING_PURCHASER) {
+          return NextResponse.json(
+            { error: 'This request is not awaiting purchaser action' },
+            { status: 400 }
+          )
+        }
+
         // Type-aware validation: incoterm only required for Koop/O-kweker
         const submitType = (data.supplierType as string) || existingRequest.supplierType || 'KOOP'
         if (requiresIncoterm(submitType) && !data.incoterm) {
@@ -333,6 +355,20 @@ export async function PATCH(
         const useVercelBlob = !!process.env.BLOB_READ_WRITE_TOKEN
 
         if (formDataObj) {
+          // Validate all files before uploading
+          const filesToValidate = [
+            formDataObj.get('kvk') as File | null,
+            formDataObj.get('passport') as File | null,
+            formDataObj.get('bankDetails') as File | null,
+          ].filter((f): f is File => f !== null && f.size > 0)
+
+          for (const file of filesToValidate) {
+            const error = validateFile(file)
+            if (error) {
+              return NextResponse.json({ error }, { status: 400 })
+            }
+          }
+
           const kvkFile = formDataObj.get('kvk') as File | null
           if (kvkFile && kvkFile.size > 0) {
             const fileName = `kvk_${Date.now()}_${kvkFile.name}`
@@ -395,10 +431,44 @@ export async function PATCH(
           })
         }
 
+        // Explicit allowlist of purchaser-editable fields
+        const purchaserData = {
+          companyName: data.companyName ?? existingRequest.companyName,
+          address: data.address ?? existingRequest.address,
+          postalCode: data.postalCode ?? existingRequest.postalCode,
+          city: data.city ?? existingRequest.city,
+          country: data.country ?? existingRequest.country,
+          contactName: data.contactName ?? existingRequest.contactName,
+          contactPhone: data.contactPhone ?? existingRequest.contactPhone,
+          contactEmail: data.contactEmail ?? existingRequest.contactEmail,
+          chamberOfCommerceNumber: data.chamberOfCommerceNumber ?? existingRequest.chamberOfCommerceNumber,
+          vatNumber: data.vatNumber ?? existingRequest.vatNumber,
+          iban: data.iban ?? existingRequest.iban,
+          bankName: data.bankName ?? existingRequest.bankName,
+          glnNumber: data.glnNumber ?? existingRequest.glnNumber,
+          invoiceEmail: data.invoiceEmail ?? existingRequest.invoiceEmail,
+          invoiceAddress: data.invoiceAddress ?? existingRequest.invoiceAddress,
+          invoicePostalCode: data.invoicePostalCode ?? existingRequest.invoicePostalCode,
+          invoiceCity: data.invoiceCity ?? existingRequest.invoiceCity,
+          invoiceCurrency: data.invoiceCurrency ?? existingRequest.invoiceCurrency,
+          directorName: data.directorName ?? existingRequest.directorName,
+          directorFunction: data.directorFunction ?? existingRequest.directorFunction,
+          directorDateOfBirth: data.directorDateOfBirth ?? existingRequest.directorDateOfBirth,
+          directorPassportNumber: data.directorPassportNumber ?? existingRequest.directorPassportNumber,
+          incoterm: data.incoterm ?? existingRequest.incoterm,
+          commissionPercentage: data.commissionPercentage ?? existingRequest.commissionPercentage,
+          paymentTerm: data.paymentTerm ?? existingRequest.paymentTerm,
+          accountManager: data.accountManager ?? existingRequest.accountManager,
+          auctionNumberRFH: data.auctionNumberRFH ?? existingRequest.auctionNumberRFH,
+          salesSheetEmail: data.salesSheetEmail ?? existingRequest.salesSheetEmail,
+          mandateRFH: data.mandateRFH ?? existingRequest.mandateRFH,
+          apiKeyFloriday: data.apiKeyFloriday ?? existingRequest.apiKeyFloriday,
+        }
+
         const updated = await prisma.supplierRequest.update({
           where: { id },
           data: {
-            ...data,
+            ...purchaserData,
             supplierType: submitType,
             status: Status.AWAITING_FINANCE,
           },
@@ -410,7 +480,6 @@ export async function PATCH(
             userId: session.user.id,
             action: AuditAction.PURCHASER_SUBMITTED,
             details: JSON.stringify({
-              ...data,
               supplierType: submitType,
               filesUploaded: filesToCreate.length,
             }),
@@ -441,6 +510,13 @@ export async function PATCH(
           return NextResponse.json(
             { error: 'Only Finance can perform this action' },
             { status: 403 }
+          )
+        }
+
+        if (existingRequest.status !== Status.AWAITING_FINANCE) {
+          return NextResponse.json(
+            { error: 'This request is not awaiting Finance action' },
+            { status: 400 }
           )
         }
 
@@ -507,6 +583,13 @@ export async function PATCH(
           return NextResponse.json(
             { error: 'Only ERP can perform this action' },
             { status: 403 }
+          )
+        }
+
+        if (existingRequest.status !== Status.AWAITING_ERP) {
+          return NextResponse.json(
+            { error: 'This request is not awaiting ERP action' },
+            { status: 400 }
           )
         }
 

@@ -51,5 +51,11 @@ export default async function RequestDetailPage({ params }: Props) {
     notFound()
   }
 
+  // Check label authorization
+  const userLabels = session.user.labels || ['COLORIGINZ']
+  if (!userLabels.includes(request.label)) {
+    notFound()
+  }
+
   return <RequestDetail request={request} userRoles={session.user.roles} userId={session.user.id} />
 }

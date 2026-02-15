@@ -11,6 +11,15 @@ import {
 import { formatUserName } from '@/lib/user-utils'
 import type { Language } from '@/lib/i18n'
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
+
+function validateFile(file: File): string | null {
+  if (file.size > MAX_FILE_SIZE) return `File "${file.name}" exceeds 10MB limit`
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) return `File "${file.name}" has invalid type (allowed: PDF, JPG, PNG)`
+  return null
+}
+
 // Dynamic import for Vercel Blob (only used in production)
 const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
   if (process.env.BLOB_READ_WRITE_TOKEN) {
@@ -167,6 +176,20 @@ export async function POST(
     // Handle file uploads
     const filesToCreate: { fileName: string; fileType: string; filePath: string }[] = []
     const useVercelBlob = !!process.env.BLOB_READ_WRITE_TOKEN
+
+    // Validate all files before uploading
+    const filesToValidate = [
+      formData.get('kvk') as File | null,
+      formData.get('passport') as File | null,
+      formData.get('bankDetails') as File | null,
+    ].filter((f): f is File => f !== null && f.size > 0)
+
+    for (const file of filesToValidate) {
+      const fileError = validateFile(file)
+      if (fileError) {
+        return NextResponse.json({ error: fileError }, { status: 400 })
+      }
+    }
 
     const kvkFile = formData.get('kvk') as File | null
     if (kvkFile) {
