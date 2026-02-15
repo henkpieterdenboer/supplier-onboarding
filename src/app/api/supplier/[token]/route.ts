@@ -11,6 +11,7 @@ import {
 import { formatUserName } from '@/lib/user-utils'
 import type { Language } from '@/lib/i18n'
 import { supplierFormSchema } from '@/lib/validations'
+import { checkVat } from '@/lib/vies'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -346,6 +347,20 @@ export async function POST(
       return NextResponse.json({ success: true, saved: true })
     } else {
       // Submit: existing behavior — status change, invalidate token
+      // VIES check for EU suppliers with vatNumber
+      if (supplierRequest.region === 'EU' && data.vatNumber) {
+        try {
+          const viesResult = await checkVat(data.vatNumber)
+          if (viesResult) {
+            updateData.vatValid = viesResult.isValid
+            updateData.vatCheckResponse = JSON.stringify(viesResult)
+            updateData.vatCheckedAt = new Date()
+          }
+        } catch {
+          // VIES failure should not block submission
+        }
+      }
+
       updateData.status = Status.AWAITING_PURCHASER
       updateData.supplierSubmittedAt = new Date()
       updateData.invitationToken = null // Invalidate token after use

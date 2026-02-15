@@ -98,6 +98,10 @@ interface Request {
   salesSheetEmail: string | null
   mandateRFH: boolean | null
   apiKeyFloriday: string | null
+  // VIES
+  vatValid: boolean | null
+  vatCheckResponse: string | null
+  vatCheckedAt: Date | null
   // Purchaser fields
   incoterm: string | null
   commissionPercentage: number | null
@@ -150,6 +154,37 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   const [isLoading, setIsLoading] = useState(false)
   const [creditorNumber, setCreditorNumber] = useState('')
   const [kbtCode, setKbtCode] = useState('')
+  const [isViesRechecking, setIsViesRechecking] = useState(false)
+  const [viesExpanded, setViesExpanded] = useState(false)
+  const [localVatValid, setLocalVatValid] = useState<boolean | null>(request.vatValid)
+  const [localVatCheckResponse, setLocalVatCheckResponse] = useState<string | null>(request.vatCheckResponse)
+  const [localVatCheckedAt, setLocalVatCheckedAt] = useState<Date | null>(request.vatCheckedAt)
+
+  const handleViesRecheck = async () => {
+    setIsViesRechecking(true)
+    try {
+      const response = await fetch(`/api/requests/${request.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'vies-recheck' }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || t('common.error'))
+      }
+
+      setLocalVatValid(result.viesResult?.isValid ?? null)
+      setLocalVatCheckResponse(result.vatCheckResponse ?? null)
+      setLocalVatCheckedAt(result.vatCheckedAt ? new Date(result.vatCheckedAt) : null)
+      toast.success(t('common.success'))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('common.error'))
+    } finally {
+      setIsViesRechecking(false)
+    }
+  }
 
   const supplierType = request.supplierType || 'KOOP'
   const region = request.region || 'EU'
@@ -408,7 +443,84 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                       </div>
                       <div>
                         <Label className="text-gray-500">{t('requests.detail.financial.vatNumber')}</Label>
-                        <p className="font-medium">{request.vatNumber || '-'}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{request.vatNumber || '-'}</p>
+                          {request.region === 'EU' && request.vatNumber && (
+                            <>
+                              {localVatValid === true && (
+                                <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                  {t('requests.detail.financial.vies.valid')}
+                                </span>
+                              )}
+                              {localVatValid === false && (
+                                <span className="inline-flex items-center gap-1 text-xs text-red-600">
+                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                  {t('requests.detail.financial.vies.invalid')}
+                                </span>
+                              )}
+                              {localVatValid === null && (
+                                <span className="text-xs text-gray-400">{t('requests.detail.financial.vies.notChecked')}</span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        {request.region === 'EU' && request.vatNumber && (
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-center gap-2">
+                              {(userRoles.includes('INKOPER') || userRoles.includes('FINANCE')) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={handleViesRecheck}
+                                  disabled={isViesRechecking}
+                                >
+                                  {isViesRechecking
+                                    ? t('requests.detail.financial.vies.rechecking')
+                                    : t('requests.detail.financial.vies.recheck')}
+                                </Button>
+                              )}
+                              {localVatCheckResponse && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setViesExpanded(!viesExpanded)}
+                                >
+                                  {t('requests.detail.financial.vies.details')} {viesExpanded ? '▲' : '▼'}
+                                </Button>
+                              )}
+                            </div>
+                            {viesExpanded && localVatCheckResponse && (() => {
+                              try {
+                                const viesData = JSON.parse(localVatCheckResponse)
+                                return (
+                                  <div className="bg-gray-50 rounded p-3 text-sm space-y-1">
+                                    {viesData.name && (
+                                      <div>
+                                        <span className="text-gray-500">{t('requests.detail.financial.vies.companyName')}:</span>{' '}
+                                        <span className="font-medium">{viesData.name}</span>
+                                      </div>
+                                    )}
+                                    {viesData.address && (
+                                      <div>
+                                        <span className="text-gray-500">{t('requests.detail.financial.vies.address')}:</span>{' '}
+                                        <span className="font-medium">{viesData.address}</span>
+                                      </div>
+                                    )}
+                                    {localVatCheckedAt && (
+                                      <div>
+                                        <span className="text-gray-500">{t('requests.detail.financial.vies.checkedAt')}:</span>{' '}
+                                        <span className="font-medium">{new Date(localVatCheckedAt).toLocaleString(getDateLocale(language))}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                              } catch {
+                                return null
+                              }
+                            })()}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <Label className="text-gray-500">{t('requests.detail.financial.iban')}</Label>

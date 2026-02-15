@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { purchaserSubmitSchema, financeSubmitSchema, erpSubmitSchema, changeTypeSchema } from '@/lib/validations'
+import { checkVat } from '@/lib/vies'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -476,10 +477,29 @@ export async function PATCH(
           apiKeyFloriday: validatedData.apiKeyFloriday ?? existingRequest.apiKeyFloriday,
         }
 
+        // VIES check for EU suppliers with vatNumber
+        let viesData: Record<string, unknown> = {}
+        const finalVatNumber = purchaserData.vatNumber || existingRequest.vatNumber
+        if (existingRequest.region === 'EU' && finalVatNumber) {
+          try {
+            const viesResult = await checkVat(finalVatNumber)
+            if (viesResult) {
+              viesData = {
+                vatValid: viesResult.isValid,
+                vatCheckResponse: JSON.stringify(viesResult),
+                vatCheckedAt: new Date(),
+              }
+            }
+          } catch {
+            // VIES failure should not block submission
+          }
+        }
+
         const updated = await prisma.supplierRequest.update({
           where: { id },
           data: {
             ...purchaserData,
+            ...viesData,
             supplierType: submitType,
             status: Status.AWAITING_FINANCE,
           },
@@ -703,6 +723,59 @@ export async function PATCH(
         })
 
         return NextResponse.json(updatedType)
+      }
+
+      case 'vies-recheck': {
+        // INKOPER or FINANCE can recheck VIES
+        if (!session.user.roles.includes('INKOPER') && !session.user.roles.includes('FINANCE')) {
+          return NextResponse.json(
+            { error: 'Only purchasers or Finance can perform this action' },
+            { status: 403 }
+          )
+        }
+
+        const vatNumber = existingRequest.vatNumber
+        if (!vatNumber) {
+          return NextResponse.json(
+            { error: 'No VAT number to check' },
+            { status: 400 }
+          )
+        }
+
+        const viesResult = await checkVat(vatNumber)
+        if (!viesResult) {
+          return NextResponse.json(
+            { error: 'VIES service is currently unavailable' },
+            { status: 503 }
+          )
+        }
+
+        const updatedVies = await prisma.supplierRequest.update({
+          where: { id },
+          data: {
+            vatValid: viesResult.isValid,
+            vatCheckResponse: JSON.stringify(viesResult),
+            vatCheckedAt: new Date(),
+          },
+        })
+
+        await prisma.auditLog.create({
+          data: {
+            requestId: id,
+            userId: session.user.id,
+            action: AuditAction.VIES_CHECKED,
+            details: JSON.stringify({
+              vatNumber,
+              isValid: viesResult.isValid,
+              name: viesResult.name,
+            }),
+          },
+        })
+
+        return NextResponse.json({
+          ...updatedVies,
+          viesResult,
+        })
       }
 
       default:

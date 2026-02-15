@@ -278,7 +278,22 @@
         "invoiceAddress": "Factuuradres",
         "invoicePostalCode": "Factuur postcode",
         "invoiceCity": "Factuur plaats",
-        "currency": "Valuta"
+        "currency": "Valuta",
+        "vies": {
+          "valid": "Geldig BTW-nummer (VIES)",
+          "invalid": "Ongeldig BTW-nummer (VIES)",
+          "notChecked": "Niet gecontroleerd",
+          "checking": "BTW-nummer controleren...",
+          "companyName": "Bedrijfsnaam (VIES)",
+          "address": "Adres (VIES)",
+          "checkedAt": "Gecontroleerd op",
+          "recheck": "Opnieuw controleren",
+          "rechecking": "Bezig met controleren...",
+          "details": "VIES Details",
+          "unavailable": "VIES niet bereikbaar, BTW-nummer kon niet gecontroleerd worden",
+          "invalidFormat": "Ongeldig formaat. Begin met een EU-landcode (bijv. NL, DE, BE).",
+          "notFoundInVies": "BTW-nummer niet gevonden in VIES"
+        }
       },
       "director": {
         "title": "Bestuurder",
@@ -381,7 +396,12 @@
         "currencyPlaceholder": "Selecteer valuta",
         "currencyEUR": "EUR - Euro",
         "currencyUSD": "USD - US Dollar",
-        "currencyGBP": "GBP - Brits Pond"
+        "currencyGBP": "GBP - Brits Pond",
+        "viesChecking": "BTW-nummer controleren...",
+        "viesValid": "Geldig BTW-nummer",
+        "viesInvalid": "BTW-nummer niet gevonden in VIES",
+        "viesUnavailable": "VIES niet bereikbaar, BTW-nummer kon niet gecontroleerd worden",
+        "viesInvalidFormat": "Ongeldig formaat. Begin met een EU-landcode (bijv. NL, DE, BE)."
       },
       "director": {
         "title": "Bestuurder",
@@ -633,7 +653,8 @@
       "FILE_DELETED": "Bestand verwijderd",
       "REMINDER_SENT": "Herinnering verstuurd",
       "SUPPLIER_SAVED": "Leverancier heeft gegevens opgeslagen",
-      "SUPPLIER_TYPE_CHANGED": "Leverancierstype gewijzigd"
+      "SUPPLIER_TYPE_CHANGED": "Leverancierstype gewijzigd",
+      "VIES_CHECKED": "VIES BTW-controle uitgevoerd"
     }
   }
 }

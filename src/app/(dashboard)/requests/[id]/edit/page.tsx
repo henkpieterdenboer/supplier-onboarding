@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
@@ -95,6 +95,64 @@ export default function EditRequestPage() {
   const [bankDetailsFile, setBankDetailsFile] = useState<File | null>(null)
 
   const [supplierType, setSupplierType] = useState<string>('KOOP')
+
+  // VIES VAT validation state
+  const [viesStatus, setViesStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'error' | 'invalid-format'>('idle')
+  const [viesResult, setViesResult] = useState<{ name: string; address: string } | null>(null)
+  const viesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const checkViesVat = useCallback(async (vatNumber: string) => {
+    if (!vatNumber || vatNumber.replace(/[\s.\-]/g, '').length < 4) {
+      setViesStatus('idle')
+      setViesResult(null)
+      return
+    }
+
+    setViesStatus('checking')
+    try {
+      const res = await fetch('/api/vies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vatNumber }),
+      })
+
+      if (res.status === 400) {
+        setViesStatus('invalid-format')
+        setViesResult(null)
+        return
+      }
+
+      if (res.status === 503) {
+        setViesStatus('error')
+        setViesResult(null)
+        return
+      }
+
+      if (!res.ok) {
+        setViesStatus('error')
+        setViesResult(null)
+        return
+      }
+
+      const data = await res.json()
+      if (data.isValid) {
+        setViesStatus('valid')
+        setViesResult({ name: data.name, address: data.address })
+      } else {
+        setViesStatus('invalid')
+        setViesResult(null)
+      }
+    } catch {
+      setViesStatus('error')
+      setViesResult(null)
+    }
+  }, [])
+
+  const handleVatChange = useCallback((value: string) => {
+    setFormData((prev) => ({ ...prev, vatNumber: value }))
+    if (viesTimerRef.current) clearTimeout(viesTimerRef.current)
+    viesTimerRef.current = setTimeout(() => checkViesVat(value), 800)
+  }, [checkViesVat])
 
   const [formData, setFormData] = useState({
     // Supplier data
@@ -447,12 +505,46 @@ export default function EditRequestPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vatNumber">{t('requests.edit.vatNumber')}</Label>
-                    <Input
-                      id="vatNumber"
-                      value={formData.vatNumber}
-                      onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
-                      disabled={isSaving}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="vatNumber"
+                        value={formData.vatNumber}
+                        onChange={(e) => handleVatChange(e.target.value)}
+                        disabled={isSaving}
+                      />
+                      {region === 'EU' && viesStatus === 'checking' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        </div>
+                      )}
+                      {region === 'EU' && viesStatus === 'valid' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                      )}
+                      {region === 'EU' && viesStatus === 'invalid' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-600">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </div>
+                      )}
+                      {region === 'EU' && viesStatus === 'error' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                        </div>
+                      )}
+                    </div>
+                    {region === 'EU' && viesStatus === 'valid' && viesResult && (
+                      <p className="text-xs text-green-600">{t('supplier.form.financial.viesValid')}: {viesResult.name}</p>
+                    )}
+                    {region === 'EU' && viesStatus === 'invalid' && (
+                      <p className="text-xs text-red-600">{t('supplier.form.financial.viesInvalid')}</p>
+                    )}
+                    {region === 'EU' && viesStatus === 'error' && (
+                      <p className="text-xs text-orange-500">{t('supplier.form.financial.viesUnavailable')}</p>
+                    )}
+                    {region === 'EU' && viesStatus === 'invalid-format' && (
+                      <p className="text-xs text-red-600">{t('supplier.form.financial.viesInvalidFormat')}</p>
+                    )}
                   </div>
                 </div>
 

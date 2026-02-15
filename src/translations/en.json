@@ -278,7 +278,22 @@
         "invoiceAddress": "Invoice address",
         "invoicePostalCode": "Invoice postal code",
         "invoiceCity": "Invoice city",
-        "currency": "Currency"
+        "currency": "Currency",
+        "vies": {
+          "valid": "Valid VAT number (VIES)",
+          "invalid": "Invalid VAT number (VIES)",
+          "notChecked": "Not checked",
+          "checking": "Checking VAT number...",
+          "companyName": "Company name (VIES)",
+          "address": "Address (VIES)",
+          "checkedAt": "Checked on",
+          "recheck": "Recheck",
+          "rechecking": "Rechecking...",
+          "details": "VIES Details",
+          "unavailable": "VIES unavailable, VAT number could not be verified",
+          "invalidFormat": "Invalid format. Must start with an EU country code (e.g. NL, DE, BE).",
+          "notFoundInVies": "VAT number not found in VIES"
+        }
       },
       "director": {
         "title": "Director",
@@ -381,7 +396,12 @@
         "currencyPlaceholder": "Select currency",
         "currencyEUR": "EUR - Euro",
         "currencyUSD": "USD - US Dollar",
-        "currencyGBP": "GBP - British Pound"
+        "currencyGBP": "GBP - British Pound",
+        "viesChecking": "Checking VAT number...",
+        "viesValid": "Valid VAT number",
+        "viesInvalid": "VAT number not found in VIES",
+        "viesUnavailable": "VIES unavailable, VAT number could not be verified",
+        "viesInvalidFormat": "Invalid format. Must start with an EU country code (e.g. NL, DE, BE)."
       },
       "director": {
         "title": "Director",
@@ -633,7 +653,8 @@
       "FILE_DELETED": "File deleted",
       "REMINDER_SENT": "Reminder sent",
       "SUPPLIER_SAVED": "Supplier saved details",
-      "SUPPLIER_TYPE_CHANGED": "Supplier type changed"
+      "SUPPLIER_TYPE_CHANGED": "Supplier type changed",
+      "VIES_CHECKED": "VIES VAT check performed"
     }
   }
 }

@@ -113,6 +113,11 @@ model SupplierRequest {
   invitationExpiresAt DateTime?
   invitationSentAt    DateTime?
 
+  // VIES VAT validation
+  vatValid          Boolean?
+  vatCheckResponse  String?    // JSON string of VIES response
+  vatCheckedAt      DateTime?
+
   // Supplier submitted/saved timestamps
   supplierSubmittedAt DateTime?
   supplierSavedAt     DateTime?
