@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendInvitationEmail } from '@/lib/email'
-import { AuditAction, Label, Status, SupplierType } from '@/types'
+import { AuditAction, Status } from '@/types'
 import type { Language } from '@/lib/i18n'
+import { createRequestSchema } from '@/lib/validations'
 
 // POST /api/requests - Create new request
 export async function POST(request: NextRequest) {
@@ -24,25 +25,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { supplierName, supplierEmail, region, selfFill, supplierType, supplierLanguage, label } = body
-
-    // Validate required fields
-    if (!supplierName || !supplierEmail || !region) {
+    const parsed = createRequestSchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Name, email and region are required' },
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
         { status: 400 }
       )
     }
 
-    // Validate supplier type
-    const validTypes = Object.values(SupplierType)
-    const resolvedType = supplierType && validTypes.includes(supplierType) ? supplierType : 'KOOP'
-    const resolvedLanguage = supplierLanguage === 'en' ? 'en' : 'nl'
+    const { supplierName, supplierEmail, region, selfFill, supplierType, supplierLanguage, label } = parsed.data
 
     // Validate label (must be in user's labels)
-    const validLabels = Object.values(Label)
     const userLabels = session.user.labels || ['COLORIGINZ']
-    const resolvedLabel = label && validLabels.includes(label) && userLabels.includes(label)
+    const resolvedLabel = label && userLabels.includes(label)
       ? label
       : userLabels[0] || 'COLORIGINZ'
 
@@ -79,8 +74,8 @@ export async function POST(request: NextRequest) {
         supplierEmail,
         region,
         selfFill,
-        supplierType: resolvedType,
-        supplierLanguage: resolvedLanguage,
+        supplierType,
+        supplierLanguage,
         label: resolvedLabel,
         status,
         createdById: session.user.id,
@@ -101,7 +96,7 @@ export async function POST(request: NextRequest) {
           supplierEmail,
           region,
           selfFill,
-          supplierType: resolvedType,
+          supplierType,
           label: resolvedLabel,
         }),
       },
@@ -115,7 +110,7 @@ export async function POST(request: NextRequest) {
         supplierName,
         invitationToken,
         expiresAt: invitationExpiresAt,
-        language: resolvedLanguage as Language,
+        language: supplierLanguage as Language,
         label: resolvedLabel,
       })
 

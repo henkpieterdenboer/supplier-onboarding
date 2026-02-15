@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { AuditAction, Status, SupplierType } from '@/types'
+import { AuditAction, Status } from '@/types'
 import { requiresIncoterm } from '@/lib/supplier-type-utils'
 import {
   sendFinanceNotificationEmail,
@@ -16,6 +16,7 @@ import type { Language } from '@/lib/i18n'
 import { v4 as uuidv4 } from 'uuid'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
+import { purchaserSubmitSchema, financeSubmitSchema, erpSubmitSchema, changeTypeSchema } from '@/lib/validations'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -341,9 +342,19 @@ export async function PATCH(
           )
         }
 
+        // Validate purchaser data with Zod
+        const parsedPurchaser = purchaserSubmitSchema.safeParse(data)
+        if (!parsedPurchaser.success) {
+          return NextResponse.json(
+            { error: parsedPurchaser.error.issues[0]?.message || 'Invalid input' },
+            { status: 400 }
+          )
+        }
+        const validatedData = parsedPurchaser.data
+
         // Type-aware validation: incoterm only required for Koop/O-kweker
-        const submitType = (data.supplierType as string) || existingRequest.supplierType || 'KOOP'
-        if (requiresIncoterm(submitType) && !data.incoterm) {
+        const submitType = validatedData.supplierType || existingRequest.supplierType || 'KOOP'
+        if (requiresIncoterm(submitType) && !validatedData.incoterm) {
           return NextResponse.json(
             { error: 'Incoterm is required for this supplier type' },
             { status: 400 }
@@ -431,38 +442,38 @@ export async function PATCH(
           })
         }
 
-        // Explicit allowlist of purchaser-editable fields
+        // Build update data from validated fields (fall back to existing values)
         const purchaserData = {
-          companyName: data.companyName ?? existingRequest.companyName,
-          address: data.address ?? existingRequest.address,
-          postalCode: data.postalCode ?? existingRequest.postalCode,
-          city: data.city ?? existingRequest.city,
-          country: data.country ?? existingRequest.country,
-          contactName: data.contactName ?? existingRequest.contactName,
-          contactPhone: data.contactPhone ?? existingRequest.contactPhone,
-          contactEmail: data.contactEmail ?? existingRequest.contactEmail,
-          chamberOfCommerceNumber: data.chamberOfCommerceNumber ?? existingRequest.chamberOfCommerceNumber,
-          vatNumber: data.vatNumber ?? existingRequest.vatNumber,
-          iban: data.iban ?? existingRequest.iban,
-          bankName: data.bankName ?? existingRequest.bankName,
-          glnNumber: data.glnNumber ?? existingRequest.glnNumber,
-          invoiceEmail: data.invoiceEmail ?? existingRequest.invoiceEmail,
-          invoiceAddress: data.invoiceAddress ?? existingRequest.invoiceAddress,
-          invoicePostalCode: data.invoicePostalCode ?? existingRequest.invoicePostalCode,
-          invoiceCity: data.invoiceCity ?? existingRequest.invoiceCity,
-          invoiceCurrency: data.invoiceCurrency ?? existingRequest.invoiceCurrency,
-          directorName: data.directorName ?? existingRequest.directorName,
-          directorFunction: data.directorFunction ?? existingRequest.directorFunction,
-          directorDateOfBirth: data.directorDateOfBirth ?? existingRequest.directorDateOfBirth,
-          directorPassportNumber: data.directorPassportNumber ?? existingRequest.directorPassportNumber,
-          incoterm: data.incoterm ?? existingRequest.incoterm,
-          commissionPercentage: data.commissionPercentage ?? existingRequest.commissionPercentage,
-          paymentTerm: data.paymentTerm ?? existingRequest.paymentTerm,
-          accountManager: data.accountManager ?? existingRequest.accountManager,
-          auctionNumberRFH: data.auctionNumberRFH ?? existingRequest.auctionNumberRFH,
-          salesSheetEmail: data.salesSheetEmail ?? existingRequest.salesSheetEmail,
-          mandateRFH: data.mandateRFH ?? existingRequest.mandateRFH,
-          apiKeyFloriday: data.apiKeyFloriday ?? existingRequest.apiKeyFloriday,
+          companyName: validatedData.companyName ?? existingRequest.companyName,
+          address: validatedData.address ?? existingRequest.address,
+          postalCode: validatedData.postalCode ?? existingRequest.postalCode,
+          city: validatedData.city ?? existingRequest.city,
+          country: validatedData.country ?? existingRequest.country,
+          contactName: validatedData.contactName ?? existingRequest.contactName,
+          contactPhone: validatedData.contactPhone ?? existingRequest.contactPhone,
+          contactEmail: validatedData.contactEmail ?? existingRequest.contactEmail,
+          chamberOfCommerceNumber: validatedData.chamberOfCommerceNumber ?? existingRequest.chamberOfCommerceNumber,
+          vatNumber: validatedData.vatNumber ?? existingRequest.vatNumber,
+          iban: validatedData.iban ?? existingRequest.iban,
+          bankName: validatedData.bankName ?? existingRequest.bankName,
+          glnNumber: validatedData.glnNumber ?? existingRequest.glnNumber,
+          invoiceEmail: validatedData.invoiceEmail ?? existingRequest.invoiceEmail,
+          invoiceAddress: validatedData.invoiceAddress ?? existingRequest.invoiceAddress,
+          invoicePostalCode: validatedData.invoicePostalCode ?? existingRequest.invoicePostalCode,
+          invoiceCity: validatedData.invoiceCity ?? existingRequest.invoiceCity,
+          invoiceCurrency: validatedData.invoiceCurrency ?? existingRequest.invoiceCurrency,
+          directorName: validatedData.directorName ?? existingRequest.directorName,
+          directorFunction: validatedData.directorFunction ?? existingRequest.directorFunction,
+          directorDateOfBirth: validatedData.directorDateOfBirth ?? existingRequest.directorDateOfBirth,
+          directorPassportNumber: validatedData.directorPassportNumber ?? existingRequest.directorPassportNumber,
+          incoterm: validatedData.incoterm ?? existingRequest.incoterm,
+          commissionPercentage: validatedData.commissionPercentage ?? existingRequest.commissionPercentage,
+          paymentTerm: validatedData.paymentTerm ?? existingRequest.paymentTerm,
+          accountManager: validatedData.accountManager ?? existingRequest.accountManager,
+          auctionNumberRFH: validatedData.auctionNumberRFH ?? existingRequest.auctionNumberRFH,
+          salesSheetEmail: validatedData.salesSheetEmail ?? existingRequest.salesSheetEmail,
+          mandateRFH: validatedData.mandateRFH ?? existingRequest.mandateRFH,
+          apiKeyFloriday: validatedData.apiKeyFloriday ?? existingRequest.apiKeyFloriday,
         }
 
         const updated = await prisma.supplierRequest.update({
@@ -520,17 +531,19 @@ export async function PATCH(
           )
         }
 
-        if (!data.creditorNumber) {
+        const parsedFinance = financeSubmitSchema.safeParse(data)
+        if (!parsedFinance.success) {
           return NextResponse.json(
-            { error: 'Creditor number is required' },
+            { error: parsedFinance.error.issues[0]?.message || 'Invalid input' },
             { status: 400 }
           )
         }
+        const { creditorNumber } = parsedFinance.data
 
         // Check for duplicate creditor number
         const existingCreditor = await prisma.supplierRequest.findFirst({
           where: {
-            creditorNumber: data.creditorNumber,
+            creditorNumber,
             id: { not: id },
           },
         })
@@ -545,7 +558,7 @@ export async function PATCH(
         const updated = await prisma.supplierRequest.update({
           where: { id },
           data: {
-            creditorNumber: data.creditorNumber,
+            creditorNumber,
             status: Status.AWAITING_ERP,
           },
         })
@@ -555,7 +568,7 @@ export async function PATCH(
             requestId: id,
             userId: session.user.id,
             action: AuditAction.FINANCE_SUBMITTED,
-            details: JSON.stringify({ creditorNumber: data.creditorNumber }),
+            details: JSON.stringify({ creditorNumber }),
           },
         })
 
@@ -593,17 +606,19 @@ export async function PATCH(
           )
         }
 
-        if (!data.kbtCode) {
+        const parsedErp = erpSubmitSchema.safeParse(data)
+        if (!parsedErp.success) {
           return NextResponse.json(
-            { error: 'KBT code is required' },
+            { error: parsedErp.error.issues[0]?.message || 'Invalid input' },
             { status: 400 }
           )
         }
+        const { kbtCode } = parsedErp.data
 
         // Check for duplicate KBT code
         const existingKbt = await prisma.supplierRequest.findFirst({
           where: {
-            kbtCode: data.kbtCode,
+            kbtCode,
             id: { not: id },
           },
         })
@@ -618,7 +633,7 @@ export async function PATCH(
         const updated = await prisma.supplierRequest.update({
           where: { id },
           data: {
-            kbtCode: data.kbtCode,
+            kbtCode,
             status: Status.COMPLETED,
           },
         })
@@ -628,7 +643,7 @@ export async function PATCH(
             requestId: id,
             userId: session.user.id,
             action: AuditAction.ERP_SUBMITTED,
-            details: JSON.stringify({ kbtCode: data.kbtCode }),
+            details: JSON.stringify({ kbtCode }),
           },
         })
 
@@ -644,7 +659,7 @@ export async function PATCH(
           supplierName: existingRequest.supplierName,
           requestId: id,
           creditorNumber: existingRequest.creditorNumber || '',
-          kbtCode: data.kbtCode as string,
+          kbtCode,
           language: (existingRequest.createdBy.preferredLanguage || 'nl') as Language,
           label: existingRequest.label,
         })
@@ -661,14 +676,14 @@ export async function PATCH(
           )
         }
 
-        const newType = data.supplierType as string
-        const validTypes = Object.values(SupplierType)
-        if (!newType || !validTypes.includes(newType as SupplierType)) {
+        const parsedType = changeTypeSchema.safeParse(data)
+        if (!parsedType.success) {
           return NextResponse.json(
-            { error: 'Invalid supplier type' },
+            { error: parsedType.error.issues[0]?.message || 'Invalid supplier type' },
             { status: 400 }
           )
         }
+        const { supplierType: newType } = parsedType.data
 
         const updatedType = await prisma.supplierRequest.update({
           where: { id },

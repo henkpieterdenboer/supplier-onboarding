@@ -3,19 +3,20 @@ import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendPasswordResetEmail } from '@/lib/email'
 import type { Language } from '@/lib/i18n'
+import { forgotPasswordSchema } from '@/lib/validations'
 
 // POST /api/auth/forgot-password - Request password reset
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email } = body
-
-    if (!email) {
+    const parsed = forgotPasswordSchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Email is required' },
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
         { status: 400 }
       )
     }
+    const { email } = parsed.data
 
     // Always return success to prevent email enumeration
     const successResponse = NextResponse.json({

@@ -1,26 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
+import { activateSchema } from '@/lib/validations'
 
 // POST /api/auth/activate - Activate account with token and password
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { token, password } = body
-
-    if (!token || !password) {
+    const parsed = activateSchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Token and password are required' },
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
         { status: 400 }
       )
     }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Password must be at least 6 characters' },
-        { status: 400 }
-      )
-    }
+    const { token, password } = parsed.data
 
     // Find user by activation token
     const user = await prisma.user.findUnique({

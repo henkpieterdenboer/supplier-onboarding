@@ -10,6 +10,7 @@ import {
 } from '@/lib/email'
 import { formatUserName } from '@/lib/user-utils'
 import type { Language } from '@/lib/i18n'
+import { supplierFormSchema } from '@/lib/validations'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -168,10 +169,22 @@ export async function POST(
     // Parse form data
     const formData = await request.formData()
     const dataJson = formData.get('data') as string
-    const data = JSON.parse(dataJson)
+    let rawData: unknown
+    try {
+      rawData = JSON.parse(dataJson)
+    } catch {
+      return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
+    }
 
-    // Determine action: 'save' or 'submit' (default: 'submit' for backward compat)
-    const action = data.action || 'submit'
+    const parsed = supplierFormSchema.safeParse(rawData)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
+        { status: 400 }
+      )
+    }
+    const data = parsed.data
+    const action = data.action
 
     // Handle file uploads
     const filesToCreate: { fileName: string; fileType: string; filePath: string }[] = []

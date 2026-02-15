@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendActivationEmail } from '@/lib/email'
 import type { Language } from '@/lib/i18n'
+import { updateUserSchema } from '@/lib/validations'
 
 // PATCH /api/admin/users/[id] - Update user
 export async function PATCH(
@@ -78,15 +79,24 @@ export async function PATCH(
       })
     }
 
-    // Regular update (name, roles, receiveEmails, preferredLanguage)
+    // Regular update (name, roles, labels, receiveEmails, preferredLanguage)
+    const parsed = updateUserSchema.safeParse(data)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
+        { status: 400 }
+      )
+    }
+
     const updateData: Record<string, unknown> = {}
-    if (data.firstName !== undefined) updateData.firstName = data.firstName
-    if (data.middleName !== undefined) updateData.middleName = data.middleName || null
-    if (data.lastName !== undefined) updateData.lastName = data.lastName
-    if (data.roles !== undefined) updateData.roles = data.roles
-    if (data.labels !== undefined) updateData.labels = data.labels
-    if (data.receiveEmails !== undefined) updateData.receiveEmails = data.receiveEmails
-    if (data.preferredLanguage !== undefined) updateData.preferredLanguage = data.preferredLanguage
+    const validData = parsed.data
+    if (validData.firstName !== undefined) updateData.firstName = validData.firstName
+    if (validData.middleName !== undefined) updateData.middleName = validData.middleName || null
+    if (validData.lastName !== undefined) updateData.lastName = validData.lastName
+    if (validData.roles !== undefined) updateData.roles = validData.roles
+    if (validData.labels !== undefined) updateData.labels = validData.labels
+    if (validData.receiveEmails !== undefined) updateData.receiveEmails = validData.receiveEmails
+    if (validData.preferredLanguage !== undefined) updateData.preferredLanguage = validData.preferredLanguage
 
     const updated = await prisma.user.update({
       where: { id },

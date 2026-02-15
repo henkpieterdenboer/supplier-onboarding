@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 import { sendActivationEmail } from '@/lib/email'
 import type { Language } from '@/lib/i18n'
+import { createUserSchema } from '@/lib/validations'
 
 // GET /api/admin/users - List all users
 export async function GET() {
@@ -61,14 +62,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { email, firstName, middleName, lastName, roles, labels, receiveEmails, preferredLanguage } = body
-
-    if (!email || !firstName || !lastName || !roles || !Array.isArray(roles) || roles.length === 0) {
+    const parsed = createUserSchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Email, first name, last name and at least one role are required' },
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
         { status: 400 }
       )
     }
+    const { email, firstName, middleName, lastName, roles, labels, receiveEmails, preferredLanguage } = parsed.data
 
     // Check for duplicate email
     const existing = await prisma.user.findUnique({
@@ -94,9 +95,9 @@ export async function POST(request: NextRequest) {
         middleName: middleName || null,
         lastName,
         roles,
-        labels: Array.isArray(labels) && labels.length > 0 ? labels : ['COLORIGINZ'],
-        receiveEmails: receiveEmails ?? true,
-        preferredLanguage: preferredLanguage || 'nl',
+        labels,
+        receiveEmails,
+        preferredLanguage,
         isActive: false,
         activationToken,
         activationExpiresAt,
