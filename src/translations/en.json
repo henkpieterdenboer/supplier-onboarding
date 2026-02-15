@@ -143,8 +143,8 @@
       "description": "Enter the basic details to onboard a new supplier",
       "supplierType": "Supplier type *",
       "typeKoop": "Standard supplier",
-      "typeXKweker": "Auction supplier",
-      "typeOKweker": "Direct grower",
+      "typeXKweker": "X-grower",
+      "typeOKweker": "O-grower",
       "supplierName": "Supplier name *",
       "supplierNamePlaceholder": "Company name",
       "supplierEmail": "Supplier email *",
@@ -597,8 +597,8 @@
     },
     "supplierType": {
       "KOOP": "Standard",
-      "X_KWEKER": "Auction",
-      "O_KWEKER": "Direct grower"
+      "X_KWEKER": "X-grower",
+      "O_KWEKER": "O-grower"
     },
     "fileType": {
       "KVK": "Chamber of Commerce extract",
