@@ -58,12 +58,11 @@ function LoginForm() {
   }
 
   return (
-    <>
-    <div className="w-full max-w-md flex justify-end mb-2">
-      <LanguageSelector />
-    </div>
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-4">
+        <div className="flex justify-end">
+          <LanguageSelector />
+        </div>
         <div className="flex justify-center">
           <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
         </div>
@@ -188,7 +187,6 @@ function LoginForm() {
         )}
       </CardContent>
     </Card>
-    </>
   )
 }
 
