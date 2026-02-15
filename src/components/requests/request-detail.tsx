@@ -711,7 +711,33 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                     : t('requests.detail.finance.waitingForCreditor')}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {/* Exact Globe XML URL */}
+                {request.companyName && (userRoles.includes('FINANCE') || userRoles.includes('INKOPER')) && (
+                  <div className="space-y-2">
+                    <Label className="text-gray-500">{t('requests.detail.finance.exactXml')}</Label>
+                    <p className="text-xs text-gray-400">{t('requests.detail.finance.exactXmlDescription')}</p>
+                    <div className="flex gap-2">
+                      <Input
+                        readOnly
+                        value={typeof window !== 'undefined' ? `${window.location.origin}/api/requests/${request.id}/exact-xml` : `/api/requests/${request.id}/exact-xml`}
+                        className="font-mono text-xs"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const url = `${window.location.origin}/api/requests/${request.id}/exact-xml`
+                          navigator.clipboard.writeText(url)
+                          toast.success(t('requests.detail.finance.urlCopied'))
+                        }}
+                      >
+                        {t('requests.detail.finance.copyUrl')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {request.creditorNumber ? (
                   <div>
                     <Label className="text-gray-500">{t('requests.detail.finance.creditorNumber')}</Label>

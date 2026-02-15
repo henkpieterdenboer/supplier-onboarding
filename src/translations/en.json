@@ -326,7 +326,11 @@
         "creditorNumber": "Creditor number",
         "waitingForCreditor": "Waiting for creditor number",
         "enterCreditor": "Enter creditor number",
-        "waiting": "Waiting for Finance"
+        "waiting": "Waiting for Finance",
+        "exactXml": "Exact Globe XML",
+        "exactXmlDescription": "Copy this URL and paste it in Exact Globe to import the supplier",
+        "copyUrl": "Copy URL",
+        "urlCopied": "URL copied to clipboard"
       },
       "erp": {
         "title": "ERP",

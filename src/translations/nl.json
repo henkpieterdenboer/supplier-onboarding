@@ -326,7 +326,11 @@
         "creditorNumber": "Crediteurnummer",
         "waitingForCreditor": "Wachten op crediteurnummer",
         "enterCreditor": "Voer crediteurnummer in",
-        "waiting": "Wachten op Finance"
+        "waiting": "Wachten op Finance",
+        "exactXml": "Exact Globe XML",
+        "exactXmlDescription": "Kopieer deze URL en plak in Exact Globe om de leverancier te importeren",
+        "copyUrl": "URL kopiëren",
+        "urlCopied": "URL gekopieerd naar klembord"
       },
       "erp": {
         "title": "ERP",
