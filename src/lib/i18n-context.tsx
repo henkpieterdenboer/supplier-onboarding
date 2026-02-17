@@ -41,11 +41,23 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
     return 'nl'
   })
 
-  // Sync with session language on mount/change
+  // Sync language between cookie and session
   useEffect(() => {
     if (!initialLanguage && session?.user?.language) {
       const sessionLang = session.user.language as Language
-      if (sessionLang !== language) {
+      const cookieLang = getCookie('NEXT_LOCALE')
+      const hasExplicitCookie = cookieLang === 'nl' || cookieLang === 'en' || cookieLang === 'es'
+
+      if (hasExplicitCookie && cookieLang !== sessionLang) {
+        // Cookie differs from session — user explicitly chose a language
+        // (e.g. on login page). Persist cookie value to DB.
+        fetch('/api/user/language', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ language: cookieLang }),
+        }).catch(() => {})
+      } else if (!hasExplicitCookie && sessionLang !== language) {
+        // No explicit cookie — sync from session (first visit)
         setLanguageState(sessionLang)
         setCookie('NEXT_LOCALE', sessionLang)
       }
