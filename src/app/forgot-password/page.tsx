@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert } from '@/components/ui/alert'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
 import { useLanguage } from '@/lib/i18n-context'
+import { LanguageSelector } from '@/components/ui/language-selector'
 
 export default function ForgotPasswordPage() {
   const { t } = useLanguage()
@@ -46,9 +47,12 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-4">
+            <div className="flex justify-end">
+              <LanguageSelector />
+            </div>
             <div className="flex justify-center">
               <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
             </div>
@@ -61,7 +65,7 @@ export default function ForgotPasswordPage() {
               {t('auth.forgotPassword.successMessage')}
             </Alert>
             <div className="text-center">
-              <Link href="/login" className="text-sm text-blue-600 hover:underline">
+              <Link href="/login" className="text-sm text-primary hover:underline">
                 {t('auth.forgotPassword.backToLogin')}
               </Link>
             </div>
@@ -72,9 +76,12 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
+          <div className="flex justify-end">
+            <LanguageSelector />
+          </div>
           <div className="flex justify-center">
             <img src={LOGO_BASE64} alt="Logo" className="h-12 w-auto" />
           </div>
@@ -112,7 +119,7 @@ export default function ForgotPasswordPage() {
           </form>
 
           <div className="mt-4 text-center">
-            <Link href="/login" className="text-sm text-blue-600 hover:underline">
+            <Link href="/login" className="text-sm text-primary hover:underline">
               {t('auth.forgotPassword.backToLogin')}
             </Link>
           </div>

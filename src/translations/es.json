@@ -108,8 +108,13 @@
   "dashboard": {
     "title": "Panel",
     "description": "Resumen de todas las solicitudes de proveedores",
+    "tabs": {
+      "active": "Activo",
+      "archive": "Archivo"
+    },
     "stats": {
       "total": "Total",
+      "totalActive": "Activo",
       "waitingSupplier": "Esperando al proveedor",
       "waitingPurchaser": "Esperando al comprador",
       "waitingFinance": "Esperando a finanzas",
@@ -234,7 +239,13 @@
       "paymentTerm30": "30 días",
       "accountManager": "Gestor de cuentas",
       "submitToFinance": "Guardar y enviar a Finanzas",
-      "successSubmit": "Datos guardados y enviados a Finanzas"
+      "submitToERP": "Guardar y enviar a ERP",
+      "saveOnly": "Guardar",
+      "creditorNumber": "Número de acreedor",
+      "creditorNumberPlaceholder": "Introduzca el número de acreedor",
+      "successSubmit": "Datos guardados y enviados a Finanzas",
+      "successSubmitERP": "Datos guardados y enviados a ERP",
+      "successSave": "Datos guardados"
     },
     "detail": {
       "tabs": {
@@ -351,12 +362,17 @@
       },
       "actions": {
         "edit": "Editar",
+        "selfFill": "Completar usted mismo",
+        "selfFillConfirm": "¿Desea completar el formulario usted mismo? La invitación al proveedor quedará invalidada.",
         "resendInvitation": "Reenviar invitación",
         "sendReminder": "Enviar recordatorio",
         "cancel": "Cancelar",
         "cancelTitle": "¿Cancelar solicitud?",
         "cancelMessage": "¿Está seguro de que desea cancelar esta solicitud? Puede reabrirla más tarde.",
-        "reopen": "Reabrir"
+        "reopen": "Reabrir",
+        "delete": "Eliminar",
+        "deleteTitle": "¿Eliminar solicitud?",
+        "deleteMessage": "¿Está seguro de que desea eliminar permanentemente esta solicitud? Esta acción no se puede deshacer."
       }
     }
   },
@@ -663,7 +679,10 @@
       "REMINDER_SENT": "Recordatorio enviado",
       "SUPPLIER_SAVED": "Proveedor guardó los datos",
       "SUPPLIER_TYPE_CHANGED": "Tipo de proveedor cambiado",
-      "VIES_CHECKED": "Verificación de IVA VIES realizada"
+      "VIES_CHECKED": "Verificación de IVA VIES realizada",
+      "SELF_FILL_ACTIVATED": "Autocompletado activado",
+      "PURCHASER_SAVED": "Comprador guardó datos",
+      "FINANCE_SAVED": "Finanzas guardó datos"
     }
   }
 }

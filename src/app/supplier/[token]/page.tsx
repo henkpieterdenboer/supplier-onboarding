@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { Check, X, Loader2, AlertTriangle } from 'lucide-react'
 import { getLabelConfig } from '@/lib/label-config'
 import {
   showFinancialSection,
@@ -297,10 +298,10 @@ export default function SupplierFormPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-muted/40">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-500">{t('common.loading')}</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="mt-4 text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -308,14 +309,14 @@ export default function SupplierFormPage() {
 
   if (error && !request) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-red-600">{t('supplier.form.invalidLink')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">{error}</p>
-            <p className="mt-4 text-sm text-gray-500">
+            <p className="text-muted-foreground">{error}</p>
+            <p className="mt-4 text-sm text-muted-foreground">
               {t('supplier.form.invalidLinkMessage')}
             </p>
           </CardContent>
@@ -328,7 +329,7 @@ export default function SupplierFormPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="flex justify-center mb-4">
@@ -341,10 +342,10 @@ export default function SupplierFormPage() {
             <CardTitle className="text-green-600">{t('supplier.form.thankYou')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               {t('supplier.form.thankYouMessage')}
             </p>
-            <p className="mt-4 text-sm text-gray-500">{t('supplier.form.closeWindow')}</p>
+            <p className="mt-4 text-sm text-muted-foreground">{t('supplier.form.closeWindow')}</p>
           </CardContent>
         </Card>
       </div>
@@ -353,7 +354,7 @@ export default function SupplierFormPage() {
 
   if (isSaved) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="flex justify-center mb-4">
@@ -366,10 +367,10 @@ export default function SupplierFormPage() {
             <CardTitle className="text-blue-600">{t('supplier.form.savedTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               {t('supplier.form.savedMessage')}
             </p>
-            <p className="mt-4 text-sm text-gray-500">{t('supplier.form.closeWindow')}</p>
+            <p className="mt-4 text-sm text-muted-foreground">{t('supplier.form.closeWindow')}</p>
           </CardContent>
         </Card>
       </div>
@@ -384,7 +385,7 @@ export default function SupplierFormPage() {
   const showBank = showBankUpload(supplierType)
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-muted/40 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
           <div className="flex justify-center mb-4">
@@ -394,8 +395,8 @@ export default function SupplierFormPage() {
               className="h-16 w-auto"
             />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('supplier.form.title')}</h1>
-          <p className="text-gray-500 mt-2">
+          <h1 className="text-2xl font-bold text-foreground">{t('supplier.form.title')}</h1>
+          <p className="text-muted-foreground mt-2">
             {t('supplier.form.welcome', { supplierName: request?.supplierName || '' })}
           </p>
         </div>
@@ -568,22 +569,22 @@ export default function SupplierFormPage() {
                       />
                       {region === 'EU' && viesStatus === 'checking' && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
                         </div>
                       )}
                       {region === 'EU' && viesStatus === 'valid' && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          <Check className="h-5 w-5" />
                         </div>
                       )}
                       {region === 'EU' && viesStatus === 'invalid' && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-600">
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                          <X className="h-5 w-5" />
                         </div>
                       )}
                       {region === 'EU' && viesStatus === 'error' && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500">
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                          <AlertTriangle className="h-5 w-5" />
                         </div>
                       )}
                     </div>
@@ -824,7 +825,7 @@ export default function SupplierFormPage() {
                   onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
                   disabled={isDisabled}
                 />
-                <p className="text-xs text-gray-500">{t('supplier.form.fileHint')}</p>
+                <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
               </div>
 
               <div className="space-y-2">
@@ -836,7 +837,7 @@ export default function SupplierFormPage() {
                   onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
                   disabled={isDisabled}
                 />
-                <p className="text-xs text-gray-500">{t('supplier.form.fileHint')}</p>
+                <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
               </div>
 
               {showBank && (
@@ -849,7 +850,7 @@ export default function SupplierFormPage() {
                     onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
                     disabled={isDisabled}
                   />
-                  <p className="text-xs text-gray-500">{t('supplier.form.fileHint')}</p>
+                  <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
                 </div>
               )}
             </CardContent>
@@ -870,13 +871,13 @@ export default function SupplierFormPage() {
               disabled={isDisabled}
               className="mt-0.5"
             />
-            <Label htmlFor="privacyAccepted" className="text-sm text-gray-600 leading-snug">
+            <Label htmlFor="privacyAccepted" className="text-sm text-muted-foreground leading-snug">
               {t('supplier.form.privacyLabel')}{' '}
               <a
                 href={t('supplier.form.privacyUrl')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-primary hover:underline"
               >
                 {t('supplier.form.privacyLink')}
               </a>

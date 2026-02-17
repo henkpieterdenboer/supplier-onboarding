@@ -170,8 +170,8 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t('admin.users.title')}</h1>
-        <p className="text-gray-500">{t('admin.users.description')}</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('admin.users.title')}</h1>
+        <p className="text-muted-foreground">{t('admin.users.description')}</p>
       </div>
 
     <div className="space-y-4">
@@ -213,7 +213,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
         </Button>
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -229,7 +229,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   {t('admin.users.table.empty')}
                 </TableCell>
               </TableRow>
@@ -311,7 +311,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
         </Table>
       </div>
 
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground">
         {t('admin.users.table.count', { filtered: filteredUsers.length, total: users.length })}
       </div>
 

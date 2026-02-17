@@ -108,8 +108,13 @@
   "dashboard": {
     "title": "Dashboard",
     "description": "Overzicht van alle leveranciersaanvragen",
+    "tabs": {
+      "active": "Actief",
+      "archive": "Archief"
+    },
     "stats": {
       "total": "Totaal",
+      "totalActive": "Actief",
       "waitingSupplier": "Wachten op leverancier",
       "waitingPurchaser": "Wachten op inkoper",
       "waitingFinance": "Wachten op finance",
@@ -234,7 +239,13 @@
       "paymentTerm30": "30 dagen",
       "accountManager": "Accountmanager",
       "submitToFinance": "Opslaan en doorsturen naar Finance",
-      "successSubmit": "Gegevens opgeslagen en doorgestuurd naar Finance"
+      "submitToERP": "Opslaan en doorsturen naar ERP",
+      "saveOnly": "Opslaan",
+      "creditorNumber": "Crediteurnummer",
+      "creditorNumberPlaceholder": "Voer crediteurnummer in",
+      "successSubmit": "Gegevens opgeslagen en doorgestuurd naar Finance",
+      "successSubmitERP": "Gegevens opgeslagen en doorgestuurd naar ERP",
+      "successSave": "Gegevens opgeslagen"
     },
     "detail": {
       "tabs": {
@@ -351,12 +362,17 @@
       },
       "actions": {
         "edit": "Bewerken",
+        "selfFill": "Zelf invullen",
+        "selfFillConfirm": "Wilt u het formulier zelf invullen? De uitnodiging naar de leverancier wordt ongeldig.",
         "resendInvitation": "Uitnodiging opnieuw versturen",
         "sendReminder": "Herinnering versturen",
         "cancel": "Afbreken",
         "cancelTitle": "Aanvraag afbreken?",
         "cancelMessage": "Weet u zeker dat u deze aanvraag wilt afbreken? U kunt de aanvraag later weer heropenen.",
-        "reopen": "Heropenen"
+        "reopen": "Heropenen",
+        "delete": "Verwijderen",
+        "deleteTitle": "Aanvraag verwijderen?",
+        "deleteMessage": "Weet u zeker dat u deze aanvraag permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
       }
     }
   },
@@ -663,7 +679,10 @@
       "REMINDER_SENT": "Herinnering verstuurd",
       "SUPPLIER_SAVED": "Leverancier heeft gegevens opgeslagen",
       "SUPPLIER_TYPE_CHANGED": "Leverancierstype gewijzigd",
-      "VIES_CHECKED": "VIES BTW-controle uitgevoerd"
+      "VIES_CHECKED": "VIES BTW-controle uitgevoerd",
+      "SELF_FILL_ACTIVATED": "Zelf invullen geactiveerd",
+      "PURCHASER_SAVED": "Inkoper heeft gegevens opgeslagen",
+      "FINANCE_SAVED": "Finance heeft gegevens opgeslagen"
     }
   }
 }

@@ -16,7 +16,7 @@ import type { Language } from '@/lib/i18n'
 import { v4 as uuidv4 } from 'uuid'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
-import { purchaserSubmitSchema, financeSubmitSchema, erpSubmitSchema, changeTypeSchema } from '@/lib/validations'
+import { purchaserSubmitSchema, financeSubmitSchema, financeSaveSchema, erpSubmitSchema, changeTypeSchema } from '@/lib/validations'
 import { checkVat } from '@/lib/vies'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -327,6 +327,193 @@ export async function PATCH(
         return NextResponse.json({ success: true })
       }
 
+      case 'self-fill': {
+        // INKOPER activates self-fill mode
+        if (!session.user.roles.includes('INKOPER')) {
+          return NextResponse.json(
+            { error: 'Only purchasers can perform this action' },
+            { status: 403 }
+          )
+        }
+
+        if (existingRequest.status !== Status.INVITATION_SENT) {
+          return NextResponse.json(
+            { error: 'This action is only available for requests awaiting supplier' },
+            { status: 400 }
+          )
+        }
+
+        const updatedSelfFill = await prisma.supplierRequest.update({
+          where: { id },
+          data: {
+            selfFill: true,
+            invitationToken: null,
+            invitationExpiresAt: null,
+            status: Status.AWAITING_PURCHASER,
+          },
+        })
+
+        await prisma.auditLog.create({
+          data: {
+            requestId: id,
+            userId: session.user.id,
+            action: AuditAction.SELF_FILL_ACTIVATED,
+          },
+        })
+
+        return NextResponse.json(updatedSelfFill)
+      }
+
+      case 'purchaser-save': {
+        // INKOPER saves data without status change
+        if (!session.user.roles.includes('INKOPER')) {
+          return NextResponse.json(
+            { error: 'Only purchasers can perform this action' },
+            { status: 403 }
+          )
+        }
+
+        if (existingRequest.status !== Status.AWAITING_PURCHASER) {
+          return NextResponse.json(
+            { error: 'This request is not awaiting purchaser action' },
+            { status: 400 }
+          )
+        }
+
+        const parsedSave = purchaserSubmitSchema.safeParse(data)
+        if (!parsedSave.success) {
+          return NextResponse.json(
+            { error: parsedSave.error.issues[0]?.message || 'Invalid input' },
+            { status: 400 }
+          )
+        }
+        const saveData = parsedSave.data
+
+        // Handle file uploads (same logic as purchaser-submit)
+        const saveFilesToCreate: { fileName: string; fileType: string; filePath: string }[] = []
+        const useVercelBlobSave = !!process.env.BLOB_READ_WRITE_TOKEN
+
+        if (formDataObj) {
+          const filesToValidate = [
+            formDataObj.get('kvk') as File | null,
+            formDataObj.get('passport') as File | null,
+            formDataObj.get('bankDetails') as File | null,
+          ].filter((f): f is File => f !== null && f.size > 0)
+
+          for (const file of filesToValidate) {
+            const error = validateFile(file)
+            if (error) {
+              return NextResponse.json({ error }, { status: 400 })
+            }
+          }
+
+          const kvkFile = formDataObj.get('kvk') as File | null
+          if (kvkFile && kvkFile.size > 0) {
+            const fileName = `kvk_${Date.now()}_${kvkFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+            if (useVercelBlobSave) {
+              await uploadToBlob(`${id}/${fileName}`, kvkFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await kvkFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+            saveFilesToCreate.push({ fileName: kvkFile.name, fileType: 'KVK', filePath })
+          }
+
+          const passportFile = formDataObj.get('passport') as File | null
+          if (passportFile && passportFile.size > 0) {
+            const fileName = `passport_${Date.now()}_${passportFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+            if (useVercelBlobSave) {
+              await uploadToBlob(`${id}/${fileName}`, passportFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await passportFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+            saveFilesToCreate.push({ fileName: passportFile.name, fileType: 'PASSPORT', filePath })
+          }
+
+          const bankDetailsFile = formDataObj.get('bankDetails') as File | null
+          if (bankDetailsFile && bankDetailsFile.size > 0) {
+            const fileName = `bank_${Date.now()}_${bankDetailsFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+            if (useVercelBlobSave) {
+              await uploadToBlob(`${id}/${fileName}`, bankDetailsFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await bankDetailsFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+            saveFilesToCreate.push({ fileName: bankDetailsFile.name, fileType: 'BANK_DETAILS', filePath })
+          }
+        }
+
+        for (const file of saveFilesToCreate) {
+          await prisma.supplierFile.create({
+            data: { requestId: id, ...file },
+          })
+        }
+
+        const saveType = saveData.supplierType || existingRequest.supplierType || 'KOOP'
+
+        const purchaserSaveData = {
+          companyName: saveData.companyName ?? existingRequest.companyName,
+          address: saveData.address ?? existingRequest.address,
+          postalCode: saveData.postalCode ?? existingRequest.postalCode,
+          city: saveData.city ?? existingRequest.city,
+          country: saveData.country ?? existingRequest.country,
+          contactName: saveData.contactName ?? existingRequest.contactName,
+          contactPhone: saveData.contactPhone ?? existingRequest.contactPhone,
+          contactEmail: saveData.contactEmail ?? existingRequest.contactEmail,
+          chamberOfCommerceNumber: saveData.chamberOfCommerceNumber ?? existingRequest.chamberOfCommerceNumber,
+          vatNumber: saveData.vatNumber ?? existingRequest.vatNumber,
+          iban: saveData.iban ?? existingRequest.iban,
+          bankName: saveData.bankName ?? existingRequest.bankName,
+          glnNumber: saveData.glnNumber ?? existingRequest.glnNumber,
+          invoiceEmail: saveData.invoiceEmail ?? existingRequest.invoiceEmail,
+          invoiceAddress: saveData.invoiceAddress ?? existingRequest.invoiceAddress,
+          invoicePostalCode: saveData.invoicePostalCode ?? existingRequest.invoicePostalCode,
+          invoiceCity: saveData.invoiceCity ?? existingRequest.invoiceCity,
+          invoiceCurrency: saveData.invoiceCurrency ?? existingRequest.invoiceCurrency,
+          directorName: saveData.directorName ?? existingRequest.directorName,
+          directorFunction: saveData.directorFunction ?? existingRequest.directorFunction,
+          directorDateOfBirth: saveData.directorDateOfBirth ?? existingRequest.directorDateOfBirth,
+          directorPassportNumber: saveData.directorPassportNumber ?? existingRequest.directorPassportNumber,
+          incoterm: saveData.incoterm ?? existingRequest.incoterm,
+          commissionPercentage: saveData.commissionPercentage ?? existingRequest.commissionPercentage,
+          paymentTerm: saveData.paymentTerm ?? existingRequest.paymentTerm,
+          accountManager: saveData.accountManager ?? existingRequest.accountManager,
+          auctionNumberRFH: saveData.auctionNumberRFH ?? existingRequest.auctionNumberRFH,
+          salesSheetEmail: saveData.salesSheetEmail ?? existingRequest.salesSheetEmail,
+          mandateRFH: saveData.mandateRFH ?? existingRequest.mandateRFH,
+          apiKeyFloriday: saveData.apiKeyFloriday ?? existingRequest.apiKeyFloriday,
+        }
+
+        const updatedSave = await prisma.supplierRequest.update({
+          where: { id },
+          data: {
+            ...purchaserSaveData,
+            supplierType: saveType,
+            // NO status change
+          },
+        })
+
+        await prisma.auditLog.create({
+          data: {
+            requestId: id,
+            userId: session.user.id,
+            action: AuditAction.PURCHASER_SAVED,
+          },
+        })
+
+        return NextResponse.json(updatedSave)
+      }
+
       case 'purchaser-submit': {
         // INKOPER submits after filling additional data
         if (!session.user.roles.includes('INKOPER')) {
@@ -535,8 +722,67 @@ export async function PATCH(
         return NextResponse.json(updated)
       }
 
+      case 'finance-save': {
+        // FINANCE saves data without status change
+        if (!session.user.roles.includes('FINANCE')) {
+          return NextResponse.json(
+            { error: 'Only Finance can perform this action' },
+            { status: 403 }
+          )
+        }
+
+        if (existingRequest.status !== Status.AWAITING_FINANCE) {
+          return NextResponse.json(
+            { error: 'This request is not awaiting Finance action' },
+            { status: 400 }
+          )
+        }
+
+        const parsedFinSave = financeSaveSchema.safeParse(data)
+        if (!parsedFinSave.success) {
+          return NextResponse.json(
+            { error: parsedFinSave.error.issues[0]?.message || 'Invalid input' },
+            { status: 400 }
+          )
+        }
+        const finSaveData = parsedFinSave.data
+
+        const financeSaveUpdateData: Record<string, unknown> = {}
+        if (finSaveData.creditorNumber) financeSaveUpdateData.creditorNumber = finSaveData.creditorNumber
+        // Save all supplier data fields
+        const finSaveFields = [
+          'companyName', 'address', 'postalCode', 'city', 'country',
+          'contactName', 'contactPhone', 'contactEmail',
+          'chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName', 'glnNumber',
+          'invoiceEmail', 'invoiceAddress', 'invoicePostalCode', 'invoiceCity', 'invoiceCurrency',
+          'directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber',
+          'incoterm', 'commissionPercentage', 'paymentTerm', 'accountManager',
+          'auctionNumberRFH', 'salesSheetEmail', 'mandateRFH', 'apiKeyFloriday',
+        ] as const
+        for (const field of finSaveFields) {
+          if (finSaveData[field] !== undefined && finSaveData[field] !== null) {
+            financeSaveUpdateData[field] = finSaveData[field]
+          }
+        }
+
+        const updatedFinSave = await prisma.supplierRequest.update({
+          where: { id },
+          data: financeSaveUpdateData,
+        })
+
+        await prisma.auditLog.create({
+          data: {
+            requestId: id,
+            userId: session.user.id,
+            action: AuditAction.FINANCE_SAVED,
+          },
+        })
+
+        return NextResponse.json(updatedFinSave)
+      }
+
       case 'finance-submit': {
-        // FINANCE submits creditor number
+        // FINANCE submits creditor number (+ optionally all supplier data)
         if (!session.user.roles.includes('FINANCE')) {
           return NextResponse.json(
             { error: 'Only Finance can perform this action' },
@@ -558,7 +804,7 @@ export async function PATCH(
             { status: 400 }
           )
         }
-        const { creditorNumber } = parsedFinance.data
+        const { creditorNumber, ...financeSupplierData } = parsedFinance.data
 
         // Check for duplicate creditor number
         const existingCreditor = await prisma.supplierRequest.findFirst({
@@ -575,12 +821,29 @@ export async function PATCH(
           )
         }
 
+        // Build update data including optional supplier fields
+        const financeUpdateData: Record<string, unknown> = {
+          creditorNumber,
+          status: Status.AWAITING_ERP,
+        }
+        const financeFields = [
+          'companyName', 'address', 'postalCode', 'city', 'country',
+          'contactName', 'contactPhone', 'contactEmail',
+          'chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName', 'glnNumber',
+          'invoiceEmail', 'invoiceAddress', 'invoicePostalCode', 'invoiceCity', 'invoiceCurrency',
+          'directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber',
+          'incoterm', 'commissionPercentage', 'paymentTerm', 'accountManager',
+          'auctionNumberRFH', 'salesSheetEmail', 'mandateRFH', 'apiKeyFloriday',
+        ] as const
+        for (const field of financeFields) {
+          if (financeSupplierData[field] !== undefined && financeSupplierData[field] !== null) {
+            financeUpdateData[field] = financeSupplierData[field]
+          }
+        }
+
         const updated = await prisma.supplierRequest.update({
           where: { id },
-          data: {
-            creditorNumber,
-            status: Status.AWAITING_ERP,
-          },
+          data: financeUpdateData,
         })
 
         await prisma.auditLog.create({
@@ -783,6 +1046,69 @@ export async function PATCH(
     }
   } catch (error) {
     console.error('Error updating request:', error)
+    return NextResponse.json(
+      { error: 'An error occurred' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/requests/[id] - Delete a cancelled request (ADMIN only)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    const { id } = await params
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!session.user.roles.includes('ADMIN')) {
+      return NextResponse.json({ error: 'Only admins can delete requests' }, { status: 403 })
+    }
+
+    const existingRequest = await prisma.supplierRequest.findUnique({
+      where: { id },
+      include: { files: true },
+    })
+
+    if (!existingRequest) {
+      return NextResponse.json({ error: 'Request not found' }, { status: 404 })
+    }
+
+    if (existingRequest.status !== 'CANCELLED') {
+      return NextResponse.json(
+        { error: 'Only cancelled requests can be deleted' },
+        { status: 400 }
+      )
+    }
+
+    // Delete files from Vercel Blob if available
+    if (process.env.BLOB_READ_WRITE_TOKEN && existingRequest.files.length > 0) {
+      try {
+        const { del } = await import('@vercel/blob')
+        for (const file of existingRequest.files) {
+          if (file.filePath.startsWith('http')) {
+            await del(file.filePath)
+          }
+        }
+      } catch (e) {
+        console.error('Error deleting blob files:', e)
+        // Don't block deletion if blob cleanup fails
+      }
+    }
+
+    // Delete audit logs, files, then request (cascade should handle files/audit but be explicit)
+    await prisma.auditLog.deleteMany({ where: { requestId: id } })
+    await prisma.supplierFile.deleteMany({ where: { requestId: id } })
+    await prisma.supplierRequest.delete({ where: { id } })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting request:', error)
     return NextResponse.json(
       { error: 'An error occurred' },
       { status: 500 }

@@ -117,7 +117,7 @@ function LoginForm() {
           </Button>
 
           <div className="text-center">
-            <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+            <Link href="/forgot-password" className="text-sm text-primary hover:underline">
               {t('auth.login.forgotPassword')}
             </Link>
           </div>
@@ -127,7 +127,7 @@ function LoginForm() {
           <>
             <div className="relative my-6">
               <Separator />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-muted-foreground">
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-sm text-muted-foreground">
                 {t('common.or')}
               </span>
             </div>
@@ -161,9 +161,9 @@ function LoginForm() {
 
         {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
           <>
-            <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-              <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.accounts')}</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+            <div className="mt-6 p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground font-medium mb-2">{t('demo.accounts')}</p>
+              <ul className="text-sm text-muted-foreground space-y-1">
                 <li><strong>Admin:</strong> admin@demo.nl / demo123</li>
                 <li><strong>Inkoper:</strong> inkoper@demo.nl / demo123</li>
                 <li><strong>Finance:</strong> finance@demo.nl / demo123</li>
@@ -171,14 +171,14 @@ function LoginForm() {
               </ul>
             </div>
 
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.viewEmails')}</p>
-              <p className="text-sm text-gray-500 mb-1">
-                <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+            <div className="mt-4 p-4 bg-accent rounded-lg">
+              <p className="text-sm text-muted-foreground font-medium mb-2">{t('demo.viewEmails')}</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                   https://ethereal.email/login
                 </a>
               </p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <ul className="text-sm text-muted-foreground space-y-1">
                 <li><strong>Email:</strong> dxubywxljl4roleu@ethereal.email</li>
                 <li>{t('demo.passwordCreds')}</li>
               </ul>
@@ -194,7 +194,7 @@ export default function LoginPage() {
   const { t } = useLanguage()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
       <Suspense fallback={
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">

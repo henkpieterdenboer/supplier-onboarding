@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useLanguage } from '@/lib/i18n-context'
 import { Label as LabelEnum } from '@/types'
 
@@ -187,7 +188,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
               placeholder={t('admin.users.form.emailPlaceholder')}
             />
             {isEdit && (
-              <p className="text-xs text-gray-500">{t('admin.users.form.emailReadonly')}</p>
+              <p className="text-xs text-muted-foreground">{t('admin.users.form.emailReadonly')}</p>
             )}
           </div>
 
@@ -196,13 +197,11 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
             <div className="space-y-2">
               {(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
                 <div key={role} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id={`role-${role}`}
                     checked={roles.includes(role)}
-                    onChange={() => handleRoleToggle(role)}
+                    onCheckedChange={() => handleRoleToggle(role)}
                     disabled={isLoading}
-                    className="h-4 w-4 rounded border-gray-300"
                   />
                   <Label htmlFor={`role-${role}`} className="font-normal">
                     {t(`enums.role.${role}`)}
@@ -217,13 +216,11 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
             <div className="space-y-2">
               {Object.values(LabelEnum).map((label) => (
                 <div key={label} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id={`label-${label}`}
                     checked={labels.includes(label)}
-                    onChange={() => handleLabelToggle(label)}
+                    onCheckedChange={() => handleLabelToggle(label)}
                     disabled={isLoading}
-                    className="h-4 w-4 rounded border-gray-300"
                   />
                   <Label htmlFor={`label-${label}`} className="font-normal">
                     {t(`enums.label.${label}`)}
@@ -234,13 +231,11 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
           </div>
 
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="receiveEmails"
               checked={receiveEmails}
-              onChange={(e) => setReceiveEmails(e.target.checked)}
+              onCheckedChange={(checked) => setReceiveEmails(checked === true)}
               disabled={isLoading}
-              className="h-4 w-4 rounded border-gray-300"
             />
             <Label htmlFor="receiveEmails" className="font-normal">
               {t('admin.users.form.receiveEmails')}

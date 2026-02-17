@@ -95,6 +95,9 @@ export const AuditAction = {
   SUPPLIER_SAVED: 'SUPPLIER_SAVED',
   SUPPLIER_TYPE_CHANGED: 'SUPPLIER_TYPE_CHANGED',
   VIES_CHECKED: 'VIES_CHECKED',
+  SELF_FILL_ACTIVATED: 'SELF_FILL_ACTIVATED',
+  PURCHASER_SAVED: 'PURCHASER_SAVED',
+  FINANCE_SAVED: 'FINANCE_SAVED',
 } as const
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 

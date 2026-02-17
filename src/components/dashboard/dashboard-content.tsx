@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { DashboardStats } from '@/components/dashboard/stats'
 import { RequestsTable } from '@/components/dashboard/requests-table'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLanguage } from '@/lib/i18n-context'
 
 interface Request {
@@ -39,9 +40,23 @@ interface DashboardContentProps {
   userLabels: string[]
 }
 
+const ACTIVE_STATUSES = ['INVITATION_SENT', 'AWAITING_PURCHASER', 'AWAITING_FINANCE', 'AWAITING_ERP']
+const ARCHIVE_STATUSES = ['COMPLETED', 'CANCELLED']
+
 export function DashboardContent({ stats, requests, userRoles, userLabels }: DashboardContentProps) {
+  const [activeTab, setActiveTab] = useState<'active' | 'archive'>('active')
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const { t } = useLanguage()
+
+  const filteredRequests = useMemo(() => {
+    const statuses = activeTab === 'active' ? ACTIVE_STATUSES : ARCHIVE_STATUSES
+    return requests.filter(r => statuses.includes(r.status))
+  }, [requests, activeTab])
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as 'active' | 'archive')
+    setSelectedStatus(null)
+  }
 
   return (
     <>
@@ -50,17 +65,26 @@ export function DashboardContent({ stats, requests, userRoles, userLabels }: Das
         <p className="text-gray-500">{t('dashboard.description')}</p>
       </div>
 
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="active">{t('dashboard.tabs.active')}</TabsTrigger>
+          <TabsTrigger value="archive">{t('dashboard.tabs.archive')}</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <DashboardStats
         stats={stats}
+        activeTab={activeTab}
         selectedStatus={selectedStatus}
         onStatusClick={setSelectedStatus}
       />
 
       <RequestsTable
-        requests={requests}
+        requests={filteredRequests}
         userRoles={userRoles}
         userLabels={userLabels}
         externalStatusFilter={selectedStatus}
+        activeTab={activeTab}
       />
 
       {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (

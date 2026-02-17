@@ -22,9 +22,11 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Label, Status, SupplierType } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
+import { statusColors, supplierTypeColors, labelColors } from '@/lib/status-colors'
 import * as XLSX from 'xlsx'
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale } from '@/lib/i18n'
+import { Inbox } from 'lucide-react'
 
 interface Request {
   id: string
@@ -48,35 +50,16 @@ interface RequestsTableProps {
   userRoles: string[]
   userLabels: string[]
   externalStatusFilter?: string | null
+  activeTab?: 'active' | 'archive'
 }
 
-const statusColors: Record<string, string> = {
-  INVITATION_SENT: 'bg-yellow-100 text-yellow-800',
-  AWAITING_PURCHASER: 'bg-orange-100 text-orange-800',
-  AWAITING_FINANCE: 'bg-blue-100 text-blue-800',
-  AWAITING_ERP: 'bg-purple-100 text-purple-800',
-  COMPLETED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-}
-
-const supplierTypeColors: Record<string, string> = {
-  KOOP: 'bg-slate-100 text-slate-800',
-  X_KWEKER: 'bg-emerald-100 text-emerald-800',
-  O_KWEKER: 'bg-cyan-100 text-cyan-800',
-}
-
-const labelColors: Record<string, string> = {
-  COLORIGINZ: 'bg-indigo-100 text-indigo-800',
-  PFC: 'bg-pink-100 text-pink-800',
-}
-
-export function RequestsTable({ requests, userRoles, userLabels, externalStatusFilter }: RequestsTableProps) {
+export function RequestsTable({ requests, userRoles, userLabels, externalStatusFilter, activeTab }: RequestsTableProps) {
   const { t, language } = useLanguage()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [labelFilter, setLabelFilter] = useState<string>('all')
-  const [sortField, setSortField] = useState<'createdAt' | 'supplierName' | 'status' | 'supplierEmail'>('createdAt')
+  const [sortField, setSortField] = useState<'createdAt' | 'supplierName' | 'status' | 'supplierEmail' | 'createdBy'>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   // Synchroniseer externe filter met interne state
@@ -127,6 +110,8 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
         comparison = a.status.localeCompare(b.status)
       } else if (sortField === 'supplierEmail') {
         comparison = a.supplierEmail.localeCompare(b.supplierEmail)
+      } else if (sortField === 'createdBy') {
+        comparison = a.createdBy.lastName.localeCompare(b.createdBy.lastName)
       }
       return sortOrder === 'asc' ? comparison : -comparison
     })
@@ -151,7 +136,7 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
     XLSX.writeFile(wb, `leveranciersaanvragen_${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
-  const toggleSort = (field: 'createdAt' | 'supplierName' | 'status' | 'supplierEmail') => {
+  const toggleSort = (field: 'createdAt' | 'supplierName' | 'status' | 'supplierEmail' | 'createdBy') => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
     } else {
@@ -170,6 +155,21 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-64"
           />
+          {userLabels.length > 1 && (
+            <Select value={labelFilter} onValueChange={setLabelFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder={t('requests.table.filterLabel')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('requests.table.allLabels')}</SelectItem>
+                {Object.values(Label).filter(l => userLabels.includes(l)).map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {t(`enums.label.${value}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder={t('requests.table.filterStatus')} />
@@ -196,21 +196,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
               ))}
             </SelectContent>
           </Select>
-          {userLabels.length > 1 && (
-            <Select value={labelFilter} onValueChange={setLabelFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder={t('requests.table.filterLabel')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('requests.table.allLabels')}</SelectItem>
-                {Object.values(Label).filter(l => userLabels.includes(l)).map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {t(`enums.label.${value}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
         </div>
 
         <Button onClick={handleExport} variant="outline">
@@ -218,12 +203,12 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
         </Button>
       </div>
 
-      <div className="rounded-md border bg-white">
-        <Table>
+      <div className="rounded-md border bg-card overflow-x-auto">
+        <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
               <TableHead
-                className="cursor-pointer hover:bg-gray-50"
+                className="cursor-pointer hover:bg-muted"
                 onClick={() => toggleSort('supplierName')}
               >
                 {t('requests.table.supplier')}
@@ -234,7 +219,7 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
               <TableHead>{t('requests.table.label')}</TableHead>
               <TableHead>{t('requests.table.type')}</TableHead>
               <TableHead
-                className="cursor-pointer hover:bg-gray-50"
+                className="cursor-pointer hover:bg-muted"
                 onClick={() => toggleSort('supplierEmail')}
               >
                 {t('requests.table.email')}
@@ -243,7 +228,7 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                 )}
               </TableHead>
               <TableHead
-                className="cursor-pointer hover:bg-gray-50"
+                className="cursor-pointer hover:bg-muted"
                 onClick={() => toggleSort('status')}
               >
                 {t('requests.table.status')}
@@ -251,9 +236,17 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                   <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
-              <TableHead>{t('requests.table.createdBy')}</TableHead>
               <TableHead
-                className="cursor-pointer hover:bg-gray-50"
+                className="cursor-pointer hover:bg-muted"
+                onClick={() => toggleSort('createdBy')}
+              >
+                {t('requests.table.createdBy')}
+                {sortField === 'createdBy' && (
+                  <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                )}
+              </TableHead>
+              <TableHead
+                className="cursor-pointer hover:bg-muted"
                 onClick={() => toggleSort('createdAt')}
               >
                 {t('requests.table.date')}
@@ -267,25 +260,28 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
           <TableBody>
             {filteredAndSortedRequests.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                  {t('requests.table.empty')}
+                <TableCell colSpan={8} className="h-32">
+                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                    <Inbox className="h-8 w-8" />
+                    <p className="text-sm font-medium">{t('requests.table.empty')}</p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               filteredAndSortedRequests.map((request) => (
                 <TableRow key={request.id}>
                   <TableCell className="font-medium">
-                    <Link href={`/requests/${request.id}`} className="hover:text-blue-600 hover:underline">
+                    <Link href={`/requests/${request.id}`} className="hover:text-primary hover:underline">
                       {request.supplierName}
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge className={labelColors[request.label] || 'bg-gray-100 text-gray-800'}>
+                    <Badge className={labelColors[request.label] || 'bg-muted text-muted-foreground'}>
                       {t(`enums.label.${request.label}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={supplierTypeColors[request.supplierType] || 'bg-gray-100 text-gray-800'}>
+                    <Badge className={supplierTypeColors[request.supplierType] || 'bg-muted text-muted-foreground'}>
                       {t(`enums.supplierType.${request.supplierType}`)}
                     </Badge>
                   </TableCell>
@@ -313,7 +309,7 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
         </Table>
       </div>
 
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground">
         {t('requests.table.count', { filtered: filteredAndSortedRequests.length, total: requests.length })}
       </div>
     </div>

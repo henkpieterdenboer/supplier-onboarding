@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
+import { ChevronDown, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,7 +13,15 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Role, RoleLabels } from '@/types'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
 import { useLanguage } from '@/lib/i18n-context'
@@ -35,6 +44,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
   const [isChangingRole, setIsChangingRole] = useState(false)
   const [emailProvider, setEmailProvider] = useState<'ethereal' | 'resend'>('ethereal')
   const [isChangingProvider, setIsChangingProvider] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
@@ -121,23 +131,57 @@ export function DashboardNav({ user }: DashboardNavProps) {
   }
 
   return (
-    <header className="bg-slate-300 border-b sticky top-0 z-50">
+    <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
+            {/* Mobile hamburger menu */}
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72">
+                <SheetHeader>
+                  <SheetTitle>
+                    <img src={LOGO_BASE64} alt="Logo" className="h-8 w-auto" />
+                  </SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2 px-4">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`text-sm font-medium transition-colors ${
+                        pathname === item.href
+                          ? 'bg-accent text-accent-foreground rounded-md px-3 py-2'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md px-3 py-2'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+
             <Link href="/dashboard" className="flex items-center gap-3">
               <img src={LOGO_BASE64} alt="Logo" className="h-8 w-auto" />
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6">
+            {/* Desktop navigation */}
+            <nav className="hidden md:flex items-center gap-2">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors hover:text-gray-900 ${
+                  className={`text-sm font-medium transition-colors ${
                     pathname === item.href
-                      ? 'text-gray-900'
-                      : 'text-gray-500'
+                      ? 'bg-accent text-accent-foreground rounded-md px-3 py-1.5'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md px-3 py-1.5'
                   }`}
                 >
                   {item.label}
@@ -154,7 +198,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
+                    className="hidden sm:flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
                     disabled={isChangingRole}
                   >
                     <span className="text-xs text-yellow-700">{t('demo.label')}</span>
@@ -165,23 +209,11 @@ export function DashboardNav({ user }: DashboardNavProps) {
                         </Badge>
                       ))}
                     </div>
-                    <svg
-                      className="h-3 w-3 text-yellow-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                    <ChevronDown className="h-3 w-3 text-yellow-700" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <div className="px-2 py-1.5 text-xs text-gray-500 font-medium">
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">
                     {t('demo.changeRoles')}
                   </div>
                   <DropdownMenuSeparator />
@@ -194,16 +226,15 @@ export function DashboardNav({ user }: DashboardNavProps) {
                       }}
                       className={`cursor-pointer ${
                         user.roles.includes(role)
-                          ? 'bg-blue-50 text-blue-700 font-medium'
+                          ? 'bg-accent text-accent-foreground font-medium'
                           : ''
                       }`}
                     >
                       <div className="flex items-center gap-2 w-full">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={user.roles.includes(role)}
-                          readOnly
-                          className="h-4 w-4 rounded border-gray-300"
+                          onCheckedChange={() => handleRoleToggle(role)}
+                          aria-label={RoleLabels[role as keyof typeof RoleLabels]}
                         />
                         {RoleLabels[role as keyof typeof RoleLabels]}
                       </div>
@@ -215,7 +246,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
+                className="hidden sm:flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
                 onClick={handleEmailProviderToggle}
                 disabled={isChangingProvider}
               >
@@ -225,7 +256,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   className={`text-xs ${
                     emailProvider === 'resend'
                       ? 'bg-green-100 text-green-700 border-green-300'
-                      : 'bg-gray-100 text-gray-600 border-gray-300'
+                      : 'bg-muted text-muted-foreground border-border'
                   }`}
                 >
                   {emailProvider === 'resend' ? t('demo.emailResend') : t('demo.emailEthereal')}
@@ -239,23 +270,11 @@ export function DashboardNav({ user }: DashboardNavProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
                   <span className="text-sm">{user.name || user.email}</span>
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <div className="px-2 py-1.5 text-sm text-gray-500">
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
                   {user.email}
                 </div>
                 <DropdownMenuSeparator />
