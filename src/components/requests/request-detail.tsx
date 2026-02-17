@@ -317,22 +317,6 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
         </div>
       </div>
 
-      {/* Demo mode: link to test email inbox when invitation is pending */}
-      {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && request.status === 'INVITATION_SENT' && (
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.viewEmails')}</p>
-          <p className="text-sm text-gray-500 mb-1">
-            <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-              https://ethereal.email/login
-            </a>
-          </p>
-          <ul className="text-sm text-gray-500 space-y-1">
-            <li>{t('demo.emailCreds')}</li>
-            <li>{t('demo.passwordCreds')}</li>
-          </ul>
-        </div>
-      )}
-
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList>
           <TabsTrigger value="details">{t('requests.detail.tabs.details')}</TabsTrigger>
@@ -862,6 +846,22 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Demo mode: link to test email inbox when invitation is pending */}
+      {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && request.status === 'INVITATION_SENT' && (
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+          <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.viewEmails')}</p>
+          <p className="text-sm text-gray-500 mb-1">
+            <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              https://ethereal.email/login
+            </a>
+          </p>
+          <ul className="text-sm text-gray-500 space-y-1">
+            <li>{t('demo.emailCreds')}</li>
+            <li>{t('demo.passwordCreds')}</li>
+          </ul>
+        </div>
+      )}
     </div>
   )
 }
