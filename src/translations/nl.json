@@ -435,6 +435,9 @@
       "submit": "Definitief versturen",
       "submittingForm": "Bezig met verzenden...",
       "fileHint": "PDF, JPG of PNG (max 10MB)",
+      "privacyLabel": "Ik ga akkoord met het",
+      "privacyLink": "privacybeleid",
+      "privacyUrl": "#",
       "savedSuccess": "Gegevens opgeslagen! U ontvangt een email met de link om later verder te gaan.",
       "submitSuccess": "Gegevens succesvol verstuurd!"
     }

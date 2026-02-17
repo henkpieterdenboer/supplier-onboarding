@@ -74,6 +74,7 @@ export default function SupplierFormPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [error, setError] = useState('')
 
   const [formData, setFormData] = useState({
@@ -860,6 +861,28 @@ export default function SupplierFormPage() {
             </Alert>
           )}
 
+          {/* Privacy consent */}
+          <div className="flex items-start space-x-2 mb-6">
+            <Checkbox
+              id="privacyAccepted"
+              checked={privacyAccepted}
+              onCheckedChange={(checked) => setPrivacyAccepted(checked === true)}
+              disabled={isDisabled}
+              className="mt-0.5"
+            />
+            <Label htmlFor="privacyAccepted" className="text-sm text-gray-600 leading-snug">
+              {t('supplier.form.privacyLabel')}{' '}
+              <a
+                href={t('supplier.form.privacyUrl')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {t('supplier.form.privacyLink')}
+              </a>
+            </Label>
+          </div>
+
           <div className="flex gap-4">
             <Button
               type="button"
@@ -870,7 +893,7 @@ export default function SupplierFormPage() {
             >
               {isSaving ? t('supplier.form.saving') : t('supplier.form.saveLater')}
             </Button>
-            <Button type="submit" disabled={isDisabled} className="flex-1">
+            <Button type="submit" disabled={isDisabled || !privacyAccepted} className="flex-1">
               {isSubmitting ? t('supplier.form.submittingForm') : t('supplier.form.submit')}
             </Button>
           </div>

@@ -435,6 +435,9 @@
       "submit": "Submit",
       "submittingForm": "Submitting...",
       "fileHint": "PDF, JPG or PNG (max 10MB)",
+      "privacyLabel": "I agree to the",
+      "privacyLink": "privacy policy",
+      "privacyUrl": "#",
       "savedSuccess": "Details saved! You will receive an email with a link to continue later.",
       "submitSuccess": "Details successfully submitted!"
     }
