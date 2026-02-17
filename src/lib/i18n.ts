@@ -1,9 +1,10 @@
 import nl from '@/translations/nl.json'
 import en from '@/translations/en.json'
+import es from '@/translations/es.json'
 
-export type Language = 'nl' | 'en'
+export type Language = 'nl' | 'en' | 'es'
 
-const translations: Record<Language, Record<string, unknown>> = { nl, en }
+const translations: Record<Language, Record<string, unknown>> = { nl, en, es }
 
 /**
  * Get a translation by dot-notation path.
@@ -53,7 +54,11 @@ export function getTranslation(
  * Get the date locale string for a language
  */
 export function getDateLocale(language: Language): string {
-  return language === 'nl' ? 'nl-NL' : 'en-GB'
+  switch (language) {
+    case 'nl': return 'nl-NL'
+    case 'es': return 'es-ES'
+    default: return 'en-GB'
+  }
 }
 
 /**

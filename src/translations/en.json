@@ -160,6 +160,7 @@
       "supplierLanguageDescription": "The language for the supplier form and emails",
       "languageNl": "Dutch",
       "languageEn": "English",
+      "languageEs": "Spanish",
       "howToContinue": "How would you like to continue?",
       "sendInvitation": "Send invitation",
       "sendInvitationDescription": "The supplier receives an email to fill in the form themselves",

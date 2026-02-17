@@ -54,6 +54,12 @@ export function LanguageSelector() {
         >
           English
         </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => handleChange('es')}
+          className={`cursor-pointer ${language === 'es' ? 'bg-blue-50 font-medium' : ''}`}
+        >
+          Español
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

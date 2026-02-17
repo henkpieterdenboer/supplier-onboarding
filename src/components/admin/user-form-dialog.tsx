@@ -256,6 +256,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
               <SelectContent>
                 <SelectItem value="nl">Nederlands</SelectItem>
                 <SelectItem value="en">English</SelectItem>
+                <SelectItem value="es">Español</SelectItem>
               </SelectContent>
             </Select>
           </div>

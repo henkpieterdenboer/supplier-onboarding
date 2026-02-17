@@ -6,7 +6,7 @@ function getLanguageFromCookie(): Language {
   if (typeof document === 'undefined') return 'nl'
   const match = document.cookie.match(/(^| )NEXT_LOCALE=([^;]+)/)
   const lang = match ? match[2] : 'nl'
-  return lang === 'en' ? 'en' : 'nl'
+  return lang === 'en' ? 'en' : lang === 'es' ? 'es' : 'nl'
 }
 
 export default function GlobalError({

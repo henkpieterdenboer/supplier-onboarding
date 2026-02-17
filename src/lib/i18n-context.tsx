@@ -36,7 +36,7 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
     if (initialLanguage) return initialLanguage
     if (typeof document !== 'undefined') {
       const cookie = getCookie('NEXT_LOCALE')
-      if (cookie === 'en' || cookie === 'nl') return cookie
+      if (cookie === 'en' || cookie === 'nl' || cookie === 'es') return cookie
     }
     return 'nl'
   })
