@@ -64,11 +64,13 @@ export async function GET(
 
     const xml = generateExactXml(supplierRequest)
 
+    const fileName = `${supplierRequest.companyName.replace(/[^a-zA-Z0-9]/g, '_')}.xml`
+
     return new NextResponse(xml, {
       status: 200,
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
-        'Content-Disposition': 'inline',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
       },
     })
   } catch (error) {

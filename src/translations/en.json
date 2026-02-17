@@ -329,6 +329,7 @@
         "waiting": "Waiting for Finance",
         "exactXml": "Exact Globe XML",
         "exactXmlDescription": "Copy this URL and paste it in Exact Globe to import the supplier",
+        "downloadXml": "Download XML",
         "copyUrl": "Copy URL",
         "urlCopied": "URL copied to clipboard"
       },

@@ -329,6 +329,7 @@
         "waiting": "Wachten op Finance",
         "exactXml": "Exact Globe XML",
         "exactXmlDescription": "Kopieer deze URL en plak in Exact Globe om de leverancier te importeren",
+        "downloadXml": "XML downloaden",
         "copyUrl": "URL kopiëren",
         "urlCopied": "URL gekopieerd naar klembord"
       },

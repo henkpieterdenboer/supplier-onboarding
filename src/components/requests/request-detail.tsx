@@ -718,11 +718,19 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                     <Label className="text-gray-500">{t('requests.detail.finance.exactXml')}</Label>
                     <p className="text-xs text-gray-400">{t('requests.detail.finance.exactXmlDescription')}</p>
                     <div className="flex gap-2">
-                      <Input
-                        readOnly
-                        value={typeof window !== 'undefined' ? `${window.location.origin}/api/requests/${request.id}/exact-xml` : `/api/requests/${request.id}/exact-xml`}
-                        className="font-mono text-xs"
-                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const url = `/api/requests/${request.id}/exact-xml`
+                          const link = document.createElement('a')
+                          link.href = url
+                          link.download = `${request.supplierName?.replace(/[^a-zA-Z0-9]/g, '_') || request.id}.xml`
+                          link.click()
+                        }}
+                      >
+                        {t('requests.detail.finance.downloadXml')}
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
