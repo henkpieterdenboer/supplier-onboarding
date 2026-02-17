@@ -15,7 +15,7 @@ export const labelConfigs: Record<Label, LabelConfig> = {
   PFC: {
     name: 'Parfum Flower Company',
     shortName: 'PFC',
-    logoPath: '/pfc.png',
+    logoPath: '/PFC.jpg',
   },
 }
 
