@@ -19,15 +19,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
-import { Check, X, Loader2, MoreHorizontal, Trash2 } from 'lucide-react'
+import { Check, X, Loader2, Trash2 } from 'lucide-react'
 import { formatUserName } from '@/lib/user-utils'
 import {
   showFinancialSection,
@@ -226,7 +219,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   const canSendReminder =
     request.status !== 'COMPLETED' && request.status !== 'CANCELLED'
 
-  const hasSecondaryActions = canResendInvitation || canSendReminder || canReopen || canCancel
+
 
   const handleSelfFill = async () => {
     setIsLoading(true)
@@ -269,31 +262,24 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">{request.supplierName}</h1>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-gray-900">{request.supplierName}</h1>
             <Badge className={statusColors[request.status]}>
               {t(`enums.status.${request.status}`)}
             </Badge>
+            <Badge className={supplierTypeColors[supplierType] || 'bg-gray-100 text-gray-800'}>
+              {t(`enums.supplierType.${supplierType}`)}
+            </Badge>
+            <Badge className={labelColors[request.label] || 'bg-gray-100 text-gray-800'}>
+              {t(`enums.label.${request.label}`)}
+            </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">{request.supplierEmail}</p>
-          {/* Compact metadata strip */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Badge className={supplierTypeColors[supplierType] || 'bg-muted text-muted-foreground'}>
-                {t(`enums.supplierType.${supplierType}`)}
-              </Badge>
-              <Badge className={labelColors[request.label] || 'bg-muted text-muted-foreground'}>
-                {t(`enums.label.${request.label}`)}
-              </Badge>
-            </div>
-            <span>{t(`enums.region.${request.region}`)} · {request.selfFill ? t('requests.detail.basic.byPurchaser') : t('requests.detail.basic.bySupplier')}</span>
-            <span>{formatUserName(request.createdBy) || request.createdBy.email} · {new Date(request.createdAt).toLocaleDateString(getDateLocale(language))}</span>
-          </div>
+          <p className="text-gray-500">{request.supplierEmail}</p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           {canSelfFill && (
             <Dialog>
               <DialogTrigger asChild>
@@ -327,6 +313,61 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
             </Link>
           )}
 
+          {canResendInvitation && (
+            <Button
+              variant="outline"
+              onClick={() => handleAction('resend-invitation')}
+              disabled={isLoading}
+            >
+              {t('requests.detail.actions.resendInvitation')}
+            </Button>
+          )}
+
+          {canSendReminder && (
+            <Button
+              variant="outline"
+              onClick={() => handleAction('send-reminder')}
+              disabled={isLoading}
+            >
+              {t('requests.detail.actions.sendReminder')}
+            </Button>
+          )}
+
+          {canCancel && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive">{t('requests.detail.actions.cancel')}</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t('requests.detail.actions.cancelTitle')}</DialogTitle>
+                  <DialogDescription>
+                    {t('requests.detail.actions.cancelMessage')}
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleAction('cancel')}
+                    disabled={isLoading}
+                  >
+                    {t('requests.detail.actions.cancel')}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {canReopen && (
+            <Button
+              variant="outline"
+              onClick={() => handleAction('reopen')}
+              disabled={isLoading}
+            >
+              {t('requests.detail.actions.reopen')}
+            </Button>
+          )}
+
           {canDelete && (
             <Dialog>
               <DialogTrigger asChild>
@@ -354,74 +395,6 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
               </DialogContent>
             </Dialog>
           )}
-
-          {hasSecondaryActions && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {canResendInvitation && (
-                  <DropdownMenuItem
-                    onClick={() => handleAction('resend-invitation')}
-                    disabled={isLoading}
-                  >
-                    {t('requests.detail.actions.resendInvitation')}
-                  </DropdownMenuItem>
-                )}
-                {canSendReminder && (
-                  <DropdownMenuItem
-                    onClick={() => handleAction('send-reminder')}
-                    disabled={isLoading}
-                  >
-                    {t('requests.detail.actions.sendReminder')}
-                  </DropdownMenuItem>
-                )}
-                {canReopen && (
-                  <DropdownMenuItem
-                    onClick={() => handleAction('reopen')}
-                    disabled={isLoading}
-                  >
-                    {t('requests.detail.actions.reopen')}
-                  </DropdownMenuItem>
-                )}
-                {canCancel && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onSelect={(e) => e.preventDefault()}
-                        >
-                          {t('requests.detail.actions.cancel')}
-                        </DropdownMenuItem>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>{t('requests.detail.actions.cancelTitle')}</DialogTitle>
-                          <DialogDescription>
-                            {t('requests.detail.actions.cancelMessage')}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleAction('cancel')}
-                            disabled={isLoading}
-                          >
-                            {t('requests.detail.actions.cancel')}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </div>
       </div>
 
@@ -432,7 +405,59 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
         </TabsList>
 
         <TabsContent value="details" className="space-y-4">
-          {/* Basic Info - removed, metadata is now in the header strip */}
+          {/* Basic Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('requests.detail.basic.title')}</CardTitle>
+              <CardDescription>{t('requests.detail.basic.description')}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.supplier')}</Label>
+                <p className="font-medium">{request.supplierName}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.email')}</Label>
+                <p className="font-medium">{request.supplierEmail}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.type')}</Label>
+                <p className="font-medium">
+                  {t(`enums.supplierType.${supplierType}`)}
+                </p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.label')}</Label>
+                <p className="font-medium">
+                  {t(`enums.label.${request.label}`)}
+                </p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.region')}</Label>
+                <p className="font-medium">
+                  {t(`enums.region.${request.region}`)}
+                </p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.createdBy')}</Label>
+                <p className="font-medium">
+                  {formatUserName(request.createdBy) || request.createdBy.email}
+                </p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.createdAt')}</Label>
+                <p className="font-medium">
+                  {new Date(request.createdAt).toLocaleString(getDateLocale(language))}
+                </p>
+              </div>
+              <div>
+                <Label className="text-gray-500">{t('requests.detail.basic.fillMethod')}</Label>
+                <p className="font-medium">
+                  {request.selfFill ? t('requests.detail.basic.byPurchaser') : t('requests.detail.basic.bySupplier')}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Supplier Details */}
           {(request.companyName || request.supplierSubmittedAt) && (
