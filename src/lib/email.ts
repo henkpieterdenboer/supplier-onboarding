@@ -98,12 +98,28 @@ async function sendEmail({ to, subject, html, language, label }: SendEmailOption
 
     if (IS_DEMO_MODE) {
       // In demo mode, all emails go to the demo address with the original recipient shown in the body
+      // Check for custom email target from cookie
+      let demoTarget = DEMO_EMAIL!
+      let targetSource = ''
+      try {
+        const cookieStore = await cookies()
+        const customEmail = cookieStore.get('demo-email-target')?.value
+        if (customEmail) {
+          demoTarget = customEmail
+          targetSource = ` (custom: ${customEmail})`
+        }
+      } catch {
+        // cookies() can fail outside of request context
+      }
+
       const providerLabel = provider === 'resend' ? 'Resend (echte mail)' : 'Ethereal (nep)'
+      const targetLabel = demoTarget !== DEMO_EMAIL ? `${demoTarget} (custom)` : `${demoTarget} (default)`
       const demoHtml = `
         <div style="background-color: #f0f0f0; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
           <strong>${getTranslation(language || 'nl', 'emails.demoMode.label')}</strong><br>
           ${getTranslation(language || 'nl', 'emails.demoMode.originalRecipient')} <strong>${to}</strong><br>
-          ${getTranslation(language || 'nl', 'emails.demoMode.provider')} <strong>${providerLabel}</strong>
+          ${getTranslation(language || 'nl', 'emails.demoMode.provider')} <strong>${providerLabel}</strong><br>
+          Ontvanger: <strong>${targetLabel}</strong>
         </div>
         ${getEmailHeader(label)}
         ${html}
@@ -111,11 +127,11 @@ async function sendEmail({ to, subject, html, language, label }: SendEmailOption
 
       const info = await transporter.sendMail({
         from: fromAddress,
-        to: DEMO_EMAIL!,
+        to: demoTarget,
         subject: `[DEMO] ${subject}`,
         html: demoHtml,
       })
-      console.log(`Email sent via ${provider} to ${DEMO_EMAIL} (original: ${to})`)
+      console.log(`Email sent via ${provider} to ${demoTarget}${targetSource} (original: ${to})`)
 
       // Return Ethereal preview URL only for Ethereal transport
       if (provider === 'ethereal') {

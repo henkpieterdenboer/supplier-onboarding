@@ -33,6 +33,12 @@
     "emailResend": "Demomail",
     "emailEthereal": "Ethereal",
     "changeRoles": "Rollen wijzigen",
+    "emailProvider": "Email provider",
+    "emailRecipient": "Test email ontvanger",
+    "emailDefault": "Standaard (env)",
+    "emailSave": "Opslaan",
+    "emailSaved": "Opgeslagen",
+    "emailPlaceholder": "Email adres...",
     "viewEmails": "Om verstuurde mails te kunnen zien:",
     "emailCreds": "Email: dxubywxljl4roleu@ethereal.email",
     "passwordCreds": "Wachtwoord: SbGwM71ZJusSNSQWr3"

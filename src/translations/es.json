@@ -33,6 +33,12 @@
     "emailResend": "Correo demo",
     "emailEthereal": "Ethereal",
     "changeRoles": "Cambiar roles",
+    "emailProvider": "Proveedor de correo",
+    "emailRecipient": "Destinatario de prueba",
+    "emailDefault": "Predeterminado (env)",
+    "emailSave": "Guardar",
+    "emailSaved": "Guardado",
+    "emailPlaceholder": "Correo electrónico...",
     "viewEmails": "Para ver los correos enviados:",
     "emailCreds": "Email: dxubywxljl4roleu@ethereal.email",
     "passwordCreds": "Contraseña: SbGwM71ZJusSNSQWr3"

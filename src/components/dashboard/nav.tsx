@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { ChevronDown, Menu } from 'lucide-react'
+import { Check, ChevronDown, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import { Role, RoleLabels } from '@/types'
 import { LOGO_BASE64 } from '@/lib/logo-base64'
 import { useLanguage } from '@/lib/i18n-context'
@@ -43,7 +44,9 @@ export function DashboardNav({ user }: DashboardNavProps) {
   const { t } = useLanguage()
   const [isChangingRole, setIsChangingRole] = useState(false)
   const [emailProvider, setEmailProvider] = useState<'ethereal' | 'resend'>('ethereal')
-  const [isChangingProvider, setIsChangingProvider] = useState(false)
+  const [demoEmail, setDemoEmail] = useState<string>('')
+  const [demoEmailInput, setDemoEmailInput] = useState<string>('')
+  const [emailSaved, setEmailSaved] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -52,16 +55,17 @@ export function DashboardNav({ user }: DashboardNavProps) {
         .then((res) => res.json())
         .then((data) => {
           if (data.provider) setEmailProvider(data.provider)
+          if (data.demoEmail) {
+            setDemoEmail(data.demoEmail)
+            setDemoEmailInput(data.demoEmail)
+          }
         })
         .catch(() => {})
     }
   }, [])
 
-  const handleEmailProviderToggle = async () => {
-    if (isChangingProvider) return
-    setIsChangingProvider(true)
+  const handleEmailProviderChange = async (newProvider: 'ethereal' | 'resend') => {
     try {
-      const newProvider = emailProvider === 'ethereal' ? 'resend' : 'ethereal'
       const response = await fetch('/api/email-provider', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,8 +76,23 @@ export function DashboardNav({ user }: DashboardNavProps) {
       }
     } catch (error) {
       console.error('Error switching email provider:', error)
-    } finally {
-      setIsChangingProvider(false)
+    }
+  }
+
+  const handleDemoEmailSave = async () => {
+    try {
+      const response = await fetch('/api/email-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ demoEmail: demoEmailInput || null }),
+      })
+      if (response.ok) {
+        setDemoEmail(demoEmailInput)
+        setEmailSaved(true)
+        setTimeout(() => setEmailSaved(false), 2000)
+      }
+    } catch (error) {
+      console.error('Error saving demo email:', error)
     }
   }
 
@@ -243,25 +262,81 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden sm:flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
-                onClick={handleEmailProviderToggle}
-                disabled={isChangingProvider}
-              >
-                <span className="text-xs text-yellow-700">{t('demo.emailLabel')}</span>
-                <Badge
-                  variant="outline"
-                  className={`text-xs ${
-                    emailProvider === 'resend'
-                      ? 'bg-green-100 text-green-700 border-green-300'
-                      : 'bg-muted text-muted-foreground border-border'
-                  }`}
-                >
-                  {emailProvider === 'resend' ? t('demo.emailResend') : t('demo.emailEthereal')}
-                </Badge>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden sm:flex items-center gap-2 bg-yellow-50 border-yellow-300 hover:bg-yellow-100"
+                  >
+                    <span className="text-xs text-yellow-700">{t('demo.emailLabel')}</span>
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${
+                        emailProvider === 'resend'
+                          ? 'bg-green-100 text-green-700 border-green-300'
+                          : 'bg-muted text-muted-foreground border-border'
+                      }`}
+                    >
+                      {emailProvider === 'resend' ? t('demo.emailResend') : t('demo.emailEthereal')}
+                    </Badge>
+                    <ChevronDown className="h-3 w-3 text-yellow-700" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">
+                    {t('demo.emailProvider')}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleEmailProviderChange('ethereal')}
+                    className={`cursor-pointer ${emailProvider === 'ethereal' ? 'bg-accent font-medium' : ''}`}
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      {emailProvider === 'ethereal' ? <Check className="h-4 w-4" /> : <div className="w-4" />}
+                      Ethereal
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleEmailProviderChange('resend')}
+                    className={`cursor-pointer ${emailProvider === 'resend' ? 'bg-accent font-medium' : ''}`}
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      {emailProvider === 'resend' ? <Check className="h-4 w-4" /> : <div className="w-4" />}
+                      Resend
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">
+                    {t('demo.emailRecipient')}
+                  </div>
+                  <div className="px-2 pb-2">
+                    <Input
+                      type="email"
+                      value={demoEmailInput}
+                      onChange={(e) => setDemoEmailInput(e.target.value)}
+                      placeholder={t('demo.emailPlaceholder')}
+                      className="h-8 text-xs"
+                      onKeyDown={(e) => {
+                        e.stopPropagation()
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full mt-1.5 h-7 text-xs"
+                      onClick={handleDemoEmailSave}
+                    >
+                      {emailSaved ? t('demo.emailSaved') : t('demo.emailSave')}
+                    </Button>
+                    {demoEmail && (
+                      <p className="text-[10px] text-muted-foreground mt-1 truncate">
+                        Actief: {demoEmail}
+                      </p>
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>)}
 
             <LanguageSelector />
