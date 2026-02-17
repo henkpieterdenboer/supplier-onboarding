@@ -317,6 +317,25 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
         </div>
       </div>
 
+      {/* Demo mode: link to test email inbox when invitation is pending */}
+      {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && request.status === 'INVITATION_SENT' && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="font-medium text-amber-900 mb-1">{t('demo.testEmailTip')}</p>
+          <p className="text-sm text-amber-800 mb-2">{t('demo.testEmailDescription')}</p>
+          <a
+            href="https://ethereal.email/login"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline"
+          >
+            {t('demo.openTestInbox')} →
+          </a>
+          <p className="text-xs text-amber-700 mt-2">
+            {t('demo.emailCreds')} · {t('demo.passwordCreds')}
+          </p>
+        </div>
+      )}
+
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList>
           <TabsTrigger value="details">{t('requests.detail.tabs.details')}</TabsTrigger>
