@@ -319,20 +319,17 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
 
       {/* Demo mode: link to test email inbox when invitation is pending */}
       {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && request.status === 'INVITATION_SENT' && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="font-medium text-amber-900 mb-1">{t('demo.testEmailTip')}</p>
-          <p className="text-sm text-amber-800 mb-2">{t('demo.testEmailDescription')}</p>
-          <a
-            href="https://ethereal.email/login"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline"
-          >
-            {t('demo.openTestInbox')} →
-          </a>
-          <p className="text-xs text-amber-700 mt-2">
-            {t('demo.emailCreds')} · {t('demo.passwordCreds')}
+        <div className="p-4 bg-blue-50 rounded-lg">
+          <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.viewEmails')}</p>
+          <p className="text-sm text-gray-500 mb-1">
+            <a href="https://ethereal.email/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              https://ethereal.email/login
+            </a>
           </p>
+          <ul className="text-sm text-gray-500 space-y-1">
+            <li>{t('demo.emailCreds')}</li>
+            <li>{t('demo.passwordCreds')}</li>
+          </ul>
         </div>
       )}
 

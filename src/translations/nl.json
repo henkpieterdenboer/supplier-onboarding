@@ -35,10 +35,7 @@
     "changeRoles": "Rollen wijzigen",
     "viewEmails": "Om verstuurde mails te kunnen zien:",
     "emailCreds": "Email: dxubywxljl4roleu@ethereal.email",
-    "passwordCreds": "Wachtwoord: SbGwM71ZJusSNSQWr3",
-    "testEmailTip": "Uitnodiging verstuurd naar test-inbox",
-    "testEmailDescription": "Open de Ethereal test-inbox om de uitnodigingsmail te bekijken en door te klikken als leverancier.",
-    "openTestInbox": "Open test-inbox (Ethereal)"
+    "passwordCreds": "Wachtwoord: SbGwM71ZJusSNSQWr3"
   },
   "auth": {
     "login": {

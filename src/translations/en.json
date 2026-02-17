@@ -35,10 +35,7 @@
     "changeRoles": "Change roles",
     "viewEmails": "To view sent emails:",
     "emailCreds": "Email: dxubywxljl4roleu@ethereal.email",
-    "passwordCreds": "Password: SbGwM71ZJusSNSQWr3",
-    "testEmailTip": "Invitation sent to test inbox",
-    "testEmailDescription": "Open the Ethereal test inbox to view the invitation email and click through as the supplier.",
-    "openTestInbox": "Open test inbox (Ethereal)"
+    "passwordCreds": "Password: SbGwM71ZJusSNSQWr3"
   },
   "auth": {
     "login": {
