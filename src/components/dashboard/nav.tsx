@@ -294,7 +294,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   >
                     <div className="flex items-center gap-2 w-full">
                       {emailProvider === 'ethereal' ? <Check className="h-4 w-4" /> : <div className="w-4" />}
-                      {t('demo.emailEthereal')}
+                      {t('demo.emailEtherealLong')}
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -303,7 +303,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   >
                     <div className="flex items-center gap-2 w-full">
                       {emailProvider === 'resend' ? <Check className="h-4 w-4" /> : <div className="w-4" />}
-                      {t('demo.emailResend')}
+                      {t('demo.emailResendLong')}
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

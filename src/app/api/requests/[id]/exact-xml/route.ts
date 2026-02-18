@@ -44,6 +44,7 @@ export async function GET(
         invoicePostalCode: true,
         invoiceCity: true,
         paymentTerm: true,
+        creditorNumber: true,
         supplierType: true,
       },
     })

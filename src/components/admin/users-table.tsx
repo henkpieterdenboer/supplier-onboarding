@@ -28,6 +28,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Pencil, UserCheck, UserX, Mail } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { toast } from 'sonner'
 import { formatUserName } from '@/lib/user-utils'
 import { useLanguage } from '@/lib/i18n-context'
 import { UserFormDialog } from './user-form-dialog'
@@ -141,7 +144,12 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
             u.id === user.id ? { ...u, hasPendingActivation: true } : u
           )
         )
+        toast.success(t('admin.users.table.activationSent', { email: user.email }))
+      } else {
+        toast.error(t('admin.users.table.activationFailed'))
       }
+    } catch {
+      toast.error(t('admin.users.table.activationFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -275,34 +283,54 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingUser(user)}
-                      >
-                        {t('admin.users.table.edit')}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleActive(user)}
-                        className={user.isActive ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}
-                      >
-                        {user.isActive ? t('admin.users.table.deactivate') : t('admin.users.table.activate')}
-                      </Button>
-                      {!user.isActivated && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleResendActivation(user)}
-                          disabled={isLoading}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          {t('admin.users.table.resendActivation')}
-                        </Button>
-                      )}
-                    </div>
+                    <TooltipProvider>
+                      <div className="flex gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setEditingUser(user)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t('admin.users.table.edit')}</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`h-8 w-8 ${user.isActive ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}`}
+                              onClick={() => handleToggleActive(user)}
+                            >
+                              {user.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {user.isActive ? t('admin.users.table.deactivate') : t('admin.users.table.activate')}
+                          </TooltipContent>
+                        </Tooltip>
+                        {!user.isActivated && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-blue-600 hover:text-blue-700"
+                                onClick={() => handleResendActivation(user)}
+                                disabled={isLoading}
+                              >
+                                <Mail className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{t('admin.users.table.resendActivation')}</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))
