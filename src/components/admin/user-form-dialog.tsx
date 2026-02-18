@@ -135,125 +135,138 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <Alert variant="destructive">
               {error}
             </Alert>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Naam & email */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">{t('admin.users.form.firstName')}</Label>
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="middleName">{t('admin.users.form.middleName')}</Label>
+                <Input
+                  id="middleName"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                  disabled={isLoading}
+                  placeholder={t('admin.users.form.middleNamePlaceholder')}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="firstName">{t('admin.users.form.firstName')}</Label>
+              <Label htmlFor="lastName">{t('admin.users.form.lastName')}</Label>
               <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 required
                 disabled={isLoading}
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="middleName">{t('admin.users.form.middleName')}</Label>
+              <Label htmlFor="email">{t('admin.users.form.email')}</Label>
               <Input
-                id="middleName"
-                value={middleName}
-                onChange={(e) => setMiddleName(e.target.value)}
-                disabled={isLoading}
-                placeholder={t('admin.users.form.middleNamePlaceholder')}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading || isEdit}
+                placeholder={t('admin.users.form.emailPlaceholder')}
               />
+              {isEdit && (
+                <p className="text-xs text-muted-foreground">{t('admin.users.form.emailReadonly')}</p>
+              )}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="lastName">{t('admin.users.form.lastName')}</Label>
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-              disabled={isLoading}
-            />
+          <hr className="border-border" />
+
+          {/* Rollen & labels naast elkaar */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label>{t('admin.users.form.roles')}</Label>
+              <div className="space-y-2">
+                {(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
+                  <div key={role} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`role-${role}`}
+                      checked={roles.includes(role)}
+                      onCheckedChange={() => handleRoleToggle(role)}
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor={`role-${role}`} className="font-normal">
+                      {t(`enums.role.${role}`)}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label>{t('admin.users.form.labels')}</Label>
+              <div className="space-y-2">
+                {Object.values(LabelEnum).map((label) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`label-${label}`}
+                      checked={labels.includes(label)}
+                      onCheckedChange={() => handleLabelToggle(label)}
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor={`label-${label}`} className="font-normal">
+                      {t(`enums.label.${label}`)}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">{t('admin.users.form.email')}</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading || isEdit}
-              placeholder={t('admin.users.form.emailPlaceholder')}
-            />
-            {isEdit && (
-              <p className="text-xs text-muted-foreground">{t('admin.users.form.emailReadonly')}</p>
-            )}
-          </div>
+          <hr className="border-border" />
 
-          <div className="space-y-2">
-            <Label>{t('admin.users.form.roles')}</Label>
+          {/* Voorkeuren */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="receiveEmails"
+                checked={receiveEmails}
+                onCheckedChange={(checked) => setReceiveEmails(checked === true)}
+                disabled={isLoading}
+              />
+              <Label htmlFor="receiveEmails" className="font-normal">
+                {t('admin.users.form.receiveEmails')}
+              </Label>
+            </div>
+
             <div className="space-y-2">
-              {(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
-                <div key={role} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`role-${role}`}
-                    checked={roles.includes(role)}
-                    onCheckedChange={() => handleRoleToggle(role)}
-                    disabled={isLoading}
-                  />
-                  <Label htmlFor={`role-${role}`} className="font-normal">
-                    {t(`enums.role.${role}`)}
-                  </Label>
-                </div>
-              ))}
+              <Label>{t('admin.users.form.preferredLanguage')}</Label>
+              <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nl">Nederlands</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="es">Español</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t('admin.users.form.labels')}</Label>
-            <div className="space-y-2">
-              {Object.values(LabelEnum).map((label) => (
-                <div key={label} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`label-${label}`}
-                    checked={labels.includes(label)}
-                    onCheckedChange={() => handleLabelToggle(label)}
-                    disabled={isLoading}
-                  />
-                  <Label htmlFor={`label-${label}`} className="font-normal">
-                    {t(`enums.label.${label}`)}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="receiveEmails"
-              checked={receiveEmails}
-              onCheckedChange={(checked) => setReceiveEmails(checked === true)}
-              disabled={isLoading}
-            />
-            <Label htmlFor="receiveEmails" className="font-normal">
-              {t('admin.users.form.receiveEmails')}
-            </Label>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t('admin.users.form.preferredLanguage')}</Label>
-            <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="nl">Nederlands</SelectItem>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Español</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <DialogFooter>
