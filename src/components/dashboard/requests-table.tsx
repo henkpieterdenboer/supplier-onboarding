@@ -20,9 +20,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Label, Status, SupplierType } from '@/types'
+import { Label, Status } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
-import { statusColors, supplierTypeColors, labelColors } from '@/lib/status-colors'
+import { statusColors, labelColors } from '@/lib/status-colors'
 import * as XLSX from 'xlsx'
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale } from '@/lib/i18n'
@@ -57,7 +57,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
   const { t, language } = useLanguage()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
   const [labelFilter, setLabelFilter] = useState<string>('all')
   const [sortField, setSortField] = useState<'createdAt' | 'supplierName' | 'status' | 'supplierEmail' | 'createdBy'>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
@@ -89,11 +88,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
       result = result.filter((r) => r.status === statusFilter)
     }
 
-    // Filter by type
-    if (typeFilter !== 'all') {
-      result = result.filter((r) => r.supplierType === typeFilter)
-    }
-
     // Filter by label
     if (labelFilter !== 'all') {
       result = result.filter((r) => r.label === labelFilter)
@@ -117,14 +111,13 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
     })
 
     return result
-  }, [requests, search, statusFilter, typeFilter, labelFilter, sortField, sortOrder])
+  }, [requests, search, statusFilter, labelFilter, sortField, sortOrder])
 
   const handleExport = () => {
     const data = filteredAndSortedRequests.map((r) => ({
       [t('requests.table.supplier')]: r.supplierName,
       'Email': r.supplierEmail,
       [t('requests.table.label')]: t(`enums.label.${r.label}`),
-      [t('requests.table.type')]: t(`enums.supplierType.${r.supplierType}`),
       [t('requests.table.status')]: t(`enums.status.${r.status}`),
       [t('requests.table.createdBy')]: formatUserName(r.createdBy) || r.createdBy.email,
       [t('requests.table.date')]: new Date(r.createdAt).toLocaleDateString(getDateLocale(language)),
@@ -183,19 +176,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
               ))}
             </SelectContent>
           </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder={t('requests.table.filterType')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('requests.table.allTypes')}</SelectItem>
-              {Object.values(SupplierType).map((value) => (
-                <SelectItem key={value} value={value}>
-                  {t(`enums.supplierType.${value}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         <Button onClick={handleExport} variant="outline">
@@ -217,7 +197,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                 )}
               </TableHead>
               <TableHead>{t('requests.table.label')}</TableHead>
-              <TableHead>{t('requests.table.type')}</TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-muted"
                 onClick={() => toggleSort('supplierEmail')}
@@ -260,7 +239,7 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
           <TableBody>
             {filteredAndSortedRequests.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-32">
+                <TableCell colSpan={7} className="h-32">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <Inbox className="h-8 w-8" />
                     <p className="text-sm font-medium">{t('requests.table.empty')}</p>
@@ -278,11 +257,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                   <TableCell>
                     <Badge className={labelColors[request.label] || 'bg-muted text-muted-foreground'}>
                       {t(`enums.label.${request.label}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={supplierTypeColors[request.supplierType] || 'bg-muted text-muted-foreground'}>
-                      {t(`enums.supplierType.${request.supplierType}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>{request.supplierEmail}</TableCell>
