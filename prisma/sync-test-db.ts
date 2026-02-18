@@ -15,14 +15,20 @@ neonConfig.webSocketConstructor = ws
 
 const projectRoot = path.resolve(__dirname, '..')
 
-const envLocal = dotenv.parse(fs.readFileSync(path.join(projectRoot, '.env.local'), 'utf-8'))
+const envProdPath = path.join(projectRoot, '.env.production')
+if (!fs.existsSync(envProdPath)) {
+  console.error('.env.production not found — create it with the production DATABASE_URL')
+  process.exit(1)
+}
+
+const envProd = dotenv.parse(fs.readFileSync(envProdPath, 'utf-8'))
 const envFile = dotenv.parse(fs.readFileSync(path.join(projectRoot, '.env'), 'utf-8'))
 
-const sourceUrl = envLocal.DATABASE_URL   // productie (ep-ancient-shadow)
+const sourceUrl = envProd.DATABASE_URL    // productie (ep-ancient-shadow)
 const targetUrl = envFile.DATABASE_URL    // test/demo (ep-summer-wildflower)
 
 if (!sourceUrl || !targetUrl) {
-  console.error('DATABASE_URL not found in .env.local (source) or .env (target)')
+  console.error('DATABASE_URL not found in .env.production (source) or .env (target)')
   process.exit(1)
 }
 
