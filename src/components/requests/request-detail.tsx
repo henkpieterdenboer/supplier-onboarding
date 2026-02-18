@@ -269,12 +269,6 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
             <Badge className={statusColors[request.status]}>
               {t(`enums.status.${request.status}`)}
             </Badge>
-            <Badge className={supplierTypeColors[supplierType] || 'bg-gray-100 text-gray-800'}>
-              {t(`enums.supplierType.${supplierType}`)}
-            </Badge>
-            <Badge className={labelColors[request.label] || 'bg-gray-100 text-gray-800'}>
-              {t(`enums.label.${request.label}`)}
-            </Badge>
           </div>
           <p className="text-gray-500">{request.supplierEmail}</p>
         </div>
