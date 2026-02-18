@@ -155,6 +155,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Request not found' }, { status: 404 })
     }
 
+    // Label authorization — user can only modify requests matching their labels
+    const userLabels = (session.user.labels || ['COLORIGINZ']) as string[]
+    if (!userLabels.includes(existingRequest.label)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     // Handle different actions
     switch (action) {
       case 'cancel': {
@@ -281,7 +287,7 @@ export async function PATCH(
             break
           case 'AWAITING_FINANCE': {
             const financeUsers = await prisma.user.findMany({
-              where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
+              where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
               select: { email: true, firstName: true, middleName: true, lastName: true, preferredLanguage: true },
             })
             recipients = financeUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'Finance', language: (u.preferredLanguage || 'nl') as Language }))
@@ -290,7 +296,7 @@ export async function PATCH(
           }
           case 'AWAITING_ERP': {
             const erpUsers = await prisma.user.findMany({
-              where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true },
+              where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
               select: { email: true, firstName: true, middleName: true, lastName: true, preferredLanguage: true },
             })
             recipients = erpUsers.map(u => ({ email: u.email, name: formatUserName(u) || 'ERP', language: (u.preferredLanguage || 'nl') as Language }))
@@ -706,7 +712,7 @@ export async function PATCH(
 
         // Notify Finance users with receiveEmails enabled
         const financeUsersForNotify = await prisma.user.findMany({
-          where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
+          where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
           select: { email: true, preferredLanguage: true },
         })
         for (const fu of financeUsersForNotify) {
@@ -857,7 +863,7 @@ export async function PATCH(
 
         // Notify ERP users with receiveEmails enabled
         const erpUsersForNotify = await prisma.user.findMany({
-          where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true },
+          where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
           select: { email: true, preferredLanguage: true },
         })
         for (const eu of erpUsersForNotify) {
@@ -932,11 +938,11 @@ export async function PATCH(
 
         // Send completion email to Finance users and Purchaser (respecting receiveEmails)
         const financeUsersForCompletion = await prisma.user.findMany({
-          where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true },
+          where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
           select: { email: true, preferredLanguage: true },
         })
         await sendCompletionEmail({
-          financeEmails: financeUsersForCompletion.map(u => u.email),
+          financeRecipients: financeUsersForCompletion,
           purchaserEmail: existingRequest.createdBy.receiveEmails ? existingRequest.createdBy.email : null,
           purchaserName: formatUserName(existingRequest.createdBy) || 'Inkoper',
           supplierName: existingRequest.supplierName,
@@ -1077,6 +1083,12 @@ export async function DELETE(
 
     if (!existingRequest) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 })
+    }
+
+    // Label authorization
+    const userLabels = (session.user.labels || ['COLORIGINZ']) as string[]
+    if (!userLabels.includes(existingRequest.label)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     if (existingRequest.status !== 'CANCELLED') {

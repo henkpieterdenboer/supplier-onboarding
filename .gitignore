@@ -71,3 +71,6 @@ VERCEL-ENV.md
 
 # One-off SQL migration scripts
 prisma/migrate-roles.sql
+
+# Test files
+test-exact-import*.xml

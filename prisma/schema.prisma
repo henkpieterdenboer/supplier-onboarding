@@ -125,6 +125,10 @@ model SupplierRequest {
   // Relations
   files     SupplierFile[]
   auditLogs AuditLog[]
+
+  @@index([status])
+  @@index([label])
+  @@index([createdById])
 }
 
 // Uploaded files
