@@ -98,13 +98,13 @@ export function ProfileForm({ initialLanguage, initialReceiveEmails }: ProfileFo
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{t('profile.title')}</h1>
         <p className="text-muted-foreground">{t('profile.description')}</p>
       </div>
 
-      <div className="grid gap-6 max-w-2xl">
+      <div className="grid gap-6">
         {/* Settings card */}
         <Card>
           <CardHeader>
