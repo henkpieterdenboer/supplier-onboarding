@@ -338,11 +338,9 @@ export function DashboardNav({ user }: DashboardNavProps) {
                     >
                       {emailSaved ? t('demo.emailSaved') : t('demo.emailSave')}
                     </Button>
-                    {demoEmail && (
-                      <p className="text-[10px] text-muted-foreground mt-1 truncate">
-                        Actief: {demoEmail}
-                      </p>
-                    )}
+                    <p className="text-[10px] text-muted-foreground mt-1 truncate">
+                      {demoEmail ? `Actief: ${demoEmail}` : 'Geen adres ingesteld'}
+                    </p>
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
