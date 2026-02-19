@@ -311,6 +311,8 @@
           "recheck": "Recheck",
           "rechecking": "Rechecking...",
           "details": "VIES Details",
+          "countryCode": "Country code",
+          "consultationNumber": "Consultation number",
           "unavailable": "VIES unavailable, VAT number could not be verified",
           "invalidFormat": "Invalid format. Must start with an EU country code (e.g. NL, DE, BE).",
           "notFoundInVies": "VAT number not found in VIES"

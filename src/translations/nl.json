@@ -311,6 +311,8 @@
           "recheck": "Opnieuw controleren",
           "rechecking": "Bezig met controleren...",
           "details": "VIES Details",
+          "countryCode": "Landcode",
+          "consultationNumber": "Consultatienummer",
           "unavailable": "VIES niet bereikbaar, BTW-nummer kon niet gecontroleerd worden",
           "invalidFormat": "Ongeldig formaat. Begin met een EU-landcode (bijv. NL, DE, BE).",
           "notFoundInVies": "BTW-nummer niet gevonden in VIES"

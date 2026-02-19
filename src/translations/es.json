@@ -311,6 +311,8 @@
           "recheck": "Volver a verificar",
           "rechecking": "Verificando...",
           "details": "Detalles VIES",
+          "countryCode": "Código de país",
+          "consultationNumber": "Número de consulta",
           "unavailable": "VIES no disponible, no se pudo verificar el número de IVA",
           "invalidFormat": "Formato no válido. Debe comenzar con un código de país de la UE (p. ej. NL, DE, ES).",
           "notFoundInVies": "Número de IVA no encontrado en VIES"

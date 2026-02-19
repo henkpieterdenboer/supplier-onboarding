@@ -9,6 +9,7 @@ export interface ViesResult {
   userError: string
   vatNumber: string
   countryCode: string
+  requestIdentifier: string
 }
 
 // EU country codes that VIES supports
@@ -69,6 +70,7 @@ export async function checkVat(vatNumber: string): Promise<ViesResult | null> {
       userError: data.userError || '',
       vatNumber: data.vatNumber || parsed.number,
       countryCode: parsed.countryCode,
+      requestIdentifier: data.requestIdentifier || '',
     }
   } catch {
     // Network error, timeout, etc.

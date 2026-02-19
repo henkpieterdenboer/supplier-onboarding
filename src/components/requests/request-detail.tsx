@@ -137,7 +137,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   const [creditorNumber, setCreditorNumber] = useState('')
   const [kbtCode, setKbtCode] = useState('')
   const [isViesRechecking, setIsViesRechecking] = useState(false)
-  const [viesExpanded, setViesExpanded] = useState(false)
+  const [viesExpanded, setViesExpanded] = useState(!!request.vatCheckResponse)
   const [localVatValid, setLocalVatValid] = useState<boolean | null>(request.vatValid)
   const [localVatCheckResponse, setLocalVatCheckResponse] = useState<string | null>(request.vatCheckResponse)
   const [localVatCheckedAt, setLocalVatCheckedAt] = useState<Date | null>(request.vatCheckedAt)
@@ -583,10 +583,22 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                                         <span className="font-medium">{viesData.address}</span>
                                       </div>
                                     )}
+                                    {viesData.countryCode && (
+                                      <div>
+                                        <span className="text-muted-foreground">{t('requests.detail.financial.vies.countryCode')}:</span>{' '}
+                                        <span className="font-medium">{viesData.countryCode}</span>
+                                      </div>
+                                    )}
                                     {localVatCheckedAt && (
                                       <div>
                                         <span className="text-muted-foreground">{t('requests.detail.financial.vies.checkedAt')}:</span>{' '}
                                         <span className="font-medium">{new Date(localVatCheckedAt).toLocaleString(getDateLocale(language))}</span>
+                                      </div>
+                                    )}
+                                    {viesData.requestIdentifier && (
+                                      <div>
+                                        <span className="text-muted-foreground">{t('requests.detail.financial.vies.consultationNumber')}:</span>{' '}
+                                        <span className="font-medium">{viesData.requestIdentifier}</span>
                                       </div>
                                     )}
                                   </div>
