@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { DashboardStats } from '@/components/dashboard/stats'
 import { RequestsTable } from '@/components/dashboard/requests-table'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -46,7 +46,17 @@ const ARCHIVE_STATUSES = ['COMPLETED', 'CANCELLED']
 export function DashboardContent({ stats, requests, userRoles, userLabels }: DashboardContentProps) {
   const [activeTab, setActiveTab] = useState<'active' | 'archive'>('active')
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [emailProvider, setEmailProvider] = useState<string>('ethereal')
   const { t } = useLanguage()
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+      fetch('/api/email-provider')
+        .then((res) => res.json())
+        .then((data) => { if (data.provider) setEmailProvider(data.provider) })
+        .catch(() => {})
+    }
+  }, [])
 
   const filteredRequests = useMemo(() => {
     const statuses = activeTab === 'active' ? ACTIVE_STATUSES : ARCHIVE_STATUSES
@@ -87,7 +97,7 @@ export function DashboardContent({ stats, requests, userRoles, userLabels }: Das
         activeTab={activeTab}
       />
 
-      {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+      {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && emailProvider === 'ethereal' && (
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-600 font-medium mb-2">{t('demo.viewEmails')}</p>
           <p className="text-sm text-gray-500 mb-1">

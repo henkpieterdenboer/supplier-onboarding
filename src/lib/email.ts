@@ -10,7 +10,7 @@ function getEmailHeader(label?: string): string {
   const logoUrl = `${appUrl}${config.logoPath}`
   return `
     <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px;">
-      <img src="${logoUrl}" alt="${config.name}" style="height: 60px; width: auto;" />
+      <img src="${logoUrl}" alt="${config.name}" style="height: ${config.emailLogoHeight}px; width: auto;" />
     </div>
   `
 }

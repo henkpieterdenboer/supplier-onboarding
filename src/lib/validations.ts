@@ -209,6 +209,18 @@ export const updateUserSchema = z.object({
   preferredLanguage: languageEnum.optional(),
 })
 
+// --- Profile ---
+
+export const updateProfileSchema = z.object({
+  preferredLanguage: languageEnum.optional(),
+  receiveEmails: z.boolean().optional(),
+})
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters').max(128),
+})
+
 // --- Auth ---
 
 export const activateSchema = z.object({

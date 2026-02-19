@@ -111,7 +111,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "newRequest": "New request",
-    "userManagement": "User management"
+    "userManagement": "User management",
+    "profile": "My profile"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -526,6 +527,36 @@
         "create": "Create"
       }
     }
+  },
+  "profile": {
+    "title": "My profile",
+    "description": "Manage your personal settings",
+    "settings": "Settings",
+    "settingsDescription": "Adjust your language preference and notifications",
+    "language": "Preferred language",
+    "languageNl": "Dutch",
+    "languageEn": "English",
+    "languageEs": "Spanish",
+    "receiveEmails": "Receive email notifications",
+    "receiveEmailsDescription": "Receive notifications when a request requires your action",
+    "saveSettings": "Save settings",
+    "savingSettings": "Saving...",
+    "settingsSaved": "Settings saved",
+    "settingsError": "Error saving settings",
+    "changePassword": "Change password",
+    "changePasswordDescription": "Change your password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Minimum 8 characters",
+    "confirmPassword": "Confirm new password",
+    "confirmPasswordPlaceholder": "Repeat your new password",
+    "savePassword": "Change password",
+    "savingPassword": "Saving...",
+    "passwordChanged": "Password changed successfully",
+    "passwordError": "Error changing password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "currentPasswordWrong": "Current password is incorrect"
   },
   "errors": {
     "notFound": {

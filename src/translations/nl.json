@@ -111,7 +111,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "newRequest": "Nieuwe aanvraag",
-    "userManagement": "Gebruikersbeheer"
+    "userManagement": "Gebruikersbeheer",
+    "profile": "Mijn profiel"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -526,6 +527,36 @@
         "create": "Aanmaken"
       }
     }
+  },
+  "profile": {
+    "title": "Mijn profiel",
+    "description": "Beheer uw persoonlijke instellingen",
+    "settings": "Instellingen",
+    "settingsDescription": "Pas uw taalvoorkeur en notificaties aan",
+    "language": "Voorkeurstaal",
+    "languageNl": "Nederlands",
+    "languageEn": "Engels",
+    "languageEs": "Spaans",
+    "receiveEmails": "E-mailnotificaties ontvangen",
+    "receiveEmailsDescription": "Ontvang notificaties wanneer een aanvraag uw actie vereist",
+    "saveSettings": "Instellingen opslaan",
+    "savingSettings": "Opslaan...",
+    "settingsSaved": "Instellingen opgeslagen",
+    "settingsError": "Fout bij opslaan van instellingen",
+    "changePassword": "Wachtwoord wijzigen",
+    "changePasswordDescription": "Wijzig uw wachtwoord",
+    "currentPassword": "Huidig wachtwoord",
+    "newPassword": "Nieuw wachtwoord",
+    "newPasswordPlaceholder": "Minimaal 8 tekens",
+    "confirmPassword": "Bevestig nieuw wachtwoord",
+    "confirmPasswordPlaceholder": "Herhaal uw nieuwe wachtwoord",
+    "savePassword": "Wachtwoord wijzigen",
+    "savingPassword": "Bezig...",
+    "passwordChanged": "Wachtwoord succesvol gewijzigd",
+    "passwordError": "Fout bij wijzigen van wachtwoord",
+    "passwordMismatch": "Wachtwoorden komen niet overeen",
+    "passwordTooShort": "Wachtwoord moet minimaal 8 tekens bevatten",
+    "currentPasswordWrong": "Huidig wachtwoord is onjuist"
   },
   "errors": {
     "notFound": {

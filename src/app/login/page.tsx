@@ -194,16 +194,27 @@ export default function LoginPage() {
   const { t } = useLanguage()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
-      <Suspense fallback={
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
-            {t('common.loading')}
-          </CardContent>
-        </Card>
-      }>
-        <LoginForm />
-      </Suspense>
+    <div
+      className="min-h-screen flex items-center justify-center px-4 relative"
+      style={{
+        backgroundImage: 'url(/login-bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      <div className="absolute inset-0 bg-black/30" />
+      <div className="relative z-10">
+        <Suspense fallback={
+          <Card className="w-full max-w-md">
+            <CardContent className="p-8 text-center">
+              {t('common.loading')}
+            </CardContent>
+          </Card>
+        }>
+          <LoginForm />
+        </Suspense>
+      </div>
     </div>
   )
 }

@@ -111,7 +111,8 @@
   "nav": {
     "dashboard": "Panel",
     "newRequest": "Nueva solicitud",
-    "userManagement": "Gestión de usuarios"
+    "userManagement": "Gestión de usuarios",
+    "profile": "Mi perfil"
   },
   "dashboard": {
     "title": "Panel",
@@ -526,6 +527,36 @@
         "create": "Crear"
       }
     }
+  },
+  "profile": {
+    "title": "Mi perfil",
+    "description": "Gestione su configuración personal",
+    "settings": "Configuración",
+    "settingsDescription": "Ajuste su preferencia de idioma y notificaciones",
+    "language": "Idioma preferido",
+    "languageNl": "Neerlandés",
+    "languageEn": "Inglés",
+    "languageEs": "Español",
+    "receiveEmails": "Recibir notificaciones por correo",
+    "receiveEmailsDescription": "Recibir notificaciones cuando una solicitud requiera su acción",
+    "saveSettings": "Guardar configuración",
+    "savingSettings": "Guardando...",
+    "settingsSaved": "Configuración guardada",
+    "settingsError": "Error al guardar la configuración",
+    "changePassword": "Cambiar contraseña",
+    "changePasswordDescription": "Cambie su contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "newPasswordPlaceholder": "Mínimo 8 caracteres",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "confirmPasswordPlaceholder": "Repita su nueva contraseña",
+    "savePassword": "Cambiar contraseña",
+    "savingPassword": "Guardando...",
+    "passwordChanged": "Contraseña cambiada correctamente",
+    "passwordError": "Error al cambiar la contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "currentPasswordWrong": "La contraseña actual es incorrecta"
   },
   "errors": {
     "notFound": {

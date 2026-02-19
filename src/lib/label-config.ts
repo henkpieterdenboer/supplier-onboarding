@@ -4,6 +4,7 @@ interface LabelConfig {
   name: string
   shortName: string
   logoPath: string
+  emailLogoHeight: number // px height for logo in emails
 }
 
 export const labelConfigs: Record<Label, LabelConfig> = {
@@ -11,11 +12,13 @@ export const labelConfigs: Record<Label, LabelConfig> = {
     name: 'Coloriginz',
     shortName: 'COL',
     logoPath: '/logo.png',
+    emailLogoHeight: 60,
   },
   PFC: {
     name: 'Parfum Flower Company',
     shortName: 'PFC',
     logoPath: '/PFC.jpg',
+    emailLogoHeight: 120,
   },
 }
 

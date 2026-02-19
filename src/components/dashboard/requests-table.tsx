@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -19,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label, Status } from '@/types'
 import { formatUserName } from '@/lib/user-utils'
@@ -55,6 +55,7 @@ interface RequestsTableProps {
 
 export function RequestsTable({ requests, userRoles, userLabels, externalStatusFilter, activeTab }: RequestsTableProps) {
   const { t, language } = useLanguage()
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [labelFilter, setLabelFilter] = useState<string>('all')
@@ -233,13 +234,12 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                   <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
-              <TableHead>{t('requests.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredAndSortedRequests.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32">
+                <TableCell colSpan={6} className="h-32">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <Inbox className="h-8 w-8" />
                     <p className="text-sm font-medium">{t('requests.table.empty')}</p>
@@ -248,11 +248,13 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
               </TableRow>
             ) : (
               filteredAndSortedRequests.map((request) => (
-                <TableRow key={request.id}>
+                <TableRow
+                  key={request.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => router.push(`/requests/${request.id}`)}
+                >
                   <TableCell className="font-medium">
-                    <Link href={`/requests/${request.id}`} className="hover:text-primary hover:underline">
-                      {request.supplierName}
-                    </Link>
+                    {request.supplierName}
                   </TableCell>
                   <TableCell>
                     <Badge className={labelColors[request.label] || 'bg-muted text-muted-foreground'}>
@@ -268,13 +270,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                   <TableCell>{formatUserName(request.createdBy) || request.createdBy.email}</TableCell>
                   <TableCell>
                     {new Date(request.createdAt).toLocaleDateString(getDateLocale(language))}
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/requests/${request.id}`}>
-                      <Button variant="ghost" size="sm">
-                        {t('requests.table.view')}
-                      </Button>
-                    </Link>
                   </TableCell>
                 </TableRow>
               ))
