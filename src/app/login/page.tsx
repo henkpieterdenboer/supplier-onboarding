@@ -204,7 +204,7 @@ export default function LoginPage() {
       }}
     >
       <div className="absolute inset-0 bg-black/30" />
-      <div className="relative z-10">
+      <div className="relative z-10 w-full max-w-md">
         <Suspense fallback={
           <Card className="w-full max-w-md">
             <CardContent className="p-8 text-center">
