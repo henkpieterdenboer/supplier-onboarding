@@ -113,6 +113,16 @@ export async function POST(request: NextRequest) {
       language: (preferredLanguage || 'nl') as Language,
     })
 
+    // Audit log
+    console.log(JSON.stringify({
+      audit: true,
+      action: 'USER_CREATED',
+      targetUser: email,
+      performedBy: session.user.email,
+      details: { roles, labels },
+      timestamp: new Date().toISOString(),
+    }))
+
     return NextResponse.json({
       id: user.id,
       email: user.email,

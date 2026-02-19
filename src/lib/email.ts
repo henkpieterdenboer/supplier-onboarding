@@ -51,8 +51,9 @@ async function getEmailProvider(): Promise<EmailProvider> {
  * Create a nodemailer transporter for the given provider.
  * - 'ethereal': uses SMTP_* env vars (defaults to smtp.ethereal.email)
  * - 'resend': uses Resend SMTP with RESEND_API_KEY
+ * Returns null if required config is missing (production only — emails should not silently fall back)
  */
-function createTransporter(provider: EmailProvider) {
+function createTransporter(provider: EmailProvider): ReturnType<typeof nodemailer.createTransport> | null {
   if (provider === 'resend') {
     const apiKey = process.env.RESEND_API_KEY
     if (apiKey) {
@@ -67,10 +68,16 @@ function createTransporter(provider: EmailProvider) {
         },
       })
     }
-    // Fallback: if no RESEND_API_KEY, try SMTP_* env vars (production Resend setup)
+
+    if (!IS_DEMO_MODE) {
+      // Production: missing RESEND_API_KEY is an error, do not silently fall back to Ethereal
+      console.error('Email config error: RESEND_API_KEY is not set. Cannot send email in production mode.')
+      return null
+    }
+    // Demo mode: fall through to SMTP_* / Ethereal fallback
   }
 
-  // Ethereal or fallback: use SMTP_* env vars
+  // Ethereal or demo fallback: use SMTP_* env vars
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.ethereal.email',
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -94,6 +101,12 @@ async function sendEmail({ to, subject, html, language, label }: SendEmailOption
   try {
     const provider = await getEmailProvider()
     const transporter = createTransporter(provider)
+
+    if (!transporter) {
+      console.error(`Email not sent to ${to}: email provider "${provider}" is not configured`)
+      return null
+    }
+
     const fromAddress = provider === 'resend' ? EMAIL_FROM : '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
 
     if (IS_DEMO_MODE) {

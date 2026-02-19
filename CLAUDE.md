@@ -18,7 +18,7 @@ UI is in **Dutch**, code (variables, comments) is in **English**.
 - **Email**: Nodemailer with two providers — Ethereal (dev/demo) and Resend SMTP (production). In demo mode, a cookie toggles between providers.
 - **File Storage**: Vercel Blob
 - **Validation**: Zod v4 — all API routes validated via schemas in `src/lib/validations.ts`
-- **Forms**: react-hook-form + @hookform/resolvers (in dependencies, not yet used in form components)
+- **Forms**: Manual `useState` management (react-hook-form was removed as unused)
 - **Excel Export**: xlsx
 - **i18n**: Custom translation system (`src/lib/i18n.ts`) with NL/EN JSON files (`src/translations/`). `LanguageProvider` context wraps all pages via root layout. Language persisted via `NEXT_LOCALE` cookie.
 
@@ -35,7 +35,7 @@ npx prisma generate      # Regenerate Prisma client after schema changes
 npx prisma studio        # Open Prisma Studio DB browser
 ```
 
-**Important**: Do NOT use `prisma migrate dev` — this project uses `prisma db push` for schema changes and manual SQL when needed. The `db:migrate` and `db:reset` scripts in package.json are legacy. The `prisma/migrations/` directory is historical only — do not use it.
+**Important**: Do NOT use `prisma migrate dev` — this project uses `prisma db push` for schema changes and manual SQL when needed. The `prisma/migrations/` directory is historical only — do not use it.
 
 **No test framework**: This project has no unit/integration tests. Don't try to run `npm test`.
 

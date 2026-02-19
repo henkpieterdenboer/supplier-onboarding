@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import { resetPasswordSchema } from '@/lib/validations'
+import { rateLimit } from '@/lib/rate-limit'
 
 // POST /api/auth/reset-password - Reset password with token
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: max 5 requests per 15 minutes per IP
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const { success: rateLimitOk } = rateLimit(ip, 'reset-password', 5, 15 * 60 * 1000)
+    if (!rateLimitOk) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
     const body = await request.json()
     const parsed = resetPasswordSchema.safeParse(body)
     if (!parsed.success) {

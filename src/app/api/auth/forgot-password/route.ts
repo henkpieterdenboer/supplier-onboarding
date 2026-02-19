@@ -4,10 +4,18 @@ import { v4 as uuidv4 } from 'uuid'
 import { sendPasswordResetEmail } from '@/lib/email'
 import type { Language } from '@/lib/i18n'
 import { forgotPasswordSchema } from '@/lib/validations'
+import { rateLimit } from '@/lib/rate-limit'
 
 // POST /api/auth/forgot-password - Request password reset
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: max 3 requests per 15 minutes per IP
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const { success: rateLimitOk } = rateLimit(ip, 'forgot-password', 3, 15 * 60 * 1000)
+    if (!rateLimitOk) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
     const body = await request.json()
     const parsed = forgotPasswordSchema.safeParse(body)
     if (!parsed.success) {

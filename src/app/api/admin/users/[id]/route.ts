@@ -50,6 +50,15 @@ export async function PATCH(
         language: (user.preferredLanguage || 'nl') as Language,
       })
 
+      // Audit log
+      console.log(JSON.stringify({
+        audit: true,
+        action: 'ACTIVATION_RESENT',
+        targetUser: user.email,
+        performedBy: session.user.email,
+        timestamp: new Date().toISOString(),
+      }))
+
       return NextResponse.json({ success: true })
     }
 
@@ -72,6 +81,15 @@ export async function PATCH(
         where: { id },
         data: { isActive: !user.isActive },
       })
+
+      // Audit log
+      console.log(JSON.stringify({
+        audit: true,
+        action: updated.isActive ? 'USER_ACTIVATED' : 'USER_DEACTIVATED',
+        targetUser: user.email,
+        performedBy: session.user.email,
+        timestamp: new Date().toISOString(),
+      }))
 
       return NextResponse.json({
         id: updated.id,
@@ -114,6 +132,16 @@ export async function PATCH(
         preferredLanguage: true,
       },
     })
+
+    // Audit log
+    console.log(JSON.stringify({
+      audit: true,
+      action: 'USER_UPDATED',
+      targetUser: updated.email,
+      performedBy: session.user.email,
+      details: { updatedFields: Object.keys(updateData) },
+      timestamp: new Date().toISOString(),
+    }))
 
     return NextResponse.json(updated)
   } catch (error) {
