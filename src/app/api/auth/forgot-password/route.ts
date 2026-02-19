@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     })
 
     // Find active user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
     })
 
     if (!user || !user.isActive || !user.passwordHash) {
