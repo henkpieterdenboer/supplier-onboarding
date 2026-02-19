@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { Check, ChevronDown, Menu } from 'lucide-react'
+import { Check, ChevronDown, ExternalLink, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -294,7 +294,16 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   >
                     <div className="flex items-center gap-2 w-full">
                       {emailProvider === 'ethereal' ? <Check className="h-4 w-4" /> : <div className="w-4" />}
-                      {t('demo.emailEtherealLong')}
+                      <span className="flex-1">{t('demo.emailEtherealLong')}</span>
+                      <a
+                        href="https://ethereal.email/login"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem
