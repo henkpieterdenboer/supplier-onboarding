@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { DashboardStats } from '@/components/dashboard/stats'
 import { RequestsTable } from '@/components/dashboard/requests-table'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -44,7 +45,9 @@ const ACTIVE_STATUSES = ['INVITATION_SENT', 'AWAITING_PURCHASER', 'AWAITING_FINA
 const ARCHIVE_STATUSES = ['COMPLETED', 'CANCELLED']
 
 export function DashboardContent({ stats, requests, userRoles, userLabels }: DashboardContentProps) {
-  const [activeTab, setActiveTab] = useState<'active' | 'archive'>('active')
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get('tab') === 'archive' ? 'archive' : 'active'
+  const [activeTab, setActiveTab] = useState<'active' | 'archive'>(initialTab)
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [emailProvider, setEmailProvider] = useState<string>('ethereal')
   const { t } = useLanguage()

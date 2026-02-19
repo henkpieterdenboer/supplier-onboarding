@@ -251,7 +251,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
         throw new Error(result.error || t('common.error'))
       }
       toast.success(t('common.success'))
-      router.push('/dashboard')
+      router.push('/dashboard?tab=archive')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('common.error'))
     } finally {
