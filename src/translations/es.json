@@ -586,8 +586,8 @@
     "linkValid": "Este enlace es válido hasta el {date}.",
     "contactInfo": "Si tiene alguna pregunta, póngase en contacto con su persona de contacto.",
     "invitation": {
-      "subject": "Invitación para Supplier Onboarding",
-      "title": "Bienvenido a Supplier Onboarding",
+      "subject": "Invitación para Supplier Onboarding - {label}",
+      "title": "Bienvenido a {label}",
       "greeting": "Estimado/a {supplierName},",
       "body": "Ha sido invitado a completar los datos de su empresa para nuestro registro de proveedores.",
       "cta": "Haga clic en el botón de abajo para comenzar:",

@@ -195,12 +195,12 @@ export async function sendInvitationEmail({
 
   return sendEmail({
     to,
-    subject: t('emails.invitation.subject'),
+    subject: t('emails.invitation.subject', { label: getLabelConfig(label || 'COLORIGINZ').name }),
     language,
     label,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333;">${t('emails.invitation.title')}</h2>
+        <h2 style="color: #333;">${t('emails.invitation.title', { label: getLabelConfig(label || 'COLORIGINZ').name })}</h2>
         <p>${t('emails.invitation.greeting', { supplierName })}</p>
         <p>${t('emails.invitation.body')}</p>
         <p>${t('emails.invitation.cta')}</p>

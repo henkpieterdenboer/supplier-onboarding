@@ -586,8 +586,8 @@
     "linkValid": "Deze link is geldig tot {date}.",
     "contactInfo": "Als u vragen heeft, neem dan contact op met uw contactpersoon.",
     "invitation": {
-      "subject": "Uitnodiging voor Supplier Onboarding",
-      "title": "Welkom bij Supplier Onboarding",
+      "subject": "Uitnodiging voor Supplier Onboarding - {label}",
+      "title": "Welkom bij {label}",
       "greeting": "Beste {supplierName},",
       "body": "U bent uitgenodigd om uw bedrijfsgegevens in te vullen voor onze leveranciersregistratie.",
       "cta": "Klik op de onderstaande knop om te beginnen:",
