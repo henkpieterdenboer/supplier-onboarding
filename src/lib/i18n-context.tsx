@@ -36,7 +36,7 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
     if (initialLanguage) return initialLanguage
     if (typeof document !== 'undefined') {
       const cookie = getCookie('NEXT_LOCALE')
-      if (cookie === 'en' || cookie === 'nl' || cookie === 'es') return cookie
+      if (cookie === 'en' || cookie === 'nl' || cookie === 'es' || cookie === 'it') return cookie
     }
     return 'nl'
   })
@@ -46,7 +46,7 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
     if (!initialLanguage && session?.user?.language) {
       const sessionLang = session.user.language as Language
       const cookieLang = getCookie('NEXT_LOCALE')
-      const hasExplicitCookie = cookieLang === 'nl' || cookieLang === 'en' || cookieLang === 'es'
+      const hasExplicitCookie = cookieLang === 'nl' || cookieLang === 'en' || cookieLang === 'es' || cookieLang === 'it'
 
       if (hasExplicitCookie && cookieLang !== sessionLang) {
         // Cookie differs from session — user explicitly chose a language

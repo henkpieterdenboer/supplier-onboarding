@@ -263,6 +263,7 @@ export default function NewRequestPage() {
                     <SelectItem value="nl">{t('requests.new.languageNl')}</SelectItem>
                     <SelectItem value="en">{t('requests.new.languageEn')}</SelectItem>
                     <SelectItem value="es">{t('requests.new.languageEs')}</SelectItem>
+                    <SelectItem value="it">{t('requests.new.languageIt')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

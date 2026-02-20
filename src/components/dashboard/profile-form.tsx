@@ -50,7 +50,7 @@ export function ProfileForm({ initialLanguage, initialReceiveEmails }: ProfileFo
       }
 
       // Update the app language to match
-      setAppLanguage(preferredLanguage as 'nl' | 'en' | 'es')
+      setAppLanguage(preferredLanguage as 'nl' | 'en' | 'es' | 'it')
       toast.success(t('profile.settingsSaved'))
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('profile.settingsError'))
@@ -122,6 +122,7 @@ export function ProfileForm({ initialLanguage, initialReceiveEmails }: ProfileFo
                   <SelectItem value="nl">{t('profile.languageNl')}</SelectItem>
                   <SelectItem value="en">{t('profile.languageEn')}</SelectItem>
                   <SelectItem value="es">{t('profile.languageEs')}</SelectItem>
+                  <SelectItem value="it">{t('profile.languageIt')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

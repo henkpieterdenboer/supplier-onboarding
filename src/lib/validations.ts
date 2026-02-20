@@ -6,7 +6,7 @@ const regionEnum = z.enum(['EU', 'ROW'])
 const supplierTypeEnum = z.enum(['KOOP', 'X_KWEKER', 'O_KWEKER'])
 const labelEnum = z.enum(['COLORIGINZ', 'PFC'])
 const roleEnum = z.enum(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'])
-const languageEnum = z.enum(['nl', 'en', 'es'])
+const languageEnum = z.enum(['nl', 'en', 'es', 'it'])
 const incotermEnum = z.enum(['CIF', 'FOB'])
 
 // --- Requests ---
