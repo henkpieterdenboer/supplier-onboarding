@@ -372,6 +372,25 @@
         "by": "By",
         "system": "System"
       },
+      "sanctions": {
+        "title": "Sanctions Check",
+        "notChecked": "Not checked",
+        "noMatch": "No sanctions hits found",
+        "matchFound": "Sanctions hit found!",
+        "check": "Run sanctions check",
+        "checking": "Checking...",
+        "recheck": "Recheck",
+        "rechecking": "Rechecking...",
+        "checkedAt": "Checked on",
+        "companyResults": "Company",
+        "directorResults": "Director",
+        "score": "Score",
+        "datasets": "Sanctions lists",
+        "countries": "Countries",
+        "noDirector": "No director details available",
+        "error": "Sanctions check could not be performed",
+        "matchWarning": "Warning: a potential sanctions hit was found. Please verify the result manually."
+      },
       "actions": {
         "edit": "Edit",
         "selfFill": "Fill in yourself",
@@ -725,6 +744,7 @@
       "SUPPLIER_SAVED": "Supplier saved details",
       "SUPPLIER_TYPE_CHANGED": "Supplier type changed",
       "VIES_CHECKED": "VIES VAT check performed",
+      "SANCTIONS_CHECKED": "Sanctions check performed",
       "SELF_FILL_ACTIVATED": "Self-fill activated",
       "PURCHASER_SAVED": "Purchaser saved details",
       "FINANCE_SAVED": "Finance saved details"

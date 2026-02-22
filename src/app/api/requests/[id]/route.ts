@@ -18,6 +18,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { purchaserSubmitSchema, financeSubmitSchema, financeSaveSchema, erpSubmitSchema, changeTypeSchema } from '@/lib/validations'
 import { checkVat } from '@/lib/vies'
+import { checkSanctions } from '@/lib/sanctions'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -1044,6 +1045,65 @@ export async function PATCH(
         return NextResponse.json({
           ...updatedVies,
           viesResult,
+        })
+      }
+
+      case 'sanctions-check': {
+        // INKOPER or FINANCE can run sanctions check
+        if (!session.user.roles.includes('INKOPER') && !session.user.roles.includes('FINANCE')) {
+          return NextResponse.json(
+            { error: 'Only purchasers or Finance can perform this action' },
+            { status: 403 }
+          )
+        }
+
+        const companyName = existingRequest.companyName || existingRequest.supplierName
+        const sanctionsResult = await checkSanctions(
+          { name: companyName, country: existingRequest.country },
+          existingRequest.directorName
+            ? {
+                name: existingRequest.directorName,
+                dateOfBirth: existingRequest.directorDateOfBirth,
+                passportNumber: existingRequest.directorPassportNumber,
+              }
+            : null
+        )
+
+        if (!sanctionsResult) {
+          return NextResponse.json(
+            { error: 'Sanctions check service is currently unavailable' },
+            { status: 503 }
+          )
+        }
+
+        const hasMatch = sanctionsResult.companyMatch || sanctionsResult.directorMatch
+
+        const updatedSanctions = await prisma.supplierRequest.update({
+          where: { id },
+          data: {
+            sanctionsMatch: hasMatch,
+            sanctionsResponse: JSON.stringify(sanctionsResult),
+            sanctionsCheckedAt: new Date(),
+          },
+        })
+
+        await prisma.auditLog.create({
+          data: {
+            requestId: id,
+            userId: session.user.id,
+            action: AuditAction.SANCTIONS_CHECKED,
+            details: JSON.stringify({
+              companyName,
+              companyMatch: sanctionsResult.companyMatch,
+              directorMatch: sanctionsResult.directorMatch,
+              directorName: existingRequest.directorName || null,
+            }),
+          },
+        })
+
+        return NextResponse.json({
+          ...updatedSanctions,
+          sanctionsResult,
         })
       }
 

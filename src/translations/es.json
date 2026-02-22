@@ -372,6 +372,25 @@
         "by": "Por",
         "system": "Sistema"
       },
+      "sanctions": {
+        "title": "Verificación de sanciones",
+        "notChecked": "No verificado",
+        "noMatch": "No se encontraron coincidencias de sanciones",
+        "matchFound": "Se encontró una coincidencia de sanciones!",
+        "check": "Ejecutar verificación de sanciones",
+        "checking": "Verificando...",
+        "recheck": "Verificar de nuevo",
+        "rechecking": "Verificando de nuevo...",
+        "checkedAt": "Verificado el",
+        "companyResults": "Empresa",
+        "directorResults": "Director",
+        "score": "Puntuación",
+        "datasets": "Listas de sanciones",
+        "countries": "Países",
+        "noDirector": "No hay datos del director disponibles",
+        "error": "No se pudo realizar la verificación de sanciones",
+        "matchWarning": "Atención: se encontró una posible coincidencia de sanciones. Verifique el resultado manualmente."
+      },
       "actions": {
         "edit": "Editar",
         "selfFill": "Completar usted mismo",
@@ -725,6 +744,7 @@
       "SUPPLIER_SAVED": "Proveedor guardó los datos",
       "SUPPLIER_TYPE_CHANGED": "Tipo de proveedor cambiado",
       "VIES_CHECKED": "Verificación de IVA VIES realizada",
+      "SANCTIONS_CHECKED": "Verificación de sanciones realizada",
       "SELF_FILL_ACTIVATED": "Autocompletado activado",
       "PURCHASER_SAVED": "Comprador guardó datos",
       "FINANCE_SAVED": "Finanzas guardó datos"

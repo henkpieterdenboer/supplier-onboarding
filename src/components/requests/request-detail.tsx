@@ -104,6 +104,10 @@ interface Request {
   vatValid: boolean | null
   vatCheckResponse: string | null
   vatCheckedAt: Date | null
+  // Sanctions
+  sanctionsMatch: boolean | null
+  sanctionsResponse: string | null
+  sanctionsCheckedAt: Date | null
   // Purchaser fields
   incoterm: string | null
   commissionPercentage: number | null
@@ -141,6 +145,11 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   const [localVatValid, setLocalVatValid] = useState<boolean | null>(request.vatValid)
   const [localVatCheckResponse, setLocalVatCheckResponse] = useState<string | null>(request.vatCheckResponse)
   const [localVatCheckedAt, setLocalVatCheckedAt] = useState<Date | null>(request.vatCheckedAt)
+  const [isSanctionsChecking, setIsSanctionsChecking] = useState(false)
+  const [sanctionsExpanded, setSanctionsExpanded] = useState(!!request.sanctionsResponse)
+  const [localSanctionsMatch, setLocalSanctionsMatch] = useState<boolean | null>(request.sanctionsMatch)
+  const [localSanctionsResponse, setLocalSanctionsResponse] = useState<string | null>(request.sanctionsResponse)
+  const [localSanctionsCheckedAt, setLocalSanctionsCheckedAt] = useState<Date | null>(request.sanctionsCheckedAt)
 
   const handleViesRecheck = async () => {
     setIsViesRechecking(true)
@@ -165,6 +174,33 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
       toast.error(error instanceof Error ? error.message : t('common.error'))
     } finally {
       setIsViesRechecking(false)
+    }
+  }
+
+  const handleSanctionsCheck = async () => {
+    setIsSanctionsChecking(true)
+    try {
+      const response = await fetch(`/api/requests/${request.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sanctions-check' }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || t('requests.detail.sanctions.error'))
+      }
+
+      setLocalSanctionsMatch(result.sanctionsResult?.companyMatch || result.sanctionsResult?.directorMatch || false)
+      setLocalSanctionsResponse(result.sanctionsResponse ?? null)
+      setLocalSanctionsCheckedAt(result.sanctionsCheckedAt ? new Date(result.sanctionsCheckedAt) : null)
+      setSanctionsExpanded(true)
+      toast.success(t('common.success'))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('requests.detail.sanctions.error'))
+    } finally {
+      setIsSanctionsChecking(false)
     }
   }
 
@@ -747,6 +783,138 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                   ))}
                 </ul>
               </CardContent>
+            </Card>
+          )}
+
+          {/* Sanctions Check - visible for INKOPER, FINANCE, ADMIN */}
+          {(userRoles.includes('INKOPER') || userRoles.includes('FINANCE') || userRoles.includes('ADMIN')) && request.companyName && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      {t('requests.detail.sanctions.title')}
+                      {localSanctionsMatch === null && (
+                        <Badge variant="outline" className="text-muted-foreground">{t('requests.detail.sanctions.notChecked')}</Badge>
+                      )}
+                      {localSanctionsMatch === false && (
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{t('requests.detail.sanctions.noMatch')}</Badge>
+                      )}
+                      {localSanctionsMatch === true && (
+                        <Badge className="bg-red-100 text-red-800 hover:bg-red-100">{t('requests.detail.sanctions.matchFound')}</Badge>
+                      )}
+                    </CardTitle>
+                    {localSanctionsCheckedAt && (
+                      <CardDescription>
+                        {t('requests.detail.sanctions.checkedAt')} {new Date(localSanctionsCheckedAt).toLocaleString(getDateLocale(language))}
+                      </CardDescription>
+                    )}
+                  </div>
+                  {(userRoles.includes('INKOPER') || userRoles.includes('FINANCE')) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSanctionsCheck}
+                      disabled={isSanctionsChecking}
+                    >
+                      {isSanctionsChecking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isSanctionsChecking
+                        ? (localSanctionsResponse ? t('requests.detail.sanctions.rechecking') : t('requests.detail.sanctions.checking'))
+                        : (localSanctionsResponse ? t('requests.detail.sanctions.recheck') : t('requests.detail.sanctions.check'))}
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              {localSanctionsMatch === true && (
+                <CardContent className="pt-0 pb-3">
+                  <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+                    {t('requests.detail.sanctions.matchWarning')}
+                  </div>
+                </CardContent>
+              )}
+              {sanctionsExpanded && localSanctionsResponse && (() => {
+                try {
+                  const sanctionsData = JSON.parse(localSanctionsResponse)
+                  return (
+                    <CardContent className="pt-0 space-y-4">
+                      {/* Company results */}
+                      <div>
+                        <p className="text-sm font-medium mb-2">{t('requests.detail.sanctions.companyResults')}</p>
+                        {sanctionsData.companyResults?.length > 0 ? (
+                          <div className="space-y-2">
+                            {sanctionsData.companyResults.map((match: { name: string; score: number; datasets: string[]; countries: string[] }, i: number) => (
+                              <div key={i} className={`rounded p-3 text-sm space-y-1 ${match.score >= 0.7 ? 'bg-red-50 border border-red-200' : 'bg-muted'}`}>
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{match.name}</span>
+                                  <span className={`text-xs font-mono ${match.score >= 0.7 ? 'text-red-600 font-bold' : 'text-muted-foreground'}`}>
+                                    {t('requests.detail.sanctions.score')}: {match.score}
+                                  </span>
+                                </div>
+                                {match.datasets?.length > 0 && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {t('requests.detail.sanctions.datasets')}: {match.datasets.join(', ')}
+                                  </div>
+                                )}
+                                {match.countries?.length > 0 && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {t('requests.detail.sanctions.countries')}: {match.countries.join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">{t('requests.detail.sanctions.noMatch')}</p>
+                        )}
+                      </div>
+
+                      {/* Director results */}
+                      <div>
+                        <p className="text-sm font-medium mb-2">{t('requests.detail.sanctions.directorResults')}</p>
+                        {sanctionsData.directorResults?.length > 0 ? (
+                          <div className="space-y-2">
+                            {sanctionsData.directorResults.map((match: { name: string; score: number; datasets: string[]; countries: string[] }, i: number) => (
+                              <div key={i} className={`rounded p-3 text-sm space-y-1 ${match.score >= 0.7 ? 'bg-red-50 border border-red-200' : 'bg-muted'}`}>
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{match.name}</span>
+                                  <span className={`text-xs font-mono ${match.score >= 0.7 ? 'text-red-600 font-bold' : 'text-muted-foreground'}`}>
+                                    {t('requests.detail.sanctions.score')}: {match.score}
+                                  </span>
+                                </div>
+                                {match.datasets?.length > 0 && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {t('requests.detail.sanctions.datasets')}: {match.datasets.join(', ')}
+                                  </div>
+                                )}
+                                {match.countries?.length > 0 && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {t('requests.detail.sanctions.countries')}: {match.countries.join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">{t('requests.detail.sanctions.noDirector')}</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  )
+                } catch {
+                  return null
+                }
+              })()}
+              {localSanctionsResponse && (
+                <CardContent className="pt-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSanctionsExpanded(!sanctionsExpanded)}
+                  >
+                    {sanctionsExpanded ? '▲' : '▼'} {sanctionsExpanded ? t('common.close') : t('common.view')}
+                  </Button>
+                </CardContent>
+              )}
             </Card>
           )}
 

@@ -372,6 +372,25 @@
         "by": "Da",
         "system": "Sistema"
       },
+      "sanctions": {
+        "title": "Verifica sanzioni",
+        "notChecked": "Non verificato",
+        "noMatch": "Nessuna corrispondenza di sanzioni trovata",
+        "matchFound": "Corrispondenza di sanzioni trovata!",
+        "check": "Esegui verifica sanzioni",
+        "checking": "Verifica in corso...",
+        "recheck": "Verifica di nuovo",
+        "rechecking": "Nuova verifica in corso...",
+        "checkedAt": "Verificato il",
+        "companyResults": "Azienda",
+        "directorResults": "Amministratore",
+        "score": "Punteggio",
+        "datasets": "Liste di sanzioni",
+        "countries": "Paesi",
+        "noDirector": "Nessun dato dell'amministratore disponibile",
+        "error": "Impossibile eseguire la verifica delle sanzioni",
+        "matchWarning": "Attenzione: è stata trovata una possibile corrispondenza di sanzioni. Verificare il risultato manualmente."
+      },
       "actions": {
         "edit": "Modifica",
         "selfFill": "Compila personalmente",
@@ -725,6 +744,7 @@
       "SUPPLIER_SAVED": "Il fornitore ha salvato i dati",
       "SUPPLIER_TYPE_CHANGED": "Tipo di fornitore modificato",
       "VIES_CHECKED": "Verifica IVA VIES effettuata",
+      "SANCTIONS_CHECKED": "Verifica sanzioni effettuata",
       "SELF_FILL_ACTIVATED": "Compilazione autonoma attivata",
       "PURCHASER_SAVED": "L'acquirente ha salvato i dati",
       "FINANCE_SAVED": "Finance ha salvato i dati"

@@ -372,6 +372,25 @@
         "by": "Door",
         "system": "Systeem"
       },
+      "sanctions": {
+        "title": "Sanctiecheck",
+        "notChecked": "Niet gecontroleerd",
+        "noMatch": "Geen sanctie-hits gevonden",
+        "matchFound": "Sanctie-hit gevonden!",
+        "check": "Sanctiecheck uitvoeren",
+        "checking": "Controleren...",
+        "recheck": "Opnieuw controleren",
+        "rechecking": "Opnieuw controleren...",
+        "checkedAt": "Gecontroleerd op",
+        "companyResults": "Bedrijf",
+        "directorResults": "Bestuurder",
+        "score": "Score",
+        "datasets": "Sanctielijsten",
+        "countries": "Landen",
+        "noDirector": "Geen bestuurdergegevens beschikbaar",
+        "error": "Sanctiecheck kon niet worden uitgevoerd",
+        "matchWarning": "Let op: er is een mogelijke sanctie-hit gevonden. Controleer het resultaat handmatig."
+      },
       "actions": {
         "edit": "Bewerken",
         "selfFill": "Zelf invullen",
@@ -725,6 +744,7 @@
       "SUPPLIER_SAVED": "Leverancier heeft gegevens opgeslagen",
       "SUPPLIER_TYPE_CHANGED": "Leverancierstype gewijzigd",
       "VIES_CHECKED": "VIES BTW-controle uitgevoerd",
+      "SANCTIONS_CHECKED": "Sanctiecheck uitgevoerd",
       "SELF_FILL_ACTIVATED": "Zelf invullen geactiveerd",
       "PURCHASER_SAVED": "Inkoper heeft gegevens opgeslagen",
       "FINANCE_SAVED": "Finance heeft gegevens opgeslagen"

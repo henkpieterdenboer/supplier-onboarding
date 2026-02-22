@@ -118,6 +118,11 @@ model SupplierRequest {
   vatCheckResponse  String?    // JSON string of VIES response
   vatCheckedAt      DateTime?
 
+  // Sanctions check (OpenSanctions)
+  sanctionsMatch       Boolean?    // null = not checked, true = match found, false = no match
+  sanctionsResponse    String?     // JSON string of sanctions check results
+  sanctionsCheckedAt   DateTime?
+
   // Supplier submitted/saved timestamps
   supplierSubmittedAt DateTime?
   supplierSavedAt     DateTime?
