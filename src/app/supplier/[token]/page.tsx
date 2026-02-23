@@ -826,50 +826,52 @@ export default function SupplierFormPage() {
             </Card>
           )}
 
-          {/* Documents */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>{t('supplier.form.documents.title')}</CardTitle>
-              <CardDescription>{t('supplier.form.documents.description')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
+          {/* Documents - not shown for X-kweker (mandate upload is in auction section) */}
+          {!showAuction && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>{t('supplier.form.documents.title')}</CardTitle>
+                <CardDescription>{t('supplier.form.documents.description')}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
 
-              <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
-                <Label htmlFor="kvk">{t('supplier.form.documents.kvk')}</Label>
-                <Input
-                  id="kvk"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
-                  disabled={isDisabled}
-                />
+                <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
+                  <Label htmlFor="kvk">{t('supplier.form.documents.kvk')}</Label>
+                  <Input
+                    id="kvk"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
+                    disabled={isDisabled}
+                  />
 
-                <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
-                <Input
-                  id="passport"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
-                  disabled={isDisabled}
-                />
+                  <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
+                  <Input
+                    id="passport"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
+                    disabled={isDisabled}
+                  />
 
-                {showBank && (
-                  <>
-                    <Label htmlFor="bankDetails">{t('supplier.form.documents.bank')}</Label>
-                    <Input
-                      id="bankDetails"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
-                      disabled={isDisabled}
-                    />
-                  </>
-                )}
+                  {showBank && (
+                    <>
+                      <Label htmlFor="bankDetails">{t('supplier.form.documents.bank')}</Label>
+                      <Input
+                        id="bankDetails"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
+                        disabled={isDisabled}
+                      />
+                    </>
+                  )}
 
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {error && (
             <Alert variant="destructive" className="mb-6">

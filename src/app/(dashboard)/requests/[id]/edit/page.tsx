@@ -855,8 +855,8 @@ export default function EditRequestPage() {
           </CardContent>
         </Card>
 
-        {/* Documents Section */}
-        <Card>
+        {/* Documents Section - not shown for X-kweker (mandate upload is in auction section) */}
+        {!showAuction && <Card>
           <CardHeader>
             <CardTitle>{t('requests.edit.documents')}</CardTitle>
             <CardDescription>
@@ -932,7 +932,7 @@ export default function EditRequestPage() {
               </>
             )}
           </CardContent>
-        </Card>
+        </Card>}
 
         {/* Additional Purchaser Data */}
         <Card>
