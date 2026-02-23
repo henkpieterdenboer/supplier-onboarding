@@ -1005,7 +1005,7 @@ export default function EditRequestPage() {
           </Button>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={handleSaveOnly}
             disabled={busy}
           >

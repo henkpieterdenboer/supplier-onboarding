@@ -101,6 +101,8 @@ Workflow status transitions are validated: purchaser-submit requires `AWAITING_P
 
 File uploads validated server-side: max 10MB, only PDF/JPG/PNG (`validateFile()` in both upload routes).
 
+Auth endpoints use in-memory rate limiting (`src/lib/rate-limit.ts`) — IP + key based, no external dependencies.
+
 ### Workflow Statuses
 
 ```
@@ -116,7 +118,7 @@ All email functions accept a `language` parameter and use `getTranslation()` for
 
 ### i18n (Translations)
 
-- Translation files: `src/translations/nl.json` (Dutch, default) and `src/translations/en.json` (English)
+- Translation files: `src/translations/nl.json` (Dutch, default), `src/translations/en.json` (English), `src/translations/es.json` (Spanish), `src/translations/it.json` (Italian)
 - `src/lib/i18n.ts` — `getTranslation(lang, key)` with dot-notation path lookup and `{{variable}}` interpolation, falls back to NL then to the key itself. Also exports `formatDate()` and `formatTime()` for locale-aware formatting.
 - `src/lib/i18n-context.tsx` — `LanguageProvider` React context; `useLanguage()` hook for client components. Persists language via `NEXT_LOCALE` cookie and syncs from JWT session.
 - User model has `preferredLanguage` (synced into JWT); SupplierRequest has `supplierLanguage` (controls supplier form + emails)
@@ -130,6 +132,13 @@ Three supplier types: `KOOP`, `X_KWEKER`, `O_KWEKER`. Koop and O-kweker are iden
 - Invitation expiry: 14 days. Suppliers can save progress and resume later via email link.
 - `selfFill: Boolean` on SupplierRequest — allows the Inkoper to fill the supplier form themselves (skips supplier invitation)
 - Type-aware validation: incoterm only required for Koop/O-kweker
+- Required field `*` markers live in the translation files, shared between the supplier form (`supplier.form.*`) and the edit form (`requests.edit.*`). Both forms use the same set of required fields — changes to one must be mirrored in the other.
+
+### OpenSanctions Sanctions Check
+
+`src/lib/sanctions.ts` checks companies and directors against the OpenSanctions database. API endpoint: `sanctions-check` action in PATCH `/api/requests/[id]` (INKOPER/FINANCE role). Uses POST to `https://api.opensanctions.org/match/default` with `Authorization: ApiKey <key>`. Match threshold >= 0.7, top 3 results, 15s timeout, graceful null on error.
+
+Schema fields: `sanctionsMatch` (Boolean?), `sanctionsResponse` (String?), `sanctionsCheckedAt` (DateTime?). Tracked via `AuditAction.SANCTIONS_CHECKED`.
 
 ### VIES VAT Validation
 
@@ -214,6 +223,7 @@ See `.env.example` for the full list. Key variables:
 - `EMAIL_FROM` — From address for Resend emails
 - `NEXT_PUBLIC_AZURE_AD_ENABLED` + `AZURE_AD_*` — Optional M365 SSO
 - `BLOB_READ_WRITE_TOKEN` — Vercel Blob storage
+- `OPENSANCTIONS_API_KEY` — OpenSanctions API authentication
 
 ## Platform Gotchas
 

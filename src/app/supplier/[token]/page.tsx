@@ -399,6 +399,9 @@ export default function SupplierFormPage() {
           <p className="text-muted-foreground mt-2">
             {t('supplier.form.welcome', { supplierName: request?.supplierName || '' })}
           </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('supplier.form.requiredNote')}
+          </p>
         </div>
 
         {/* Saved before notice */}
