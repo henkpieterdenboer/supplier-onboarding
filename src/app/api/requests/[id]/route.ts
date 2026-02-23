@@ -16,7 +16,7 @@ import type { Language } from '@/lib/i18n'
 import { v4 as uuidv4 } from 'uuid'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
-import { purchaserSubmitSchema, financeSubmitSchema, financeSaveSchema, erpSubmitSchema, changeTypeSchema } from '@/lib/validations'
+import { purchaserSubmitSchema, financeSubmitSchema, financeSaveSchema, erpSubmitSchema, changeTypeSchema, changeRegionSchema } from '@/lib/validations'
 import { checkVat } from '@/lib/vies'
 import { checkSanctions } from '@/lib/sanctions'
 
@@ -1027,6 +1027,44 @@ export async function PATCH(
         })
 
         return NextResponse.json(updatedType)
+      }
+
+      case 'change-region': {
+        // INKOPER can change region
+        if (!session.user.roles.includes('INKOPER')) {
+          return NextResponse.json(
+            { error: 'Only purchasers can change the region' },
+            { status: 403 }
+          )
+        }
+
+        const parsedRegion = changeRegionSchema.safeParse(data)
+        if (!parsedRegion.success) {
+          return NextResponse.json(
+            { error: parsedRegion.error.issues[0]?.message || 'Invalid region' },
+            { status: 400 }
+          )
+        }
+        const { region: newRegion } = parsedRegion.data
+
+        const updatedRegion = await prisma.supplierRequest.update({
+          where: { id },
+          data: { region: newRegion },
+        })
+
+        await prisma.auditLog.create({
+          data: {
+            requestId: id,
+            userId: session.user.id,
+            action: AuditAction.REGION_CHANGED,
+            details: JSON.stringify({
+              oldRegion: existingRequest.region,
+              newRegion,
+            }),
+          },
+        })
+
+        return NextResponse.json(updatedRegion)
       }
 
       case 'vies-recheck': {

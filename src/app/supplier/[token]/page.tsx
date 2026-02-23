@@ -846,14 +846,18 @@ export default function SupplierFormPage() {
                     disabled={isDisabled}
                   />
 
-                  <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
-                  <Input
-                    id="passport"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
-                    disabled={isDisabled}
-                  />
+                  {showDirector && (
+                    <>
+                      <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
+                      <Input
+                        id="passport"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
+                        disabled={isDisabled}
+                      />
+                    </>
+                  )}
 
                   {showBank && (
                     <>

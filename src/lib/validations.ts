@@ -151,6 +151,10 @@ export const changeTypeSchema = z.object({
   supplierType: supplierTypeEnum,
 })
 
+export const changeRegionSchema = z.object({
+  region: regionEnum,
+})
+
 // --- Supplier form ---
 
 export const supplierFormSchema = z.object({

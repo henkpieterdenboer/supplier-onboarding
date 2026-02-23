@@ -20,7 +20,7 @@ import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import { Check, X, Loader2, AlertTriangle, FileDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { SupplierTypeLabels } from '@/types'
+import { SupplierTypeLabels, RegionLabels } from '@/types'
 import {
   showFinancialSection,
   showDirectorSection,
@@ -100,6 +100,7 @@ export default function EditRequestPage() {
   const [mandateRfhFile, setMandateRfhFile] = useState<File | null>(null)
 
   const [supplierType, setSupplierType] = useState<string>('KOOP')
+  const [region, setRegion] = useState<string>('EU')
 
   // VIES VAT validation state
   const [viesStatus, setViesStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'error' | 'invalid-format'>('idle')
@@ -203,6 +204,7 @@ export default function EditRequestPage() {
         const data = await response.json()
         setRequest(data)
         setSupplierType(data.supplierType || 'KOOP')
+        setRegion(data.region || 'EU')
 
         setFormData({
           companyName: data.companyName || (data.selfFill ? data.supplierName : '') || '',
@@ -289,7 +291,6 @@ export default function EditRequestPage() {
     )
   }
 
-  const region = request.region || 'EU'
   const showFinancial = showFinancialSection(supplierType)
   const showDirector = showDirectorSection(supplierType, region)
   const showAuction = showAuctionSection(supplierType)
@@ -308,6 +309,19 @@ export default function EditRequestPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'change-type', supplierType: newType }),
+      })
+    } catch {
+      // silently fail, it will be sent again on submit
+    }
+  }
+
+  const handleRegionChange = async (newRegion: string) => {
+    setRegion(newRegion)
+    try {
+      await fetch(`/api/requests/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'change-region', region: newRegion }),
       })
     } catch {
       // silently fail, it will be sent again on submit
@@ -456,22 +470,46 @@ export default function EditRequestPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Select
-                value={supplierType}
-                onValueChange={handleTypeChange}
-                disabled={busy}
-              >
-                <SelectTrigger className="w-full sm:w-64">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(SupplierTypeLabels).map(([value]) => (
-                    <SelectItem key={value} value={value}>
-                      {t(`enums.supplierType.${value}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="space-y-2">
+                  <Label>{t('requests.edit.supplierType')}</Label>
+                  <Select
+                    value={supplierType}
+                    onValueChange={handleTypeChange}
+                    disabled={busy}
+                  >
+                    <SelectTrigger className="w-full sm:w-64">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(SupplierTypeLabels).map(([value]) => (
+                        <SelectItem key={value} value={value}>
+                          {t(`enums.supplierType.${value}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('requests.edit.region')}</Label>
+                  <Select
+                    value={region}
+                    onValueChange={handleRegionChange}
+                    disabled={busy}
+                  >
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(RegionLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {t(`enums.region.${value}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -906,14 +944,18 @@ export default function EditRequestPage() {
                     disabled={busy}
                   />
 
-                  <Label htmlFor="passport">{t('requests.edit.passportUpload')}{hasFileOfType('PASSPORT') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
-                  <Input
-                    id="passport"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
-                    disabled={busy}
-                  />
+                  {showDirector && (
+                    <>
+                      <Label htmlFor="passport">{t('requests.edit.passportUpload')}{hasFileOfType('PASSPORT') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
+                      <Input
+                        id="passport"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
+                        disabled={busy}
+                      />
+                    </>
+                  )}
 
                   {showBank && (
                     <>
