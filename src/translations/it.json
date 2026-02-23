@@ -259,7 +259,14 @@
       "creditorNumberPlaceholder": "Inserisca il numero creditore",
       "successSubmit": "Dati salvati e inoltrati a Finance",
       "successSubmitERP": "Dati salvati e inoltrati a ERP",
-      "successSave": "Dati salvati"
+      "successSave": "Dati salvati",
+      "uploadSuccess": "File caricato",
+      "deleteSuccess": "File eliminato",
+      "uploading": "Caricamento...",
+      "deleting": "Eliminazione...",
+      "uploadError": "Errore durante il caricamento",
+      "deleteError": "Errore durante l'eliminazione",
+      "files": "File"
     },
     "detail": {
       "tabs": {

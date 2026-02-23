@@ -259,7 +259,14 @@
       "creditorNumberPlaceholder": "Enter creditor number",
       "successSubmit": "Details saved and forwarded to Finance",
       "successSubmitERP": "Details saved and forwarded to ERP",
-      "successSave": "Details saved"
+      "successSave": "Details saved",
+      "uploadSuccess": "File uploaded",
+      "deleteSuccess": "File deleted",
+      "uploading": "Uploading...",
+      "deleting": "Deleting...",
+      "uploadError": "Upload failed",
+      "deleteError": "Delete failed",
+      "files": "Files"
     },
     "detail": {
       "tabs": {

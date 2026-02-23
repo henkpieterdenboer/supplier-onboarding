@@ -18,7 +18,7 @@ import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 
 import { toast } from 'sonner'
-import { Check, X, Loader2, AlertTriangle, FileDown } from 'lucide-react'
+import { Check, X, Loader2, AlertTriangle, FileDown, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { SupplierTypeLabels, RegionLabels } from '@/types'
 import {
@@ -94,10 +94,10 @@ export default function EditRequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const [kvkFile, setKvkFile] = useState<File | null>(null)
-  const [passportFile, setPassportFile] = useState<File | null>(null)
-  const [bankDetailsFile, setBankDetailsFile] = useState<File | null>(null)
-  const [mandateRfhFile, setMandateRfhFile] = useState<File | null>(null)
+  // Instant file upload/delete state
+  const [files, setFiles] = useState<SupplierFile[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [deletingFileId, setDeletingFileId] = useState<string | null>(null)
 
   const [supplierType, setSupplierType] = useState<string>('KOOP')
   const [region, setRegion] = useState<string>('EU')
@@ -203,6 +203,7 @@ export default function EditRequestPage() {
         if (!response.ok) throw new Error(t('requests.edit.notFound'))
         const data = await response.json()
         setRequest(data)
+        setFiles(data.files || [])
         setSupplierType(data.supplierType || 'KOOP')
         setRegion(data.region || 'EU')
 
@@ -248,6 +249,54 @@ export default function EditRequestPage() {
 
     fetchRequest()
   }, [params.id])
+
+  // Instant file upload
+  const handleFileUpload = async (file: File, fileType: string, inputElement: HTMLInputElement) => {
+    setIsUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('fileType', fileType)
+
+      const res = await fetch(`/api/requests/${params.id}/files`, {
+        method: 'POST',
+        body: fd,
+      })
+
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || t('requests.edit.uploadError'))
+
+      setFiles(prev => [...prev, result])
+      toast.success(t('requests.edit.uploadSuccess'))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('requests.edit.uploadError'))
+    } finally {
+      setIsUploading(false)
+      inputElement.value = ''
+    }
+  }
+
+  // Instant file delete
+  const handleFileDelete = async (fileId: string) => {
+    setDeletingFileId(fileId)
+    try {
+      const res = await fetch(`/api/requests/${params.id}/files`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId }),
+      })
+
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || t('requests.edit.deleteError'))
+
+      setFiles(prev => prev.filter(f => f.id !== fileId))
+      toast.success(t('requests.edit.deleteSuccess'))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('requests.edit.deleteError'))
+    } finally {
+      setDeletingFileId(null)
+    }
+  }
 
   // Determine edit mode based on user role and request status
   const userRoles = session?.user?.roles || []
@@ -296,7 +345,7 @@ export default function EditRequestPage() {
   const showAuction = showAuctionSection(supplierType)
   const showBank = showBankUpload(supplierType)
   const incotermRequired = requiresIncoterm(supplierType)
-  const hasFileOfType = (type: string) => request.files.some(f => f.fileType === type)
+  const hasFileOfType = (type: string) => files.some(f => f.fileType === type)
 
   const canSubmit = canEditAsInkoper
     ? (incotermRequired ? !!formData.incoterm : true)
@@ -328,25 +377,6 @@ export default function EditRequestPage() {
     }
   }
 
-  const buildFormDataPayload = (action: string) => {
-    const submitData = new FormData()
-    submitData.append('data', JSON.stringify({
-      action,
-      ...formData,
-      commissionPercentage: formData.commissionPercentage
-        ? parseFloat(formData.commissionPercentage)
-        : null,
-      supplierType,
-    }))
-
-    if (kvkFile) submitData.append('kvk', kvkFile)
-    if (passportFile) submitData.append('passport', passportFile)
-    if (bankDetailsFile) submitData.append('bankDetails', bankDetailsFile)
-    if (mandateRfhFile) submitData.append('mandateRfh', mandateRfhFile)
-
-    return submitData
-  }
-
   const buildJsonPayload = (action: string) => {
     return JSON.stringify({
       action,
@@ -358,36 +388,17 @@ export default function EditRequestPage() {
     })
   }
 
-  const hasFileUploads = !!(kvkFile || passportFile || bankDetailsFile || mandateRfhFile)
-
   const handleSaveOnly = async () => {
     setError('')
     setIsSaving(true)
 
     try {
-      let response: Response
-
-      if (canEditAsInkoper) {
-        if (hasFileUploads) {
-          response = await fetch(`/api/requests/${params.id}`, {
-            method: 'PATCH',
-            body: buildFormDataPayload('purchaser-save'),
-          })
-        } else {
-          response = await fetch(`/api/requests/${params.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: buildJsonPayload('purchaser-save'),
-          })
-        }
-      } else {
-        // Finance save
-        response = await fetch(`/api/requests/${params.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: buildJsonPayload('finance-save'),
-        })
-      }
+      const action = canEditAsInkoper ? 'purchaser-save' : 'finance-save'
+      const response = await fetch(`/api/requests/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: buildJsonPayload(action),
+      })
 
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || t('common.error'))
@@ -407,29 +418,12 @@ export default function EditRequestPage() {
     setIsSubmitting(true)
 
     try {
-      let response: Response
-
-      if (canEditAsInkoper) {
-        if (hasFileUploads) {
-          response = await fetch(`/api/requests/${params.id}`, {
-            method: 'PATCH',
-            body: buildFormDataPayload('purchaser-submit'),
-          })
-        } else {
-          response = await fetch(`/api/requests/${params.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: buildJsonPayload('purchaser-submit'),
-          })
-        }
-      } else {
-        // Finance submit
-        response = await fetch(`/api/requests/${params.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: buildJsonPayload('finance-submit'),
-        })
-      }
+      const action = canEditAsInkoper ? 'purchaser-submit' : 'finance-submit'
+      const response = await fetch(`/api/requests/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: buildJsonPayload(action),
+      })
 
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || t('common.error'))
@@ -444,6 +438,23 @@ export default function EditRequestPage() {
   }
 
   const busy = isSaving || isSubmitting
+
+  // Render a file upload input that instantly uploads on change
+  const renderFileInput = (id: string, fileType: string, label: string) => (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) handleFileUpload(file, fileType, e.target)
+        }}
+        disabled={busy || isUploading}
+      />
+    </div>
+  )
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -857,28 +868,34 @@ export default function EditRequestPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}{hasFileOfType('MANDATE_RFH') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
-                    <a
-                      href="/rfh-incassovolmacht-template.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
-                      <FileDown className="h-3.5 w-3.5" />
-                      {t('requests.edit.mandateDownload')}
-                    </a>
+                {/* Mandate upload - instant */}
+                {canEditAsInkoper && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-4">
+                      <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
+                      <a
+                        href="/rfh-incassovolmacht-template.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                        {t('requests.edit.mandateDownload')}
+                      </a>
+                    </div>
+                    <Input
+                      id="mandateRfh"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleFileUpload(file, 'MANDATE_RFH', e.target)
+                      }}
+                      disabled={busy || isUploading}
+                    />
+                    <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
                   </div>
-                  <Input
-                    id="mandateRfh"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setMandateRfhFile(e.target.files?.[0] || null)}
-                    disabled={busy}
-                  />
-                  <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-                </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="apiKeyFloriday">{t('requests.edit.apiKeyFloriday')}</Label>
                   <Input
@@ -893,88 +910,85 @@ export default function EditRequestPage() {
           </CardContent>
         </Card>
 
-        {/* Documents Section - not shown for X-kweker (mandate upload is in auction section) */}
-        {!showAuction && <Card>
-          <CardHeader>
-            <CardTitle>{t('requests.edit.documents')}</CardTitle>
-            <CardDescription>
-              {t('requests.edit.documentsDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Existing files */}
-            {request.files.length > 0 && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">{t('requests.edit.existingFiles')}</Label>
-                <ul className="space-y-2">
-                  {request.files.map((file) => (
-                    <li key={file.id} className="flex items-center gap-3">
-                      <Badge variant="outline">
-                        {t(`enums.fileType.${file.fileType}`)}
-                      </Badge>
-                      <a
-                        href={file.filePath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm"
-                      >
-                        {file.fileName}
-                      </a>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(file.uploadedAt).toLocaleDateString(getDateLocale(language))}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <Separator />
-              </div>
-            )}
-
-            {/* File uploads - only show for INKOPER (Finance doesn't need to upload files) */}
-            {canEditAsInkoper && (
-              <>
-                <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-                <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
-                  <Label htmlFor="kvk">{t('requests.edit.kvkUpload')}{hasFileOfType('KVK') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
-                  <Input
-                    id="kvk"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setKvkFile(e.target.files?.[0] || null)}
-                    disabled={busy}
-                  />
-
-                  {showDirector && (
-                    <>
-                      <Label htmlFor="passport">{t('requests.edit.passportUpload')}{hasFileOfType('PASSPORT') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
-                      <Input
-                        id="passport"
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
-                        disabled={busy}
-                      />
-                    </>
-                  )}
-
-                  {showBank && (
-                    <>
-                      <Label htmlFor="bankDetails">{t('requests.edit.bankUpload')}{hasFileOfType('BANK_DETAILS') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
-                      <Input
-                        id="bankDetails"
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => setBankDetailsFile(e.target.files?.[0] || null)}
-                        disabled={busy}
-                      />
-                    </>
-                  )}
-
+        {/* Documents Section - upload inputs (not shown for X-kweker, mandate is in auction section) */}
+        {!showAuction && canEditAsInkoper && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('requests.edit.documents')}</CardTitle>
+              <CardDescription>
+                {t('requests.edit.documentsDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
+              {isUploading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('requests.edit.uploading')}
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>}
+              )}
+              <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
+                {renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
+
+                {showDirector && renderFileInput('passport', 'PASSPORT', t('requests.edit.passportUpload'))}
+
+                {showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Files Card - shows all uploaded files with delete option */}
+        {(files.length > 0 || (showAuction && canEditAsInkoper && isUploading)) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('requests.edit.files')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isUploading && showAuction && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('requests.edit.uploading')}
+                </div>
+              )}
+              <ul className="space-y-2">
+                {files.map((file) => (
+                  <li key={file.id} className="flex items-center gap-3">
+                    <Badge variant="outline">
+                      {t(`enums.fileType.${file.fileType}`)}
+                    </Badge>
+                    <a
+                      href={file.filePath}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline text-sm"
+                    >
+                      {file.fileName}
+                    </a>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(file.uploadedAt).toLocaleDateString(getDateLocale(language))}
+                    </span>
+                    {canEditAsInkoper && (
+                      <button
+                        type="button"
+                        onClick={() => handleFileDelete(file.id)}
+                        disabled={deletingFileId === file.id || busy}
+                        className="ml-auto text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                        title={t('common.delete')}
+                      >
+                        {deletingFileId === file.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Additional Purchaser Data */}
         <Card>

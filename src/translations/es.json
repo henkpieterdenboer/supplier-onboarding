@@ -259,7 +259,14 @@
       "creditorNumberPlaceholder": "Introduzca el número de acreedor",
       "successSubmit": "Datos guardados y enviados a Finanzas",
       "successSubmitERP": "Datos guardados y enviados a ERP",
-      "successSave": "Datos guardados"
+      "successSave": "Datos guardados",
+      "uploadSuccess": "Archivo subido",
+      "deleteSuccess": "Archivo eliminado",
+      "uploading": "Subiendo...",
+      "deleting": "Eliminando...",
+      "uploadError": "Error al subir",
+      "deleteError": "Error al eliminar",
+      "files": "Archivos"
     },
     "detail": {
       "tabs": {

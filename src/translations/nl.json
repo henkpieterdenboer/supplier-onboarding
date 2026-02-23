@@ -259,7 +259,14 @@
       "creditorNumberPlaceholder": "Voer crediteurnummer in",
       "successSubmit": "Gegevens opgeslagen en doorgestuurd naar Finance",
       "successSubmitERP": "Gegevens opgeslagen en doorgestuurd naar ERP",
-      "successSave": "Gegevens opgeslagen"
+      "successSave": "Gegevens opgeslagen",
+      "uploadSuccess": "Bestand geüpload",
+      "deleteSuccess": "Bestand verwijderd",
+      "uploading": "Uploaden...",
+      "deleting": "Verwijderen...",
+      "uploadError": "Fout bij uploaden",
+      "deleteError": "Fout bij verwijderen",
+      "files": "Bestanden"
     },
     "detail": {
       "tabs": {
