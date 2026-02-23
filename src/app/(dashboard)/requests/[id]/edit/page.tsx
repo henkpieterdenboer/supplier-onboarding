@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
-import { Checkbox } from '@/components/ui/checkbox'
+
 import { toast } from 'sonner'
 import { Check, X, Loader2, AlertTriangle, FileDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -26,7 +26,7 @@ import {
   showDirectorSection,
   showAuctionSection,
   showBankUpload,
-  showMandateUpload,
+
   requiresIncoterm,
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
@@ -185,7 +185,6 @@ export default function EditRequestPage() {
     directorPassportNumber: '',
     auctionNumberRFH: '',
     salesSheetEmail: '',
-    mandateRFH: false,
     apiKeyFloriday: '',
     // Purchaser additional data
     incoterm: '' as '' | 'CIF' | 'FOB',
@@ -230,7 +229,6 @@ export default function EditRequestPage() {
           directorPassportNumber: data.directorPassportNumber || '',
           auctionNumberRFH: data.auctionNumberRFH || '',
           salesSheetEmail: data.salesSheetEmail || '',
-          mandateRFH: data.mandateRFH || false,
           apiKeyFloriday: data.apiKeyFloriday || '',
           incoterm: data.incoterm || '',
           commissionPercentage:
@@ -296,8 +294,8 @@ export default function EditRequestPage() {
   const showDirector = showDirectorSection(supplierType, region)
   const showAuction = showAuctionSection(supplierType)
   const showBank = showBankUpload(supplierType)
-  const showMandate = showMandateUpload(supplierType)
   const incotermRequired = requiresIncoterm(supplierType)
+  const hasFileOfType = (type: string) => request.files.some(f => f.fileType === type)
 
   const canSubmit = canEditAsInkoper
     ? (incotermRequired ? !!formData.incoterm : true)
@@ -321,7 +319,6 @@ export default function EditRequestPage() {
     submitData.append('data', JSON.stringify({
       action,
       ...formData,
-      mandateRFH: formData.mandateRFH || null,
       commissionPercentage: formData.commissionPercentage
         ? parseFloat(formData.commissionPercentage)
         : null,
@@ -340,7 +337,6 @@ export default function EditRequestPage() {
     return JSON.stringify({
       action,
       ...formData,
-      mandateRFH: formData.mandateRFH || null,
       commissionPercentage: formData.commissionPercentage
         ? parseFloat(formData.commissionPercentage)
         : null,
@@ -823,16 +819,27 @@ export default function EditRequestPage() {
                     />
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mandateRFH"
-                    checked={formData.mandateRFH}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, mandateRFH: checked === true })
-                    }
+                <div className="space-y-2">
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}{hasFileOfType('MANDATE_RFH') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
+                    <a
+                      href="/rfh-incassovolmacht-template.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
+                      <FileDown className="h-3.5 w-3.5" />
+                      {t('requests.edit.mandateDownload')}
+                    </a>
+                  </div>
+                  <Input
+                    id="mandateRfh"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setMandateRfhFile(e.target.files?.[0] || null)}
                     disabled={busy}
                   />
-                  <Label htmlFor="mandateRFH">{t('requests.edit.mandateRFH')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="apiKeyFloriday">{t('requests.edit.apiKeyFloriday')}</Label>
@@ -890,7 +897,7 @@ export default function EditRequestPage() {
               <>
                 <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
                 <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
-                  <Label htmlFor="kvk">{t('requests.edit.kvkUpload')}</Label>
+                  <Label htmlFor="kvk">{t('requests.edit.kvkUpload')}{hasFileOfType('KVK') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
                   <Input
                     id="kvk"
                     type="file"
@@ -899,7 +906,7 @@ export default function EditRequestPage() {
                     disabled={busy}
                   />
 
-                  <Label htmlFor="passport">{t('requests.edit.passportUpload')}</Label>
+                  <Label htmlFor="passport">{t('requests.edit.passportUpload')}{hasFileOfType('PASSPORT') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
                   <Input
                     id="passport"
                     type="file"
@@ -910,7 +917,7 @@ export default function EditRequestPage() {
 
                   {showBank && (
                     <>
-                      <Label htmlFor="bankDetails">{t('requests.edit.bankUpload')}</Label>
+                      <Label htmlFor="bankDetails">{t('requests.edit.bankUpload')}{hasFileOfType('BANK_DETAILS') ? ` ${t('requests.edit.replaceFile')}` : ''}</Label>
                       <Input
                         id="bankDetails"
                         type="file"
@@ -921,29 +928,6 @@ export default function EditRequestPage() {
                     </>
                   )}
 
-                  {showMandate && (
-                    <>
-                      <div>
-                        <Label htmlFor="mandateRfh">{t('requests.edit.mandateUpload')}</Label>
-                        <a
-                          href="/rfh-incassovolmacht-template.pdf"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-primary hover:underline mt-1"
-                        >
-                          <FileDown className="h-3.5 w-3.5" />
-                          {t('requests.edit.mandateDownload')}
-                        </a>
-                      </div>
-                      <Input
-                        id="mandateRfh"
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => setMandateRfhFile(e.target.files?.[0] || null)}
-                        disabled={busy}
-                      />
-                    </>
-                  )}
                 </div>
               </>
             )}

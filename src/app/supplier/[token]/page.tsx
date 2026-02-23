@@ -108,7 +108,6 @@ export default function SupplierFormPage() {
     // Auction (X-kweker)
     auctionNumberRFH: '',
     salesSheetEmail: '',
-    mandateRFH: false,
     apiKeyFloriday: '',
   })
 
@@ -221,7 +220,6 @@ export default function SupplierFormPage() {
             directorPassportNumber: data.directorPassportNumber || '',
             auctionNumberRFH: data.auctionNumberRFH || '',
             salesSheetEmail: data.salesSheetEmail || '',
-            mandateRFH: data.mandateRFH || false,
             apiKeyFloriday: data.apiKeyFloriday || '',
           })
         }
@@ -792,16 +790,27 @@ export default function SupplierFormPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mandateRFH"
-                    checked={formData.mandateRFH}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, mandateRFH: checked === true })
-                    }
+                <div className="space-y-2">
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
+                    <a
+                      href="/rfh-incassovolmacht-template.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
+                      <FileDown className="h-3.5 w-3.5" />
+                      {t('supplier.form.documents.mandateDownload')}
+                    </a>
+                  </div>
+                  <Input
+                    id="mandateRfh"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange('mandateRfh', e.target.files?.[0] || null)}
                     disabled={isDisabled}
                   />
-                  <Label htmlFor="mandateRFH">{t('supplier.form.auction.mandateRFH')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
                 </div>
 
                 <div className="space-y-2">
@@ -858,29 +867,6 @@ export default function SupplierFormPage() {
                   </>
                 )}
 
-                {showMandate && (
-                  <>
-                    <div>
-                      <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
-                      <a
-                        href="/rfh-incassovolmacht-template.pdf"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-primary hover:underline mt-1"
-                      >
-                        <FileDown className="h-3.5 w-3.5" />
-                        {t('supplier.form.documents.mandateDownload')}
-                      </a>
-                    </div>
-                    <Input
-                      id="mandateRfh"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange('mandateRfh', e.target.files?.[0] || null)}
-                      disabled={isDisabled}
-                    />
-                  </>
-                )}
               </div>
             </CardContent>
           </Card>
