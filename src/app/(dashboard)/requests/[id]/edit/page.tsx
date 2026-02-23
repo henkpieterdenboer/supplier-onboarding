@@ -736,7 +736,7 @@ export default function EditRequestPage() {
                       <SelectContent>
                         <SelectItem value="EUR">EUR</SelectItem>
                         <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="ZAR">ZAR</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -884,33 +884,31 @@ export default function EditRequestPage() {
             {/* File uploads - only show for INKOPER (Finance doesn't need to upload files) */}
             {canEditAsInkoper && (
               <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="kvk">
-                      {t('requests.edit.kvkUpload')}
-                    </Label>
-                    <Input
-                      id="kvk"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => setKvkFile(e.target.files?.[0] || null)}
-                      disabled={busy}
-                    />
-                    <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="passport">
-                      {t('requests.edit.passportUpload')}
-                    </Label>
-                    <Input
-                      id="passport"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
-                      disabled={busy}
-                    />
-                    <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kvk">
+                    {t('requests.edit.kvkUpload')}
+                  </Label>
+                  <Input
+                    id="kvk"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setKvkFile(e.target.files?.[0] || null)}
+                    disabled={busy}
+                  />
+                  <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="passport">
+                    {t('requests.edit.passportUpload')}
+                  </Label>
+                  <Input
+                    id="passport"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
+                    disabled={busy}
+                  />
+                  <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
                 </div>
 
                 {showBank && (

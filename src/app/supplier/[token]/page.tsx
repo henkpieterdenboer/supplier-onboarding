@@ -687,7 +687,7 @@ export default function SupplierFormPage() {
                     <SelectContent>
                       <SelectItem value="EUR">{t('supplier.form.financial.currencyEUR')}</SelectItem>
                       <SelectItem value="USD">{t('supplier.form.financial.currencyUSD')}</SelectItem>
-                      <SelectItem value="GBP">{t('supplier.form.financial.currencyGBP')}</SelectItem>
+                      <SelectItem value="ZAR">{t('supplier.form.financial.currencyZAR')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

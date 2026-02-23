@@ -449,7 +449,7 @@
         "currencyPlaceholder": "Select currency",
         "currencyEUR": "EUR - Euro",
         "currencyUSD": "USD - US Dollar",
-        "currencyGBP": "GBP - British Pound",
+        "currencyZAR": "ZAR - South African Rand",
         "viesChecking": "Checking VAT number...",
         "viesValid": "Valid VAT number",
         "viesInvalid": "VAT number not found in VIES",
