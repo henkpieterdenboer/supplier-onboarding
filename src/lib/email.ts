@@ -4,13 +4,14 @@ import { getTranslation, Language, formatDate, formatTime } from './i18n'
 import { getLabelConfig } from './label-config'
 
 // Generate email header with label-specific logo
+// Uses HTML width/height attributes (old Outlook ignores CSS) + white background for dark mode
 function getEmailHeader(label?: string): string {
   const config = getLabelConfig(label || 'COLORIGINZ')
   const appUrl = process.env.APP_URL || 'http://localhost:3000'
   const logoUrl = `${appUrl}${config.logoPath}`
   return `
-    <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px;">
-      <img src="${logoUrl}" alt="${config.name}" style="height: ${config.emailLogoHeight}px; width: auto;" />
+    <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; background-color: #ffffff;">
+      <img src="${logoUrl}" alt="${config.name}" width="${config.emailLogoWidth}" height="${config.emailLogoHeight}" style="display: inline-block; height: ${config.emailLogoHeight}px; width: ${config.emailLogoWidth}px;" />
     </div>
   `
 }
