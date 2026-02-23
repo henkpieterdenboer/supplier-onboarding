@@ -18,7 +18,7 @@ import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import { Check, X, Loader2, AlertTriangle } from 'lucide-react'
+import { Check, X, Loader2, AlertTriangle, FileDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { SupplierTypeLabels } from '@/types'
 import {
@@ -888,10 +888,9 @@ export default function EditRequestPage() {
             {/* File uploads - only show for INKOPER (Finance doesn't need to upload files) */}
             {canEditAsInkoper && (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="kvk">
-                    {t('requests.edit.kvkUpload')}
-                  </Label>
+                <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
+                <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
+                  <Label htmlFor="kvk">{t('requests.edit.kvkUpload')}</Label>
                   <Input
                     id="kvk"
                     type="file"
@@ -899,12 +898,8 @@ export default function EditRequestPage() {
                     onChange={(e) => setKvkFile(e.target.files?.[0] || null)}
                     disabled={busy}
                   />
-                  <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="passport">
-                    {t('requests.edit.passportUpload')}
-                  </Label>
+
+                  <Label htmlFor="passport">{t('requests.edit.passportUpload')}</Label>
                   <Input
                     id="passport"
                     type="file"
@@ -912,50 +907,44 @@ export default function EditRequestPage() {
                     onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
                     disabled={busy}
                   />
-                  <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
+
+                  {showBank && (
+                    <>
+                      <Label htmlFor="bankDetails">{t('requests.edit.bankUpload')}</Label>
+                      <Input
+                        id="bankDetails"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => setBankDetailsFile(e.target.files?.[0] || null)}
+                        disabled={busy}
+                      />
+                    </>
+                  )}
+
+                  {showMandate && (
+                    <>
+                      <div>
+                        <Label htmlFor="mandateRfh">{t('requests.edit.mandateUpload')}</Label>
+                        <a
+                          href="/rfh-incassovolmacht-template.pdf"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                        >
+                          <FileDown className="h-3.5 w-3.5" />
+                          {t('requests.edit.mandateDownload')}
+                        </a>
+                      </div>
+                      <Input
+                        id="mandateRfh"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => setMandateRfhFile(e.target.files?.[0] || null)}
+                        disabled={busy}
+                      />
+                    </>
+                  )}
                 </div>
-
-                {showBank && (
-                  <div className="space-y-2">
-                    <Label htmlFor="bankDetails">
-                      {t('requests.edit.bankUpload')}
-                    </Label>
-                    <Input
-                      id="bankDetails"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => setBankDetailsFile(e.target.files?.[0] || null)}
-                      disabled={busy}
-                    />
-                    <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-                  </div>
-                )}
-
-                {showMandate && (
-                  <div className="space-y-2">
-                    <Label htmlFor="mandateRfh">
-                      {t('requests.edit.mandateUpload')}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      <a
-                        href="/rfh-incassovolmacht-template.pdf"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {t('requests.edit.mandateDownload')}
-                      </a>
-                    </p>
-                    <Input
-                      id="mandateRfh"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => setMandateRfhFile(e.target.files?.[0] || null)}
-                      disabled={busy}
-                    />
-                    <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-                  </div>
-                )}
               </>
             )}
           </CardContent>

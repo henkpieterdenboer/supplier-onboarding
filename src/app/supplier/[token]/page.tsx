@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Check, X, Loader2, AlertTriangle } from 'lucide-react'
+import { Check, X, Loader2, AlertTriangle, FileDown } from 'lucide-react'
 import { getLabelConfig } from '@/lib/label-config'
 import {
   showFinancialSection,
@@ -824,7 +824,9 @@ export default function SupplierFormPage() {
               <CardDescription>{t('supplier.form.documents.description')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
+
+              <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
                 <Label htmlFor="kvk">{t('supplier.form.documents.kvk')}</Label>
                 <Input
                   id="kvk"
@@ -833,10 +835,7 @@ export default function SupplierFormPage() {
                   onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
                   disabled={isDisabled}
                 />
-                <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
-              </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
                 <Input
                   id="passport"
@@ -845,46 +844,44 @@ export default function SupplierFormPage() {
                   onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
                   disabled={isDisabled}
                 />
-                <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
+
+                {showBank && (
+                  <>
+                    <Label htmlFor="bankDetails">{t('supplier.form.documents.bank')}</Label>
+                    <Input
+                      id="bankDetails"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
+                      disabled={isDisabled}
+                    />
+                  </>
+                )}
+
+                {showMandate && (
+                  <>
+                    <div>
+                      <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
+                      <a
+                        href="/rfh-incassovolmacht-template.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                        {t('supplier.form.documents.mandateDownload')}
+                      </a>
+                    </div>
+                    <Input
+                      id="mandateRfh"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange('mandateRfh', e.target.files?.[0] || null)}
+                      disabled={isDisabled}
+                    />
+                  </>
+                )}
               </div>
-
-              {showBank && (
-                <div className="space-y-2">
-                  <Label htmlFor="bankDetails">{t('supplier.form.documents.bank')}</Label>
-                  <Input
-                    id="bankDetails"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
-                    disabled={isDisabled}
-                  />
-                  <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
-                </div>
-              )}
-
-              {showMandate && (
-                <div className="space-y-2">
-                  <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    <a
-                      href="/rfh-incassovolmacht-template.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      {t('supplier.form.documents.mandateDownload')}
-                    </a>
-                  </p>
-                  <Input
-                    id="mandateRfh"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('mandateRfh', e.target.files?.[0] || null)}
-                    disabled={isDisabled}
-                  />
-                  <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
-                </div>
-              )}
             </CardContent>
           </Card>
 
