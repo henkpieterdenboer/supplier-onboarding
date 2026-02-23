@@ -33,6 +33,14 @@ export function showBankUpload(type: string): boolean {
 }
 
 /**
+ * Show RFH mandate upload (incassovolmacht)
+ * X-kweker only
+ */
+export function showMandateUpload(type: string): boolean {
+  return type === SupplierType.X_KWEKER
+}
+
+/**
  * Whether incoterm is required for purchaser submit
  * Koop + O-kweker: yes, X-kweker: no
  */

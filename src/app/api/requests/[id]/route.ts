@@ -405,6 +405,7 @@ export async function PATCH(
             formDataObj.get('kvk') as File | null,
             formDataObj.get('passport') as File | null,
             formDataObj.get('bankDetails') as File | null,
+            formDataObj.get('mandateRfh') as File | null,
           ].filter((f): f is File => f !== null && f.size > 0)
 
           for (const file of filesToValidate) {
@@ -457,6 +458,21 @@ export async function PATCH(
               await writeFile(path.join(uploadDir, fileName), buffer)
             }
             saveFilesToCreate.push({ fileName: bankDetailsFile.name, fileType: 'BANK_DETAILS', filePath })
+          }
+
+          const mandateRfhFile = formDataObj.get('mandateRfh') as File | null
+          if (mandateRfhFile && mandateRfhFile.size > 0) {
+            const fileName = `mandate_rfh_${Date.now()}_${mandateRfhFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+            if (useVercelBlobSave) {
+              await uploadToBlob(`${id}/${fileName}`, mandateRfhFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await mandateRfhFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+            saveFilesToCreate.push({ fileName: mandateRfhFile.name, fileType: 'MANDATE_RFH', filePath })
           }
         }
 
@@ -566,6 +582,7 @@ export async function PATCH(
             formDataObj.get('kvk') as File | null,
             formDataObj.get('passport') as File | null,
             formDataObj.get('bankDetails') as File | null,
+            formDataObj.get('mandateRfh') as File | null,
           ].filter((f): f is File => f !== null && f.size > 0)
 
           for (const file of filesToValidate) {
@@ -624,6 +641,23 @@ export async function PATCH(
             }
 
             filesToCreate.push({ fileName: bankDetailsFile.name, fileType: 'BANK_DETAILS', filePath })
+          }
+
+          const mandateRfhFile = formDataObj.get('mandateRfh') as File | null
+          if (mandateRfhFile && mandateRfhFile.size > 0) {
+            const fileName = `mandate_rfh_${Date.now()}_${mandateRfhFile.name}`
+            const filePath = `/api/files/${id}/${fileName}`
+
+            if (useVercelBlob) {
+              await uploadToBlob(`${id}/${fileName}`, mandateRfhFile)
+            } else {
+              const uploadDir = path.join(process.cwd(), 'uploads', id)
+              await mkdir(uploadDir, { recursive: true })
+              const buffer = Buffer.from(await mandateRfhFile.arrayBuffer())
+              await writeFile(path.join(uploadDir, fileName), buffer)
+            }
+
+            filesToCreate.push({ fileName: mandateRfhFile.name, fileType: 'MANDATE_RFH', filePath })
           }
         }
 

@@ -196,6 +196,7 @@ export async function POST(
       formData.get('kvk') as File | null,
       formData.get('passport') as File | null,
       formData.get('bankDetails') as File | null,
+      formData.get('mandateRfh') as File | null,
     ].filter((f): f is File => f !== null && f.size > 0)
 
     for (const file of filesToValidate) {
@@ -267,6 +268,28 @@ export async function POST(
       filesToCreate.push({
         fileName: bankFile.name,
         fileType: 'BANK_DETAILS',
+        filePath,
+      })
+    }
+
+    const mandateRfhFile = formData.get('mandateRfh') as File | null
+    if (mandateRfhFile) {
+      const fileName = `mandate_rfh_${Date.now()}_${mandateRfhFile.name}`
+      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
+
+      if (useVercelBlob) {
+        await uploadToBlob(`${supplierRequest.id}/${fileName}`, mandateRfhFile)
+      } else {
+        const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
+        await mkdir(uploadDir, { recursive: true })
+        const buffer = Buffer.from(await mandateRfhFile.arrayBuffer())
+        const localPath = path.join(uploadDir, fileName)
+        await writeFile(localPath, buffer)
+      }
+
+      filesToCreate.push({
+        fileName: mandateRfhFile.name,
+        fileType: 'MANDATE_RFH',
         filePath,
       })
     }

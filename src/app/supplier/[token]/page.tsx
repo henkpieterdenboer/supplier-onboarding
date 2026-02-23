@@ -24,6 +24,7 @@ import {
   showDirectorSection,
   showAuctionSection,
   showBankUpload,
+  showMandateUpload,
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale } from '@/lib/i18n'
@@ -173,10 +174,12 @@ export default function SupplierFormPage() {
     kvk: File | null
     passport: File | null
     bankDetails: File | null
+    mandateRfh: File | null
   }>({
     kvk: null,
     passport: null,
     bankDetails: null,
+    mandateRfh: null,
   })
 
   useEffect(() => {
@@ -239,7 +242,7 @@ export default function SupplierFormPage() {
     }
   }, [request?.supplierLanguage, setLanguage])
 
-  const handleFileChange = (type: 'kvk' | 'passport' | 'bankDetails', file: File | null) => {
+  const handleFileChange = (type: 'kvk' | 'passport' | 'bankDetails' | 'mandateRfh', file: File | null) => {
     setFiles({ ...files, [type]: file })
   }
 
@@ -258,6 +261,7 @@ export default function SupplierFormPage() {
       if (files.kvk) submitData.append('kvk', files.kvk)
       if (files.passport) submitData.append('passport', files.passport)
       if (files.bankDetails) submitData.append('bankDetails', files.bankDetails)
+      if (files.mandateRfh) submitData.append('mandateRfh', files.mandateRfh)
 
       const response = await fetch(`/api/supplier/${params.token}`, {
         method: 'POST',
@@ -383,6 +387,7 @@ export default function SupplierFormPage() {
   const showDirector = showDirectorSection(supplierType, region)
   const showAuction = showAuctionSection(supplierType)
   const showBank = showBankUpload(supplierType)
+  const showMandate = showMandateUpload(supplierType)
 
   return (
     <div className="min-h-screen bg-muted/40 py-8 px-4">
@@ -851,6 +856,30 @@ export default function SupplierFormPage() {
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
                     onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
+                    disabled={isDisabled}
+                  />
+                  <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
+                </div>
+              )}
+
+              {showMandate && (
+                <div className="space-y-2">
+                  <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    <a
+                      href="/rfh-incassovolmacht-template.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {t('supplier.form.documents.mandateDownload')}
+                    </a>
+                  </p>
+                  <Input
+                    id="mandateRfh"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange('mandateRfh', e.target.files?.[0] || null)}
                     disabled={isDisabled}
                   />
                   <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>

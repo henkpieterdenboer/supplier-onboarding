@@ -238,6 +238,8 @@
       "kvkUpload": "KvK uittreksel (vervangen)",
       "passportUpload": "Paspoort / ID (vervangen)",
       "bankUpload": "Screenshot bankgegevens (vervangen)",
+      "mandateUpload": "RFH Incassovolmacht (vervangen)",
+      "mandateDownload": "Download leeg formulier",
       "fileHint": "PDF, JPG of PNG (max 10MB)",
       "purchaserDetails": "Aanvullende gegevens (Inkoper)",
       "purchaserDetailsDescription": "Deze gegevens moeten door de inkoper worden toegevoegd",
@@ -477,7 +479,9 @@
         "description": "Upload de gevraagde documenten",
         "kvk": "KvK uittreksel",
         "passport": "Paspoort / ID",
-        "bank": "Screenshot bankgegevens"
+        "bank": "Screenshot bankgegevens",
+        "mandate": "RFH Incassovolmacht (getekend)",
+        "mandateDownload": "Download leeg formulier"
       },
       "saveLater": "Opslaan en later verder",
       "saving": "Bezig met opslaan...",
@@ -726,6 +730,7 @@
       "KVK": "KvK Uittreksel",
       "PASSPORT": "Paspoort",
       "BANK_DETAILS": "Screenshot bankgegevens",
+      "MANDATE_RFH": "RFH Incassovolmacht",
       "OTHER": "Overig"
     },
     "auditAction": {

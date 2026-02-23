@@ -238,6 +238,8 @@
       "kvkUpload": "Estratto Camera di Commercio (sostituisci)",
       "passportUpload": "Passaporto / Documento d'identità (sostituisci)",
       "bankUpload": "Screenshot dati bancari (sostituisci)",
+      "mandateUpload": "Mandato di addebito diretto RFH (sostituisci)",
+      "mandateDownload": "Scarica modulo vuoto",
       "fileHint": "PDF, JPG o PNG (max 10MB)",
       "purchaserDetails": "Dati aggiuntivi (Acquirente)",
       "purchaserDetailsDescription": "Questi dati devono essere aggiunti dall'acquirente",
@@ -477,7 +479,9 @@
         "description": "Carichi i documenti richiesti",
         "kvk": "Estratto Camera di Commercio",
         "passport": "Passaporto / Documento d'identità",
-        "bank": "Screenshot dati bancari"
+        "bank": "Screenshot dati bancari",
+        "mandate": "Mandato di addebito diretto RFH (firmato)",
+        "mandateDownload": "Scarica modulo vuoto"
       },
       "saveLater": "Salva e continua in seguito",
       "saving": "Salvataggio in corso...",
@@ -726,6 +730,7 @@
       "KVK": "Estratto Camera di Commercio",
       "PASSPORT": "Passaporto",
       "BANK_DETAILS": "Screenshot dati bancari",
+      "MANDATE_RFH": "Mandato di addebito diretto RFH",
       "OTHER": "Altro"
     },
     "auditAction": {

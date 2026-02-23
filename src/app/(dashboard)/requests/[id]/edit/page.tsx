@@ -26,6 +26,7 @@ import {
   showDirectorSection,
   showAuctionSection,
   showBankUpload,
+  showMandateUpload,
   requiresIncoterm,
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
@@ -96,6 +97,7 @@ export default function EditRequestPage() {
   const [kvkFile, setKvkFile] = useState<File | null>(null)
   const [passportFile, setPassportFile] = useState<File | null>(null)
   const [bankDetailsFile, setBankDetailsFile] = useState<File | null>(null)
+  const [mandateRfhFile, setMandateRfhFile] = useState<File | null>(null)
 
   const [supplierType, setSupplierType] = useState<string>('KOOP')
 
@@ -294,6 +296,7 @@ export default function EditRequestPage() {
   const showDirector = showDirectorSection(supplierType, region)
   const showAuction = showAuctionSection(supplierType)
   const showBank = showBankUpload(supplierType)
+  const showMandate = showMandateUpload(supplierType)
   const incotermRequired = requiresIncoterm(supplierType)
 
   const canSubmit = canEditAsInkoper
@@ -328,6 +331,7 @@ export default function EditRequestPage() {
     if (kvkFile) submitData.append('kvk', kvkFile)
     if (passportFile) submitData.append('passport', passportFile)
     if (bankDetailsFile) submitData.append('bankDetails', bankDetailsFile)
+    if (mandateRfhFile) submitData.append('mandateRfh', mandateRfhFile)
 
     return submitData
   }
@@ -344,7 +348,7 @@ export default function EditRequestPage() {
     })
   }
 
-  const hasFileUploads = !!(kvkFile || passportFile || bankDetailsFile)
+  const hasFileUploads = !!(kvkFile || passportFile || bankDetailsFile || mandateRfhFile)
 
   const handleSaveOnly = async () => {
     setError('')
@@ -921,6 +925,32 @@ export default function EditRequestPage() {
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) => setBankDetailsFile(e.target.files?.[0] || null)}
+                      disabled={busy}
+                    />
+                    <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
+                  </div>
+                )}
+
+                {showMandate && (
+                  <div className="space-y-2">
+                    <Label htmlFor="mandateRfh">
+                      {t('requests.edit.mandateUpload')}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      <a
+                        href="/rfh-incassovolmacht-template.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {t('requests.edit.mandateDownload')}
+                      </a>
+                    </p>
+                    <Input
+                      id="mandateRfh"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => setMandateRfhFile(e.target.files?.[0] || null)}
                       disabled={busy}
                     />
                     <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>

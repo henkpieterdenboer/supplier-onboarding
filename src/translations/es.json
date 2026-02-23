@@ -238,6 +238,8 @@
       "kvkUpload": "Extracto del registro mercantil (reemplazar)",
       "passportUpload": "Pasaporte / DNI (reemplazar)",
       "bankUpload": "Captura de datos bancarios (reemplazar)",
+      "mandateUpload": "Mandato de domiciliación RFH (reemplazar)",
+      "mandateDownload": "Descargar formulario en blanco",
       "fileHint": "PDF, JPG o PNG (máx. 10MB)",
       "purchaserDetails": "Datos adicionales (Comprador)",
       "purchaserDetailsDescription": "Estos datos deben ser añadidos por el comprador",
@@ -477,7 +479,9 @@
         "description": "Suba los documentos solicitados",
         "kvk": "Extracto del registro mercantil",
         "passport": "Pasaporte / DNI",
-        "bank": "Captura de datos bancarios"
+        "bank": "Captura de datos bancarios",
+        "mandate": "Mandato de domiciliación RFH (firmado)",
+        "mandateDownload": "Descargar formulario en blanco"
       },
       "saveLater": "Guardar y continuar más tarde",
       "saving": "Guardando...",
@@ -726,6 +730,7 @@
       "KVK": "Extracto del registro mercantil",
       "PASSPORT": "Pasaporte",
       "BANK_DETAILS": "Captura de datos bancarios",
+      "MANDATE_RFH": "Mandato de domiciliación RFH",
       "OTHER": "Otro"
     },
     "auditAction": {
