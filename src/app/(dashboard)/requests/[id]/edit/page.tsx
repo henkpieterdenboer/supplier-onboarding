@@ -352,8 +352,33 @@ export default function EditRequestPage() {
   const incotermRequired = requiresIncoterm(supplierType)
   const hasFileOfType = (type: string) => files.some(f => f.fileType === type)
 
+  // Required fields for purchaser submit (same as supplier form)
+  const baseFieldsFilled = !!(
+    formData.companyName &&
+    formData.address &&
+    formData.postalCode &&
+    formData.city &&
+    formData.country &&
+    formData.contactName &&
+    formData.contactPhone &&
+    formData.contactEmail
+  )
+  const financialFieldsFilled = !showFinancial || !!(
+    formData.chamberOfCommerceNumber &&
+    formData.vatNumber &&
+    formData.iban &&
+    formData.bankName
+  )
+  const directorFieldsFilled = !showDirector || !!(
+    formData.directorName &&
+    formData.directorFunction &&
+    formData.directorDateOfBirth &&
+    formData.directorPassportNumber
+  )
+  const incotermFilled = !incotermRequired || !!formData.incoterm
+
   const canSubmit = canEditAsInkoper
-    ? (incotermRequired ? !!formData.incoterm : true)
+    ? (baseFieldsFilled && financialFieldsFilled && directorFieldsFilled && incotermFilled)
     : (canEditAsFinance ? !!formData.creditorNumber : true)
 
   const handleTypeChange = async (newType: string) => {

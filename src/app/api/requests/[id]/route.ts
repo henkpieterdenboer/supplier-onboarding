@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { AuditAction, Status } from '@/types'
-import { requiresIncoterm } from '@/lib/supplier-type-utils'
+import { requiresIncoterm, showFinancialSection, showDirectorSection } from '@/lib/supplier-type-utils'
 import {
   sendFinanceNotificationEmail,
   sendERPNotificationEmail,
@@ -563,8 +563,48 @@ export async function PATCH(
         }
         const validatedData = parsedPurchaser.data
 
-        // Type-aware validation: incoterm only required for Koop/O-kweker
+        // Type-aware validation
         const submitType = validatedData.supplierType || existingRequest.supplierType || 'KOOP'
+        const submitRegion = existingRequest.region || 'EU'
+
+        // Required base fields (same as supplier form)
+        const baseRequired = ['companyName', 'address', 'postalCode', 'city', 'country', 'contactName', 'contactPhone', 'contactEmail'] as const
+        for (const field of baseRequired) {
+          if (!validatedData[field]) {
+            return NextResponse.json(
+              { error: `${field} is required` },
+              { status: 400 }
+            )
+          }
+        }
+
+        // Financial fields required for Koop/O-kweker
+        if (showFinancialSection(submitType)) {
+          const financialRequired = ['chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName'] as const
+          for (const field of financialRequired) {
+            if (!validatedData[field]) {
+              return NextResponse.json(
+                { error: `${field} is required for this supplier type` },
+                { status: 400 }
+              )
+            }
+          }
+        }
+
+        // Director fields required for Koop/O-kweker ROW
+        if (showDirectorSection(submitType, submitRegion)) {
+          const directorRequired = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber'] as const
+          for (const field of directorRequired) {
+            if (!validatedData[field]) {
+              return NextResponse.json(
+                { error: `${field} is required for ROW suppliers` },
+                { status: 400 }
+              )
+            }
+          }
+        }
+
+        // Incoterm required for Koop/O-kweker
         if (requiresIncoterm(submitType) && !validatedData.incoterm) {
           return NextResponse.json(
             { error: 'Incoterm is required for this supplier type' },
