@@ -735,7 +735,7 @@ export default function EditRequestPage() {
             {/* Financial fields - Koop + O-kweker */}
             {showFinancial && (
               <>
-                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
                   <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.financialDetails')}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -798,7 +798,7 @@ export default function EditRequestPage() {
 
                 {canEditAsInkoper && renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
 
-                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
                   <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.bankDetails')}</h3>
                 </div>
 
@@ -847,7 +847,7 @@ export default function EditRequestPage() {
             {/* Director fields - Koop + O-kweker, ROW only */}
             {showDirector && (
               <>
-                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
                   <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.director')}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -898,7 +898,7 @@ export default function EditRequestPage() {
             {/* Auction fields - X-kweker only */}
             {showAuction && (
               <>
-                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
                   <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.auctionDetails')}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
