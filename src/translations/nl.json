@@ -219,6 +219,7 @@
       "iban": "IBAN *",
       "bank": "Bank *",
       "financialDetails": "Financiële gegevens",
+      "bankDetails": "Bankgegevens",
       "invoiceEmail": "Factuur email",
       "invoiceAddress": "Factuuradres",
       "invoicePostalCode": "Factuur postcode",

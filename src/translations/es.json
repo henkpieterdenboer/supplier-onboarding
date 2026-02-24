@@ -219,6 +219,7 @@
       "iban": "IBAN *",
       "bank": "Banco *",
       "financialDetails": "Datos financieros",
+      "bankDetails": "Datos bancarios",
       "invoiceEmail": "Correo de facturación",
       "invoiceAddress": "Dirección de facturación",
       "invoicePostalCode": "Código postal de facturación",

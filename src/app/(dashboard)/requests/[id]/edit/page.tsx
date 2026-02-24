@@ -735,7 +735,9 @@ export default function EditRequestPage() {
             {/* Financial fields - Koop + O-kweker */}
             {showFinancial && (
               <>
-                <Separator />
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.financialDetails')}</h3>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="chamberOfCommerceNumber">{t('requests.edit.kvkNumber')}</Label>
@@ -796,7 +798,9 @@ export default function EditRequestPage() {
 
                 {canEditAsInkoper && renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
 
-                <Separator />
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.bankDetails')}</h3>
+                </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
@@ -843,8 +847,9 @@ export default function EditRequestPage() {
             {/* Director fields - Koop + O-kweker, ROW only */}
             {showDirector && (
               <>
-                <Separator />
-                <p className="text-sm font-medium text-muted-foreground">{t('requests.edit.director')}</p>
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.director')}</h3>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="directorName">{t('requests.edit.directorName')}</Label>
@@ -893,8 +898,9 @@ export default function EditRequestPage() {
             {/* Auction fields - X-kweker only */}
             {showAuction && (
               <>
-                <Separator />
-                <p className="text-sm font-medium text-muted-foreground">{t('requests.edit.auctionDetails')}</p>
+                <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/50 border-y border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.auctionDetails')}</h3>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="auctionNumberRFH">{t('requests.edit.auctionNumberRFH')}</Label>
