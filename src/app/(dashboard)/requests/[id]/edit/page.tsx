@@ -18,7 +18,7 @@ import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 
 import { toast } from 'sonner'
-import { Check, X, Loader2, AlertTriangle, FileDown, Trash2 } from 'lucide-react'
+import { Check, X, Loader2, AlertTriangle, FileDown, Trash2, Upload } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { SupplierTypeLabels, RegionLabels } from '@/types'
 import {
@@ -439,22 +439,40 @@ export default function EditRequestPage() {
 
   const busy = isSaving || isSubmitting
 
-  // Render a file upload input that instantly uploads on change
-  const renderFileInput = (id: string, fileType: string, label: string) => (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) handleFileUpload(file, fileType, e.target)
-        }}
-        disabled={busy || isUploading}
-      />
-    </div>
-  )
+  // Render a file upload button that instantly uploads on change
+  const renderFileInput = (id: string, fileType: string, label: string) => {
+    const hasExisting = hasFileOfType(fileType)
+    return (
+      <div className="space-y-2">
+        <Label>{label}</Label>
+        <input
+          id={id}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) handleFileUpload(file, fileType, e.target)
+          }}
+          disabled={busy || isUploading}
+        />
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={busy || isUploading}
+            onClick={() => document.getElementById(id)?.click()}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {hasExisting ? t('requests.edit.addAnother') : t('requests.edit.chooseFile')}
+          </Button>
+          {isUploading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+        </div>
+        <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -668,6 +686,7 @@ export default function EditRequestPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vatNumber">{t('requests.edit.vatNumber')}</Label>
+
                     <div className="relative">
                       <Input
                         id="vatNumber"
@@ -711,6 +730,10 @@ export default function EditRequestPage() {
                   </div>
                 </div>
 
+                {canEditAsInkoper && renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
+
+                <Separator />
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="iban">{t('requests.edit.iban')}</Label>
@@ -731,6 +754,10 @@ export default function EditRequestPage() {
                     />
                   </div>
                 </div>
+
+                {canEditAsInkoper && showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
+
+                <Separator />
 
                 <div className="space-y-2">
                   <Label htmlFor="invoiceEmail">{t('requests.edit.invoiceEmail')}</Label>
@@ -839,6 +866,7 @@ export default function EditRequestPage() {
                     />
                   </div>
                 </div>
+                {canEditAsInkoper && renderFileInput('passport', 'PASSPORT', t('requests.edit.passportUpload'))}
               </>
             )}
 
@@ -883,16 +911,27 @@ export default function EditRequestPage() {
                         {t('requests.edit.mandateDownload')}
                       </a>
                     </div>
-                    <Input
+                    <input
                       id="mandateRfh"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
+                      className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0]
                         if (file) handleFileUpload(file, 'MANDATE_RFH', e.target)
                       }}
                       disabled={busy || isUploading}
                     />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={busy || isUploading}
+                      onClick={() => document.getElementById('mandateRfh')?.click()}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {hasFileOfType('MANDATE_RFH') ? t('requests.edit.addAnother') : t('requests.edit.chooseFile')}
+                    </Button>
                     <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
                   </div>
                 )}
@@ -910,47 +949,13 @@ export default function EditRequestPage() {
           </CardContent>
         </Card>
 
-        {/* Documents Section - upload inputs (not shown for X-kweker, mandate is in auction section) */}
-        {!showAuction && canEditAsInkoper && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('requests.edit.documents')}</CardTitle>
-              <CardDescription>
-                {t('requests.edit.documentsDescription')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
-              {isUploading && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t('requests.edit.uploading')}
-                </div>
-              )}
-              <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
-                {renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
-
-                {showDirector && renderFileInput('passport', 'PASSPORT', t('requests.edit.passportUpload'))}
-
-                {showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Files Card - shows all uploaded files with delete option */}
-        {(files.length > 0 || (showAuction && canEditAsInkoper && isUploading)) && (
+        {files.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>{t('requests.edit.files')}</CardTitle>
             </CardHeader>
             <CardContent>
-              {isUploading && showAuction && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t('requests.edit.uploading')}
-                </div>
-              )}
               <ul className="space-y-2">
                 {files.map((file) => (
                   <li key={file.id} className="flex items-center gap-3">

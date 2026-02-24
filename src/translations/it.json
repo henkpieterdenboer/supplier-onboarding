@@ -243,6 +243,8 @@
       "replaceFile": "(sostituisci)",
       "mandateDownload": "Scarica modulo vuoto",
       "fileHint": "PDF, JPG o PNG (max 10MB)",
+      "chooseFile": "Scegli file",
+      "addAnother": "Aggiungi un altro",
       "purchaserDetails": "Dati aggiuntivi (Acquirente)",
       "purchaserDetailsDescription": "Questi dati devono essere aggiunti dall'acquirente",
       "incoterm": "Incoterm *",

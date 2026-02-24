@@ -243,6 +243,8 @@
       "replaceFile": "(reemplazar)",
       "mandateDownload": "Descargar formulario en blanco",
       "fileHint": "PDF, JPG o PNG (máx. 10MB)",
+      "chooseFile": "Elegir archivo",
+      "addAnother": "Agregar otro",
       "purchaserDetails": "Datos adicionales (Comprador)",
       "purchaserDetailsDescription": "Estos datos deben ser añadidos por el comprador",
       "incoterm": "Incoterm *",

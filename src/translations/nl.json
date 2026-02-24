@@ -243,6 +243,8 @@
       "replaceFile": "(vervangen)",
       "mandateDownload": "Download leeg formulier",
       "fileHint": "PDF, JPG of PNG (max 10MB)",
+      "chooseFile": "Bestand kiezen",
+      "addAnother": "Nog een toevoegen",
       "purchaserDetails": "Aanvullende gegevens (Inkoper)",
       "purchaserDetailsDescription": "Deze gegevens moeten door de inkoper worden toegevoegd",
       "incoterm": "Incoterm *",
