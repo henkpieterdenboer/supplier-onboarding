@@ -19,7 +19,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 
 import { toast } from 'sonner'
-import { Check, X, Loader2, AlertTriangle, FileDown, Trash2, Upload } from 'lucide-react'
+import { Check, X, Loader2, AlertTriangle, FileDown, Trash2, Upload, Building2, Landmark, UserCheck, Gavel } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { SupplierTypeLabels, RegionLabels } from '@/types'
 import {
@@ -736,7 +736,10 @@ export default function EditRequestPage() {
             {showFinancial && (
               <>
                 <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
-                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.financialDetails')}</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    {t('requests.edit.registrationDetails')}
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -799,7 +802,10 @@ export default function EditRequestPage() {
                 {canEditAsInkoper && renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
 
                 <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
-                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.bankDetails')}</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Landmark className="h-4 w-4" />
+                    {t('requests.edit.bankDetails')}
+                  </h3>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -848,7 +854,10 @@ export default function EditRequestPage() {
             {showDirector && (
               <>
                 <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
-                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.director')}</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <UserCheck className="h-4 w-4" />
+                    {t('requests.edit.director')}
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -899,7 +908,10 @@ export default function EditRequestPage() {
             {showAuction && (
               <>
                 <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
-                  <h3 className="text-sm font-medium text-muted-foreground">{t('requests.edit.auctionDetails')}</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Gavel className="h-4 w-4" />
+                    {t('requests.edit.auctionDetails')}
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
