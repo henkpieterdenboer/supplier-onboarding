@@ -458,7 +458,7 @@ export default function EditRequestPage() {
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || t('common.error'))
 
-      toast.success(canEditAsFinance ? t('requests.edit.successSubmitERP') : t('requests.edit.successSubmit'))
+      toast.success(canEditAsFinance ? t('requests.edit.successComplete') : t('requests.edit.successSubmitERP'))
       router.push(`/requests/${params.id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.error'))
@@ -1146,7 +1146,7 @@ export default function EditRequestPage() {
             disabled={busy || !canSubmit}
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {canEditAsFinance ? t('requests.edit.submitToERP') : t('requests.edit.submitToFinance')}
+            {canEditAsFinance ? t('requests.edit.submitComplete') : t('requests.edit.submitToERP')}
           </Button>
         </div>
       </form>

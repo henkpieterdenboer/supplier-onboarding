@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Supplier Onboarding — a multi-department workflow for registering new suppliers. The workflow: **Inkoper** (Purchaser) creates request → **Leverancier** (Supplier) fills form → **Inkoper** reviews → **Finance** assigns creditor number → **ERP** assigns KBT code → **Completed**.
+Supplier Onboarding — a multi-department workflow for registering new suppliers. The workflow: **Inkoper** (Purchaser) creates request → **Leverancier** (Supplier) fills form → **Inkoper** reviews → **ERP** assigns KBT code → **Finance** assigns creditor number → **Completed**.
 
 UI is in **Dutch**, code (variables, comments) is in **English**.
 
@@ -97,7 +97,7 @@ const { field1, field2 } = parsed.data
 
 Schemas validate: enum values (roles, labels, regions, supplier types, incoterms), email formats, string lengths, type coercion (string→number for commissionPercentage, string→boolean for mandateRFH). Password minimum: 8 characters.
 
-Workflow status transitions are validated: purchaser-submit requires `AWAITING_PURCHASER`, finance-submit requires `AWAITING_FINANCE`, erp-submit requires `AWAITING_ERP`.
+Workflow status transitions are validated: purchaser-submit requires `AWAITING_PURCHASER`, erp-submit requires `AWAITING_ERP`, finance-submit requires `AWAITING_FINANCE`.
 
 File uploads validated server-side: max 10MB, only PDF/JPG/PNG (`validateFile()` in both upload routes).
 
@@ -106,7 +106,7 @@ Auth endpoints use in-memory rate limiting (`src/lib/rate-limit.ts`) — IP + ke
 ### Workflow Statuses
 
 ```
-INVITATION_SENT → AWAITING_PURCHASER → AWAITING_FINANCE → AWAITING_ERP → COMPLETED
+INVITATION_SENT → AWAITING_PURCHASER → AWAITING_ERP → AWAITING_FINANCE → COMPLETED
 Any status can → CANCELLED (and CANCELLED can be reopened)
 ```
 

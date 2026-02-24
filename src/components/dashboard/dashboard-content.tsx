@@ -41,7 +41,7 @@ interface DashboardContentProps {
   userLabels: string[]
 }
 
-const ACTIVE_STATUSES = ['INVITATION_SENT', 'AWAITING_PURCHASER', 'AWAITING_FINANCE', 'AWAITING_ERP']
+const ACTIVE_STATUSES = ['INVITATION_SENT', 'AWAITING_PURCHASER', 'AWAITING_ERP', 'AWAITING_FINANCE']
 const ARCHIVE_STATUSES = ['COMPLETED', 'CANCELLED']
 
 export function DashboardContent({ stats, requests, userRoles, userLabels }: DashboardContentProps) {

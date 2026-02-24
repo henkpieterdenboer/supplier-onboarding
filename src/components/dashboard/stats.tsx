@@ -27,8 +27,8 @@ export function DashboardStats({ stats, activeTab, selectedStatus, onStatusClick
     { label: t('dashboard.stats.totalActive'), value: totalActive, color: 'text-foreground', status: null },
     { label: t('dashboard.stats.waitingSupplier'), value: stats.waitingSupplier, color: 'text-yellow-600', status: 'INVITATION_SENT' },
     { label: t('dashboard.stats.waitingPurchaser'), value: stats.waitingPurchaser, color: 'text-orange-600', status: 'AWAITING_PURCHASER' },
-    { label: t('dashboard.stats.waitingFinance'), value: stats.waitingFinance, color: 'text-blue-600', status: 'AWAITING_FINANCE' },
     { label: t('dashboard.stats.waitingERP'), value: stats.waitingERP, color: 'text-purple-600', status: 'AWAITING_ERP' },
+    { label: t('dashboard.stats.waitingFinance'), value: stats.waitingFinance, color: 'text-blue-600', status: 'AWAITING_FINANCE' },
   ]
 
   const archiveItems = [

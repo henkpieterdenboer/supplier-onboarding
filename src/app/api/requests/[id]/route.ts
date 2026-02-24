@@ -200,15 +200,15 @@ export async function PATCH(
         const needsIncoterm = requiresIncoterm(existingRequest.supplierType)
         const purchaserDone = needsIncoterm ? !!existingRequest.incoterm : true
         if (purchaserDone && (existingRequest.supplierSubmittedAt || existingRequest.selfFill) && newStatus === Status.AWAITING_PURCHASER) {
-          // Only advance if purchaser actually submitted (status was AWAITING_FINANCE before cancel)
+          // Only advance if purchaser actually submitted (status was AWAITING_ERP before cancel)
           if (existingRequest.incoterm || existingRequest.accountManager || existingRequest.paymentTerm) {
-            newStatus = Status.AWAITING_FINANCE
+            newStatus = Status.AWAITING_ERP
           }
         }
-        if (existingRequest.creditorNumber) {
-          newStatus = Status.AWAITING_ERP
-        }
         if (existingRequest.kbtCode) {
+          newStatus = Status.AWAITING_FINANCE
+        }
+        if (existingRequest.creditorNumber) {
           newStatus = Status.COMPLETED
         }
 
@@ -769,7 +769,7 @@ export async function PATCH(
             ...purchaserData,
             ...viesData,
             supplierType: submitType,
-            status: Status.AWAITING_FINANCE,
+            status: Status.AWAITING_ERP,
           },
         })
 
@@ -785,17 +785,17 @@ export async function PATCH(
           },
         })
 
-        // Notify Finance users with receiveEmails enabled
-        const financeUsersForNotify = await prisma.user.findMany({
-          where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
+        // Notify ERP users with receiveEmails enabled
+        const erpUsersForPurchaserNotify = await prisma.user.findMany({
+          where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
           select: { email: true, preferredLanguage: true },
         })
-        for (const fu of financeUsersForNotify) {
-          await sendFinanceNotificationEmail({
-            to: fu.email,
+        for (const eu of erpUsersForPurchaserNotify) {
+          await sendERPNotificationEmail({
+            to: eu.email,
             supplierName: existingRequest.supplierName,
             requestId: id,
-            language: (fu.preferredLanguage || 'nl') as Language,
+            language: (eu.preferredLanguage || 'nl') as Language,
             label: existingRequest.label,
           })
         }
@@ -905,7 +905,7 @@ export async function PATCH(
         // Build update data including optional supplier fields
         const financeUpdateData: Record<string, unknown> = {
           creditorNumber,
-          status: Status.AWAITING_ERP,
+          status: Status.COMPLETED,
         }
         const financeFields = [
           'companyName', 'address', 'postalCode', 'city', 'country',
@@ -936,20 +936,22 @@ export async function PATCH(
           },
         })
 
-        // Notify ERP users with receiveEmails enabled
-        const erpUsersForNotify = await prisma.user.findMany({
+        // Send completion email to ERP users and Purchaser (respecting receiveEmails)
+        const erpUsersForCompletion = await prisma.user.findMany({
           where: { roles: { has: 'ERP' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
           select: { email: true, preferredLanguage: true },
         })
-        for (const eu of erpUsersForNotify) {
-          await sendERPNotificationEmail({
-            to: eu.email,
-            supplierName: existingRequest.supplierName,
-            requestId: id,
-            language: (eu.preferredLanguage || 'nl') as Language,
-            label: existingRequest.label,
-          })
-        }
+        await sendCompletionEmail({
+          financeRecipients: erpUsersForCompletion,
+          purchaserEmail: existingRequest.createdBy.receiveEmails ? existingRequest.createdBy.email : null,
+          purchaserName: formatUserName(existingRequest.createdBy) || 'Inkoper',
+          supplierName: existingRequest.supplierName,
+          requestId: id,
+          creditorNumber,
+          kbtCode: existingRequest.kbtCode || '',
+          language: (existingRequest.createdBy.preferredLanguage || 'nl') as Language,
+          label: existingRequest.label,
+        })
 
         return NextResponse.json(updated)
       }
@@ -998,7 +1000,7 @@ export async function PATCH(
           where: { id },
           data: {
             kbtCode,
-            status: Status.COMPLETED,
+            status: Status.AWAITING_FINANCE,
           },
         })
 
@@ -1011,22 +1013,20 @@ export async function PATCH(
           },
         })
 
-        // Send completion email to Finance users and Purchaser (respecting receiveEmails)
-        const financeUsersForCompletion = await prisma.user.findMany({
+        // Notify Finance users with receiveEmails enabled
+        const financeUsersForNotify = await prisma.user.findMany({
           where: { roles: { has: 'FINANCE' }, isActive: true, receiveEmails: true, labels: { has: existingRequest.label } },
           select: { email: true, preferredLanguage: true },
         })
-        await sendCompletionEmail({
-          financeRecipients: financeUsersForCompletion,
-          purchaserEmail: existingRequest.createdBy.receiveEmails ? existingRequest.createdBy.email : null,
-          purchaserName: formatUserName(existingRequest.createdBy) || 'Inkoper',
-          supplierName: existingRequest.supplierName,
-          requestId: id,
-          creditorNumber: existingRequest.creditorNumber || '',
-          kbtCode,
-          language: (existingRequest.createdBy.preferredLanguage || 'nl') as Language,
-          label: existingRequest.label,
-        })
+        for (const fu of financeUsersForNotify) {
+          await sendFinanceNotificationEmail({
+            to: fu.email,
+            supplierName: existingRequest.supplierName,
+            requestId: id,
+            language: (fu.preferredLanguage || 'nl') as Language,
+            label: existingRequest.label,
+          })
+        }
 
         return NextResponse.json(updated)
       }
