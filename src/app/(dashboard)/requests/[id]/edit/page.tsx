@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 
 import { toast } from 'sonner'
@@ -101,6 +102,7 @@ export default function EditRequestPage() {
 
   const [supplierType, setSupplierType] = useState<string>('KOOP')
   const [region, setRegion] = useState<string>('EU')
+  const [useOtherInvoiceDetails, setUseOtherInvoiceDetails] = useState(false)
 
   // VIES VAT validation state
   const [viesStatus, setViesStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'error' | 'invalid-format'>('idle')
@@ -206,6 +208,9 @@ export default function EditRequestPage() {
         setFiles(data.files || [])
         setSupplierType(data.supplierType || 'KOOP')
         setRegion(data.region || 'EU')
+        setUseOtherInvoiceDetails(
+          !!(data.invoiceEmail || data.invoiceAddress || data.invoicePostalCode || data.invoiceCity || data.invoiceCurrency)
+        )
 
         setFormData({
           companyName: data.companyName || (data.selfFill ? data.supplierName : '') || '',
@@ -668,6 +673,65 @@ export default function EditRequestPage() {
               />
             </div>
 
+            {/* Invoice details toggle */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="useOtherInvoiceDetails"
+                checked={useOtherInvoiceDetails}
+                onCheckedChange={(checked) => setUseOtherInvoiceDetails(checked === true)}
+                disabled={busy}
+              />
+              <Label htmlFor="useOtherInvoiceDetails" className="text-sm font-normal cursor-pointer">
+                {t('requests.edit.useOtherInvoiceDetails')}
+              </Label>
+            </div>
+
+            {useOtherInvoiceDetails && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="invoiceEmail">{t('requests.edit.invoiceEmail')}</Label>
+                  <Input
+                    id="invoiceEmail"
+                    type="email"
+                    value={formData.invoiceEmail}
+                    onChange={(e) => setFormData({ ...formData, invoiceEmail: e.target.value })}
+                    disabled={busy}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="invoiceAddress">{t('requests.edit.invoiceAddress')}</Label>
+                  <Input
+                    id="invoiceAddress"
+                    value={formData.invoiceAddress}
+                    onChange={(e) => setFormData({ ...formData, invoiceAddress: e.target.value })}
+                    disabled={busy}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="invoicePostalCode">{t('requests.edit.invoicePostalCode')}</Label>
+                    <Input
+                      id="invoicePostalCode"
+                      value={formData.invoicePostalCode}
+                      onChange={(e) => setFormData({ ...formData, invoicePostalCode: e.target.value })}
+                      disabled={busy}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="invoiceCity">{t('requests.edit.invoiceCity')}</Label>
+                    <Input
+                      id="invoiceCity"
+                      value={formData.invoiceCity}
+                      onChange={(e) => setFormData({ ...formData, invoiceCity: e.target.value })}
+                      disabled={busy}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* Financial fields - Koop + O-kweker */}
             {showFinancial && (
               <>
@@ -734,7 +798,7 @@ export default function EditRequestPage() {
 
                 <Separator />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="iban">{t('requests.edit.iban')}</Label>
                     <Input
@@ -750,52 +814,6 @@ export default function EditRequestPage() {
                       id="bankName"
                       value={formData.bankName}
                       onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                </div>
-
-                {canEditAsInkoper && showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Label htmlFor="invoiceEmail">{t('requests.edit.invoiceEmail')}</Label>
-                  <Input
-                    id="invoiceEmail"
-                    type="email"
-                    value={formData.invoiceEmail}
-                    onChange={(e) => setFormData({ ...formData, invoiceEmail: e.target.value })}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="invoiceAddress">{t('requests.edit.invoiceAddress')}</Label>
-                  <Input
-                    id="invoiceAddress"
-                    value={formData.invoiceAddress}
-                    onChange={(e) => setFormData({ ...formData, invoiceAddress: e.target.value })}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="invoicePostalCode">{t('requests.edit.invoicePostalCode')}</Label>
-                    <Input
-                      id="invoicePostalCode"
-                      value={formData.invoicePostalCode}
-                      onChange={(e) => setFormData({ ...formData, invoicePostalCode: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="invoiceCity">{t('requests.edit.invoiceCity')}</Label>
-                    <Input
-                      id="invoiceCity"
-                      value={formData.invoiceCity}
-                      onChange={(e) => setFormData({ ...formData, invoiceCity: e.target.value })}
                       disabled={busy}
                     />
                   </div>
@@ -817,6 +835,8 @@ export default function EditRequestPage() {
                     </Select>
                   </div>
                 </div>
+
+                {canEditAsInkoper && showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
               </>
             )}
 
@@ -1052,6 +1072,10 @@ export default function EditRequestPage() {
                 disabled={busy}
               />
             </div>
+
+            <Separator />
+
+            {renderFileInput('otherFile', 'OTHER', t('requests.edit.otherFileUpload'))}
           </CardContent>
         </Card>
 
