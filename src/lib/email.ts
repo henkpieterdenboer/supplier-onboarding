@@ -16,16 +16,24 @@ function getEmailHeader(label?: string): string {
   `
 }
 
-// Bulletproof email button — uses table+bgcolor so old Outlook renders it properly
+// Bulletproof email button — VML roundrect for Outlook, table+bgcolor for others
 function emailButton(href: string, text: string): string {
   return `
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 30px auto;">
       <tr>
-        <td align="center" bgcolor="#2563eb" style="border-radius: 6px;">
+        <td align="center" style="border-radius: 6px; background-color: #2563eb;">
+          <!--[if mso]>
+          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${href}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="13%" strokecolor="#2563eb" fillcolor="#2563eb">
+            <w:anchorlock/>
+            <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">${text}</center>
+          </v:roundrect>
+          <![endif]-->
+          <!--[if !mso]><!-->
           <a href="${href}" target="_blank"
-             style="display: inline-block; padding: 14px 32px; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 6px;">
+             style="display: inline-block; padding: 14px 32px; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 6px; background-color: #2563eb;">
             ${text}
           </a>
+          <!--<![endif]-->
         </td>
       </tr>
     </table>
