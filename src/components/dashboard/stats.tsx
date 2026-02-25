@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useLanguage } from '@/lib/i18n-context'
+import { Users, Clock, ClipboardCheck, Database, Landmark, CheckCircle2, XCircle, type LucideIcon } from 'lucide-react'
 
 interface StatsProps {
   stats: {
@@ -24,19 +25,20 @@ export function DashboardStats({ stats, activeTab, selectedStatus, onStatusClick
   const totalActive = stats.waitingSupplier + stats.waitingPurchaser + stats.waitingFinance + stats.waitingERP
 
   const activeItems = [
-    { label: t('dashboard.stats.totalActive'), value: totalActive, color: 'text-foreground', status: null },
-    { label: t('dashboard.stats.waitingSupplier'), value: stats.waitingSupplier, color: 'text-yellow-600', status: 'INVITATION_SENT' },
-    { label: t('dashboard.stats.waitingPurchaser'), value: stats.waitingPurchaser, color: 'text-orange-600', status: 'AWAITING_PURCHASER' },
-    { label: t('dashboard.stats.waitingERP'), value: stats.waitingERP, color: 'text-purple-600', status: 'AWAITING_ERP' },
-    { label: t('dashboard.stats.waitingFinance'), value: stats.waitingFinance, color: 'text-blue-600', status: 'AWAITING_FINANCE' },
+    { label: t('dashboard.stats.totalActive'), value: totalActive, color: 'text-foreground', status: null, icon: Users },
+    { label: t('dashboard.stats.waitingSupplier'), value: stats.waitingSupplier, color: 'text-yellow-600', status: 'INVITATION_SENT', icon: Clock },
+    { label: t('dashboard.stats.waitingPurchaser'), value: stats.waitingPurchaser, color: 'text-orange-600', status: 'AWAITING_PURCHASER', icon: ClipboardCheck },
+    { label: t('dashboard.stats.waitingERP'), value: stats.waitingERP, color: 'text-purple-600', status: 'AWAITING_ERP', icon: Database },
+    { label: t('dashboard.stats.waitingFinance'), value: stats.waitingFinance, color: 'text-blue-600', status: 'AWAITING_FINANCE', icon: Landmark },
   ]
 
   const archiveItems = [
-    { label: t('dashboard.stats.completed'), value: stats.completed, color: 'text-green-600', status: 'COMPLETED' },
-    { label: t('dashboard.stats.cancelled'), value: stats.cancelled, color: 'text-red-600', status: 'CANCELLED' },
+    { label: t('dashboard.stats.completed'), value: stats.completed, color: 'text-green-600', status: 'COMPLETED', icon: CheckCircle2 },
+    { label: t('dashboard.stats.cancelled'), value: stats.cancelled, color: 'text-red-600', status: 'CANCELLED', icon: XCircle },
   ]
 
-  const statItems = activeTab === 'active' ? activeItems : archiveItems
+  const statItems: { label: string; value: number; color: string; status: string | null; icon: LucideIcon }[] =
+    activeTab === 'active' ? activeItems : archiveItems
 
   const handleClick = (status: string | null) => {
     if (!onStatusClick) return
@@ -67,9 +69,12 @@ export function DashboardStats({ stats, activeTab, selectedStatus, onStatusClick
             onClick={() => handleClick(item.status)}
           >
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {item.label}
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {item.label}
+                </CardTitle>
+                <item.icon className={`h-4 w-4 ${item.color}`} />
+              </div>
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
