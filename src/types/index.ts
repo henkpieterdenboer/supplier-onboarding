@@ -67,6 +67,7 @@ export const FileType = {
   PASSPORT: 'PASSPORT',
   BANK_DETAILS: 'BANK_DETAILS',
   MANDATE_RFH: 'MANDATE_RFH',
+  VIES_REPORT: 'VIES_REPORT',
   OTHER: 'OTHER',
 } as const
 export type FileType = (typeof FileType)[keyof typeof FileType]
@@ -76,6 +77,7 @@ export const FileTypeLabels: Record<FileType, string> = {
   PASSPORT: 'Paspoort',
   BANK_DETAILS: 'Screenshot bankgegevens',
   MANDATE_RFH: 'RFH Incassovolmacht',
+  VIES_REPORT: 'VIES Rapport',
   OTHER: 'Overig',
 }
 

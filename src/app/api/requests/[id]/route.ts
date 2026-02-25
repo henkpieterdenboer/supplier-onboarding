@@ -19,6 +19,7 @@ import path from 'path'
 import { purchaserSubmitSchema, financeSubmitSchema, financeSaveSchema, erpSubmitSchema, changeTypeSchema, changeRegionSchema } from '@/lib/validations'
 import { checkVat } from '@/lib/vies'
 import { checkSanctions } from '@/lib/sanctions'
+import { generateViesReport } from '@/lib/vies-pdf'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -1158,6 +1159,61 @@ export async function PATCH(
             }),
           },
         })
+
+        // Generate and save VIES PDF report
+        if (viesResult.isValid) {
+          try {
+            const pdfBuffer = await generateViesReport({
+              viesResult,
+              supplierName: existingRequest.supplierName,
+              vatNumber,
+              label: existingRequest.label,
+            })
+
+            // Delete any existing VIES_REPORT file (recheck replaces old report)
+            const existingViesFiles = await prisma.supplierFile.findMany({
+              where: { requestId: id, fileType: 'VIES_REPORT' },
+            })
+            for (const oldFile of existingViesFiles) {
+              if (process.env.BLOB_READ_WRITE_TOKEN && oldFile.filePath.startsWith('http')) {
+                try {
+                  const { del } = await import('@vercel/blob')
+                  await del(oldFile.filePath)
+                } catch (e) {
+                  console.error('Error deleting old VIES report from blob:', e)
+                }
+              }
+              await prisma.supplierFile.delete({ where: { id: oldFile.id } })
+            }
+
+            // Upload PDF to Vercel Blob
+            const fileName = `vies_report_${Date.now()}.pdf`
+            let filePath = `/api/files/${id}/${fileName}`
+
+            if (process.env.BLOB_READ_WRITE_TOKEN) {
+              const { put } = await import('@vercel/blob')
+              const blob = await put(`${id}/${fileName}`, pdfBuffer, {
+                access: 'public',
+                addRandomSuffix: false,
+                contentType: 'application/pdf',
+              })
+              filePath = blob.url
+            }
+
+            await prisma.supplierFile.create({
+              data: {
+                requestId: id,
+                fileName: `VIES_Report_${viesResult.countryCode}${viesResult.vatNumber}.pdf`,
+                fileType: 'VIES_REPORT',
+                filePath,
+                uploadedById: session.user.id,
+              },
+            })
+          } catch (pdfError) {
+            // PDF generation failure should not block the VIES check result
+            console.error('Error generating VIES PDF report:', pdfError)
+          }
+        }
 
         return NextResponse.json({
           ...updatedVies,

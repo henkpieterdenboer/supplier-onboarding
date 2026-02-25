@@ -171,7 +171,11 @@ export function RequestDetail({ request, userRoles }: RequestDetailProps) {
       setLocalVatValid(result.viesResult?.isValid ?? null)
       setLocalVatCheckResponse(result.vatCheckResponse ?? null)
       setLocalVatCheckedAt(result.vatCheckedAt ? new Date(result.vatCheckedAt) : null)
-      toast.success(t('common.success'))
+      if (result.viesResult?.isValid) {
+        toast.success(`${t('common.success')} — ${t('requests.detail.financial.vies.reportGenerated')}`)
+      } else {
+        toast.success(t('common.success'))
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('common.error'))
     } finally {

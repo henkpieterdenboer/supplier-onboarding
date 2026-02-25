@@ -334,7 +334,8 @@
           "consultationNumber": "Consultatienummer",
           "unavailable": "VIES niet bereikbaar, BTW-nummer kon niet gecontroleerd worden",
           "invalidFormat": "Ongeldig formaat. Begin met een EU-landcode (bijv. NL, DE, BE).",
-          "notFoundInVies": "BTW-nummer niet gevonden in VIES"
+          "notFoundInVies": "BTW-nummer niet gevonden in VIES",
+          "reportGenerated": "VIES rapport opgeslagen"
         }
       },
       "director": {
@@ -749,6 +750,7 @@
       "PASSPORT": "Paspoort",
       "BANK_DETAILS": "Screenshot bankgegevens",
       "MANDATE_RFH": "RFH Incassovolmacht",
+      "VIES_REPORT": "VIES Rapport",
       "OTHER": "Overig"
     },
     "auditAction": {

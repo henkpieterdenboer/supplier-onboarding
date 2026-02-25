@@ -334,7 +334,8 @@
           "consultationNumber": "Consultation number",
           "unavailable": "VIES unavailable, VAT number could not be verified",
           "invalidFormat": "Invalid format. Must start with an EU country code (e.g. NL, DE, BE).",
-          "notFoundInVies": "VAT number not found in VIES"
+          "notFoundInVies": "VAT number not found in VIES",
+          "reportGenerated": "VIES report saved"
         }
       },
       "director": {
@@ -749,6 +750,7 @@
       "PASSPORT": "Passport",
       "BANK_DETAILS": "Bank details screenshot",
       "MANDATE_RFH": "RFH Direct Debit Mandate",
+      "VIES_REPORT": "VIES Report",
       "OTHER": "Other"
     },
     "auditAction": {

@@ -334,7 +334,8 @@
           "consultationNumber": "Numero di consultazione",
           "unavailable": "VIES non disponibile, impossibile verificare la partita IVA",
           "invalidFormat": "Formato non valido. Deve iniziare con un codice paese UE (es. IT, NL, DE).",
-          "notFoundInVies": "Partita IVA non trovata in VIES"
+          "notFoundInVies": "Partita IVA non trovata in VIES",
+          "reportGenerated": "Report VIES salvato"
         }
       },
       "director": {
@@ -749,6 +750,7 @@
       "PASSPORT": "Passaporto",
       "BANK_DETAILS": "Screenshot dati bancari",
       "MANDATE_RFH": "Mandato di addebito diretto RFH",
+      "VIES_REPORT": "Report VIES",
       "OTHER": "Altro"
     },
     "auditAction": {
