@@ -125,14 +125,10 @@ export async function PATCH(
       formDataObj = await request.formData()
       const dataJson = formDataObj.get('data') as string
       const parsed = JSON.parse(dataJson)
-      action = parsed.action
-      const { action: _, ...rest } = parsed
-      data = rest
+      ;({ action, ...data } = parsed)
     } else {
       const body = await request.json()
-      action = body.action
-      const { action: _, ...rest } = body
-      data = rest
+      ;({ action, ...data } = body)
     }
 
     const existingRequest = await prisma.supplierRequest.findUnique({

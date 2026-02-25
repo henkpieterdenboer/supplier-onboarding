@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react'
 import { useSession } from 'next-auth/react'
 import { getTranslation, Language } from './i18n'
 
@@ -42,9 +42,13 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
   })
 
   // Sync language between cookie and session
+  const sessionLang = session?.user?.language as Language | undefined
+  const prevSessionLang = useRef(sessionLang)
   useEffect(() => {
-    if (!initialLanguage && session?.user?.language) {
-      const sessionLang = session.user.language as Language
+    if (prevSessionLang.current === sessionLang) return
+    prevSessionLang.current = sessionLang
+
+    if (!initialLanguage && sessionLang) {
       const cookieLang = getCookie('NEXT_LOCALE')
       const hasExplicitCookie = cookieLang === 'nl' || cookieLang === 'en' || cookieLang === 'es' || cookieLang === 'it'
 
@@ -62,7 +66,7 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
         setCookie('NEXT_LOCALE', sessionLang)
       }
     }
-  }, [session?.user?.language]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sessionLang, initialLanguage, language])
 
   // Update HTML lang attribute
   useEffect(() => {

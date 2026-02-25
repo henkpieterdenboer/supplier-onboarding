@@ -30,7 +30,7 @@ import {
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale, formatDate, formatTime } from '@/lib/i18n'
-import { statusColors, supplierTypeColors, labelColors } from '@/lib/status-colors'
+import { statusColors } from '@/lib/status-colors'
 
 interface AuditLog {
   id: string
@@ -133,10 +133,9 @@ interface Request {
 interface RequestDetailProps {
   request: Request
   userRoles: string[]
-  userId: string
 }
 
-export function RequestDetail({ request, userRoles, userId }: RequestDetailProps) {
+export function RequestDetail({ request, userRoles }: RequestDetailProps) {
   const router = useRouter()
   const { t, language } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)

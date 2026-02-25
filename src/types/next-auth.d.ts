@@ -1,5 +1,4 @@
 import 'next-auth'
-import { Role } from './index'
 
 declare module 'next-auth' {
   interface User {

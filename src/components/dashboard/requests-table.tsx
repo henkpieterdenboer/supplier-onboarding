@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import {
@@ -53,21 +53,18 @@ interface RequestsTableProps {
   activeTab?: 'active' | 'archive'
 }
 
-export function RequestsTable({ requests, userRoles, userLabels, externalStatusFilter, activeTab }: RequestsTableProps) {
+export function RequestsTable({ requests, userLabels, externalStatusFilter }: RequestsTableProps) {
   const { t, language } = useLanguage()
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [internalStatusFilter, setInternalStatusFilter] = useState<string>('all')
   const [labelFilter, setLabelFilter] = useState<string>('all')
   const [sortField, setSortField] = useState<'createdAt' | 'supplierName' | 'status' | 'supplierEmail' | 'createdBy'>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
-  // Synchroniseer externe filter met interne state
-  useEffect(() => {
-    if (externalStatusFilter !== undefined) {
-      setStatusFilter(externalStatusFilter ?? 'all')
-    }
-  }, [externalStatusFilter])
+  // External filter overrides internal state when set
+  const statusFilter = externalStatusFilter !== undefined ? (externalStatusFilter ?? 'all') : internalStatusFilter
+  const setStatusFilter = setInternalStatusFilter
 
   const filteredAndSortedRequests = useMemo(() => {
     let result = [...requests]

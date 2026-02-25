@@ -24,7 +24,6 @@ import {
   showDirectorSection,
   showAuctionSection,
   showBankUpload,
-  showMandateUpload,
   getMissingRequiredFields,
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
@@ -232,6 +231,7 @@ export default function SupplierFormPage() {
     }
 
     validateToken()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.token])
 
   // Set language based on supplier's preferred language
@@ -395,7 +395,6 @@ export default function SupplierFormPage() {
   const showDirector = showDirectorSection(supplierType, region)
   const showAuction = showAuctionSection(supplierType)
   const showBank = showBankUpload(supplierType)
-  const showMandate = showMandateUpload(supplierType)
 
   return (
     <div className="min-h-screen bg-muted/40 py-8 px-4">

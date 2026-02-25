@@ -56,6 +56,7 @@ export default function GlobalError({
               >
                 {t('errors.globalError.retry')}
               </button>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error cannot use Next.js components */}
               <a
                 href="/"
                 style={{

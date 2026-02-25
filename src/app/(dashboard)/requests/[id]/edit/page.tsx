@@ -255,6 +255,7 @@ export default function EditRequestPage() {
     }
 
     fetchRequest()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   // Instant file upload
@@ -353,36 +354,6 @@ export default function EditRequestPage() {
   const showBank = showBankUpload(supplierType)
   const incotermRequired = requiresIncoterm(supplierType)
   const hasFileOfType = (type: string) => files.some(f => f.fileType === type)
-
-  // Required fields for purchaser submit (same as supplier form)
-  const baseFieldsFilled = !!(
-    formData.companyName &&
-    formData.address &&
-    formData.postalCode &&
-    formData.city &&
-    formData.country &&
-    formData.contactName &&
-    formData.contactPhone &&
-    formData.contactEmail
-  )
-  const financialFieldsFilled = !showFinancial || !!(
-    formData.chamberOfCommerceNumber &&
-    formData.vatNumber &&
-    formData.iban &&
-    formData.bankName &&
-    formData.invoiceCurrency
-  )
-  const directorFieldsFilled = !showDirector || !!(
-    formData.directorName &&
-    formData.directorFunction &&
-    formData.directorDateOfBirth &&
-    formData.directorPassportNumber
-  )
-  const incotermFilled = !incotermRequired || !!formData.incoterm
-
-  const canSubmit = canEditAsInkoper
-    ? (baseFieldsFilled && financialFieldsFilled && directorFieldsFilled && incotermFilled)
-    : (canEditAsFinance ? !!formData.creditorNumber : true)
 
   const handleTypeChange = async (newType: string) => {
     setSupplierType(newType)
@@ -573,7 +544,7 @@ export default function EditRequestPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(RegionLabels).map(([value, label]) => (
+                      {Object.entries(RegionLabels).map(([value]) => (
                         <SelectItem key={value} value={value}>
                           {t(`enums.region.${value}`)}
                         </SelectItem>
