@@ -788,6 +788,7 @@ export default function EditRequestPage() {
                       }
                       disabled={busy}
                     />
+                    <p className="text-xs text-muted-foreground">{t('requests.edit.kvkHint')}</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vatNumber">{t('requests.edit.vatNumber')}</Label>

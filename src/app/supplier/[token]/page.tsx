@@ -572,6 +572,7 @@ export default function SupplierFormPage() {
                       required
                       disabled={isDisabled}
                     />
+                    <p className="text-xs text-muted-foreground">{t('supplier.form.financial.kvkHint')}</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vatNumber">{t('supplier.form.financial.vatNumber')}</Label>
