@@ -10,6 +10,7 @@ export interface ViesResult {
   vatNumber: string
   countryCode: string
   requestIdentifier: string
+  serviceUnavailable: boolean
 }
 
 // EU country codes that VIES supports
@@ -62,15 +63,21 @@ export async function checkVat(vatNumber: string): Promise<ViesResult | null> {
 
     const data = await response.json()
 
+    // VIES returns userError when a member state service is down
+    // e.g. "MS_UNAVAILABLE", "TIMEOUT", "MS_MAX_CONCURRENT_REQ"
+    const userError = data.userError || ''
+    const serviceUnavailable = !!(userError && userError !== 'VALID' && data.isValid !== true)
+
     return {
       isValid: data.isValid === true,
       name: data.name || '',
       address: data.address || '',
       requestDate: data.requestDate || '',
-      userError: data.userError || '',
+      userError,
       vatNumber: data.vatNumber || parsed.number,
       countryCode: parsed.countryCode,
       requestIdentifier: data.requestIdentifier || '',
+      serviceUnavailable,
     }
   } catch {
     // Network error, timeout, etc.

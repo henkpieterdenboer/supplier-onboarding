@@ -1130,6 +1130,13 @@ export async function PATCH(
           )
         }
 
+        if (viesResult.serviceUnavailable) {
+          return NextResponse.json(
+            { error: `VIES service for ${viesResult.countryCode} is currently unavailable (${viesResult.userError}). Please try again later.` },
+            { status: 503 }
+          )
+        }
+
         const updatedVies = await prisma.supplierRequest.update({
           where: { id },
           data: {

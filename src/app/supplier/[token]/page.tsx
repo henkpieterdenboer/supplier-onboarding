@@ -150,7 +150,10 @@ export default function SupplierFormPage() {
       }
 
       const data = await res.json()
-      if (data.isValid) {
+      if (data.serviceUnavailable) {
+        setViesStatus('error')
+        setViesResult(null)
+      } else if (data.isValid) {
         setViesStatus('valid')
         setViesResult({ name: data.name, address: data.address })
       } else {
