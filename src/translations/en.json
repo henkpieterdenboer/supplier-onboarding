@@ -210,7 +210,7 @@
       "postalCode": "Postal code *",
       "city": "City *",
       "country": "Country *",
-      "glnNumber": "GLN number",
+      "glnNumber": "GLN number (when available)",
       "useOtherInvoiceDetails": "Use different details for invoicing",
       "phone": "Phone *",
       "contactEmail": "Contact email *",
@@ -303,7 +303,7 @@
         "postalCode": "Postal code",
         "city": "City",
         "country": "Country",
-        "glnNumber": "GLN number",
+        "glnNumber": "GLN number (when available)",
         "contactName": "Contact person",
         "phone": "Phone",
         "contactEmail": "Contact email"
@@ -448,7 +448,7 @@
         "postalCode": "Postal code *",
         "city": "City *",
         "country": "Country *",
-        "glnNumber": "GLN number",
+        "glnNumber": "GLN number (when available)",
         "contactName": "Contact person *",
         "phone": "Phone *",
         "contactEmail": "Contact email *"

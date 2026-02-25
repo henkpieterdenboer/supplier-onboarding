@@ -213,7 +213,7 @@ export function RequestDetail({ request, userRoles }: RequestDetailProps) {
   const supplierType = request.supplierType || 'KOOP'
   const region = request.region || 'EU'
   const showFinancial = showFinancialSection(supplierType)
-  const showDirector = showDirectorSection(supplierType, region)
+  const showDirector = showDirectorSection(supplierType)
   const showAuction = showAuctionSection(supplierType)
 
   const handleAction = async (action: string, data?: Record<string, unknown>) => {

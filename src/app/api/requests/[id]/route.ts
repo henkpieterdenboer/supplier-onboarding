@@ -562,7 +562,6 @@ export async function PATCH(
 
         // Type-aware validation
         const submitType = validatedData.supplierType || existingRequest.supplierType || 'KOOP'
-        const submitRegion = existingRequest.region || 'EU'
 
         // Required base fields (same as supplier form)
         const baseRequired = ['companyName', 'address', 'postalCode', 'city', 'country', 'contactName', 'contactPhone', 'contactEmail'] as const
@@ -588,13 +587,13 @@ export async function PATCH(
           }
         }
 
-        // Director fields required for Koop/O-kweker ROW
-        if (showDirectorSection(submitType, submitRegion)) {
+        // Director fields required for Koop/O-kweker
+        if (showDirectorSection(submitType)) {
           const directorRequired = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber'] as const
           for (const field of directorRequired) {
             if (!validatedData[field]) {
               return NextResponse.json(
-                { error: `${field} is required for ROW suppliers` },
+                { error: `${field} is required` },
                 { status: 400 }
               )
             }

@@ -352,7 +352,7 @@ export default function EditRequestPage() {
   }
 
   const showFinancial = showFinancialSection(supplierType)
-  const showDirector = showDirectorSection(supplierType, region)
+  const showDirector = showDirectorSection(supplierType)
   const showAuction = showAuctionSection(supplierType)
   const showBank = showBankUpload(supplierType)
   const incotermRequired = requiresIncoterm(supplierType)
@@ -424,7 +424,7 @@ export default function EditRequestPage() {
 
     // Check for missing required fields before submitting
     const context = canEditAsInkoper ? 'purchaser' : 'finance'
-    const missing = getMissingRequiredFields(context, formData, supplierType, region)
+    const missing = getMissingRequiredFields(context, formData, supplierType)
     if (missing.length > 0) {
       const fieldNames = missing.map(f => t(`validation.fieldNames.${f}`)).join(', ')
       toast.error(t('validation.missingFieldsTitle'), { description: fieldNames })
@@ -588,6 +588,18 @@ export default function EditRequestPage() {
                   {t('requests.edit.postingMatrixFilled')}
                 </Label>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Finance file upload */}
+        {canEditAsFinance && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('requests.edit.otherFileUpload')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderFileInput('financeFile', 'OTHER', t('requests.edit.otherFileUpload'))}
             </CardContent>
           </Card>
         )}
@@ -1035,7 +1047,7 @@ export default function EditRequestPage() {
                     <span className="text-xs text-muted-foreground">
                       {new Date(file.uploadedAt).toLocaleDateString(getDateLocale(language))}
                     </span>
-                    {canEditAsInkoper && (
+                    {(canEditAsInkoper || canEditAsFinance) && (
                       <button
                         type="button"
                         onClick={() => handleFileDelete(file.id)}

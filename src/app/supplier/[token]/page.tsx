@@ -295,7 +295,7 @@ export default function SupplierFormPage() {
     e.preventDefault()
 
     // Check for missing required fields before submitting
-    const missing = getMissingRequiredFields('supplier', formData, supplierType, region)
+    const missing = getMissingRequiredFields('supplier', formData, supplierType)
     if (missing.length > 0) {
       const fieldNames = missing.map(f => t(`validation.fieldNames.${f}`)).join(', ')
       toast.error(t('validation.missingFieldsTitle'), { description: fieldNames })
@@ -395,7 +395,7 @@ export default function SupplierFormPage() {
   const supplierType = request?.supplierType || 'KOOP'
   const region = request?.region || 'EU'
   const showFinancial = showFinancialSection(supplierType)
-  const showDirector = showDirectorSection(supplierType, region)
+  const showDirector = showDirectorSection(supplierType)
   const showAuction = showAuctionSection(supplierType)
   const showBank = showBankUpload(supplierType)
 

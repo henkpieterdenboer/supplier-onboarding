@@ -35,8 +35,10 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!session.user.roles.includes('INKOPER')) {
-      return NextResponse.json({ error: 'Only purchasers can upload files' }, { status: 403 })
+    const isInkoper = session.user.roles.includes('INKOPER')
+    const isFinance = session.user.roles.includes('FINANCE')
+    if (!isInkoper && !isFinance) {
+      return NextResponse.json({ error: 'Only purchasers or finance can upload files' }, { status: 403 })
     }
 
     const existingRequest = await prisma.supplierRequest.findUnique({
@@ -53,8 +55,9 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    if (existingRequest.status !== 'AWAITING_PURCHASER') {
-      return NextResponse.json({ error: 'Files can only be uploaded when awaiting purchaser action' }, { status: 400 })
+    const allowedStatuses = ['AWAITING_PURCHASER', 'AWAITING_FINANCE']
+    if (!allowedStatuses.includes(existingRequest.status)) {
+      return NextResponse.json({ error: 'Files can only be uploaded when awaiting purchaser or finance action' }, { status: 400 })
     }
 
     const formData = await request.formData()
@@ -133,8 +136,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!session.user.roles.includes('INKOPER')) {
-      return NextResponse.json({ error: 'Only purchasers can delete files' }, { status: 403 })
+    const isInkoper = session.user.roles.includes('INKOPER')
+    const isFinance = session.user.roles.includes('FINANCE')
+    if (!isInkoper && !isFinance) {
+      return NextResponse.json({ error: 'Only purchasers or finance can delete files' }, { status: 403 })
     }
 
     const existingRequest = await prisma.supplierRequest.findUnique({
@@ -151,8 +156,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    if (existingRequest.status !== 'AWAITING_PURCHASER') {
-      return NextResponse.json({ error: 'Files can only be deleted when awaiting purchaser action' }, { status: 400 })
+    const allowedStatuses = ['AWAITING_PURCHASER', 'AWAITING_FINANCE']
+    if (!allowedStatuses.includes(existingRequest.status)) {
+      return NextResponse.json({ error: 'Files can only be deleted when awaiting purchaser or finance action' }, { status: 400 })
     }
 
     const body = await request.json()

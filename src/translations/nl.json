@@ -210,7 +210,7 @@
       "postalCode": "Postcode *",
       "city": "Plaats *",
       "country": "Land *",
-      "glnNumber": "GLN-nummer",
+      "glnNumber": "GLN-nummer (wanneer beschikbaar)",
       "useOtherInvoiceDetails": "Gebruik afwijkende factuurgegevens",
       "phone": "Telefoon *",
       "contactEmail": "Contact email *",
@@ -303,7 +303,7 @@
         "postalCode": "Postcode",
         "city": "Plaats",
         "country": "Land",
-        "glnNumber": "GLN-nummer",
+        "glnNumber": "GLN-nummer (wanneer beschikbaar)",
         "contactName": "Contactpersoon",
         "phone": "Telefoon",
         "contactEmail": "Contact email"
@@ -448,7 +448,7 @@
         "postalCode": "Postcode *",
         "city": "Plaats *",
         "country": "Land *",
-        "glnNumber": "GLN-nummer",
+        "glnNumber": "GLN-nummer (wanneer beschikbaar)",
         "contactName": "Contactpersoon *",
         "phone": "Telefoon *",
         "contactEmail": "Contact email *"

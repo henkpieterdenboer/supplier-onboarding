@@ -372,7 +372,6 @@ export async function POST(
     } else {
       // Submit: validate required fields
       const submitType = supplierRequest.supplierType || 'KOOP'
-      const submitRegion = supplierRequest.region || 'EU'
 
       const baseRequired = ['companyName', 'address', 'postalCode', 'city', 'country', 'contactName', 'contactPhone', 'contactEmail']
       const missingFields: string[] = []
@@ -387,7 +386,7 @@ export async function POST(
         }
       }
 
-      if (showDirectorSection(submitType, submitRegion)) {
+      if (showDirectorSection(submitType)) {
         const directorRequired = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber']
         for (const field of directorRequired) {
           if (!data[field as keyof typeof data]) missingFields.push(field)

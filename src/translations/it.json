@@ -210,7 +210,7 @@
       "postalCode": "CAP *",
       "city": "Città *",
       "country": "Paese *",
-      "glnNumber": "Numero GLN",
+      "glnNumber": "Numero GLN (quando disponibile)",
       "useOtherInvoiceDetails": "Usa dati di fatturazione diversi",
       "phone": "Telefono *",
       "contactEmail": "Email di contatto *",
@@ -303,7 +303,7 @@
         "postalCode": "CAP",
         "city": "Città",
         "country": "Paese",
-        "glnNumber": "Numero GLN",
+        "glnNumber": "Numero GLN (quando disponibile)",
         "contactName": "Referente",
         "phone": "Telefono",
         "contactEmail": "Email di contatto"
@@ -448,7 +448,7 @@
         "postalCode": "CAP *",
         "city": "Città *",
         "country": "Paese *",
-        "glnNumber": "Numero GLN",
+        "glnNumber": "Numero GLN (quando disponibile)",
         "contactName": "Referente *",
         "phone": "Telefono *",
         "contactEmail": "Email di contatto *"
