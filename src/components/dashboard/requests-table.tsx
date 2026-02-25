@@ -119,7 +119,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
       [t('requests.table.supplier')]: r.supplierName,
       'Email': r.supplierEmail,
       [t('requests.table.label')]: t(`enums.label.${r.label}`),
-      [t('requests.new.region')]: t(`enums.region.${r.region}`),
       [t('requests.table.status')]: t(`enums.status.${r.status}`),
       [t('requests.table.createdBy')]: formatUserName(r.createdBy) || r.createdBy.email,
       [t('requests.table.date')]: new Date(r.createdAt).toLocaleDateString(getDateLocale(language)),
@@ -199,7 +198,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                 )}
               </TableHead>
               <TableHead>{t('requests.table.label')}</TableHead>
-              <TableHead>{t('requests.new.region')}</TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-muted"
                 onClick={() => toggleSort('supplierEmail')}
@@ -241,7 +239,7 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
           <TableBody>
             {filteredAndSortedRequests.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32">
+                <TableCell colSpan={6} className="h-32">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <Inbox className="h-8 w-8" />
                     <p className="text-sm font-medium">{t('requests.table.empty')}</p>
@@ -263,7 +261,6 @@ export function RequestsTable({ requests, userRoles, userLabels, externalStatusF
                       {t(`enums.label.${request.label}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{t(`enums.region.${request.region}`)}</TableCell>
                   <TableCell>{request.supplierEmail}</TableCell>
                   <TableCell>
                     <Badge className={statusColors[request.status]}>

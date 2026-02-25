@@ -103,7 +103,8 @@ model SupplierRequest {
   apiKeyFloriday    String?
 
   // Finance fields
-  creditorNumber String? @unique
+  creditorNumber       String?  @unique
+  postingMatrixFilled  Boolean?
 
   // ERP fields
   kbtCode String? @unique

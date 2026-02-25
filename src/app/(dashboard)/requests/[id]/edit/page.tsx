@@ -196,6 +196,7 @@ export default function EditRequestPage() {
     accountManager: '',
     // Finance data
     creditorNumber: '',
+    postingMatrixFilled: false,
   })
 
   useEffect(() => {
@@ -244,6 +245,7 @@ export default function EditRequestPage() {
           paymentTerm: data.paymentTerm || '',
           accountManager: data.accountManager || '',
           creditorNumber: data.creditorNumber || '',
+          postingMatrixFilled: data.postingMatrixFilled ?? false,
         })
       } catch {
         setError(t('requests.edit.notFound'))
@@ -590,7 +592,7 @@ export default function EditRequestPage() {
             <CardHeader>
               <CardTitle>{t('requests.edit.creditorNumber')}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="creditorNumber">{t('requests.edit.creditorNumber')} *</Label>
                 <Input
@@ -600,6 +602,17 @@ export default function EditRequestPage() {
                   placeholder={t('requests.edit.creditorNumberPlaceholder')}
                   disabled={busy}
                 />
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="postingMatrixFilled"
+                  checked={formData.postingMatrixFilled}
+                  onCheckedChange={(checked) => setFormData({ ...formData, postingMatrixFilled: checked === true })}
+                  disabled={busy}
+                />
+                <Label htmlFor="postingMatrixFilled">
+                  {t('requests.edit.postingMatrixFilled')}
+                </Label>
               </div>
             </CardContent>
           </Card>

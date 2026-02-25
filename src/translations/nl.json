@@ -263,6 +263,7 @@
       "saveOnly": "Opslaan",
       "creditorNumber": "Crediteurnummer",
       "creditorNumberPlaceholder": "Voer crediteurnummer in",
+      "postingMatrixFilled": "Doorboekmatrix in KBT gevuld",
       "successSubmitERP": "Gegevens opgeslagen en doorgestuurd naar ERP",
       "successComplete": "Gegevens opgeslagen en aanvraag afgerond",
       "successSave": "Gegevens opgeslagen",
@@ -372,7 +373,8 @@
         "exactXmlDescription": "Kopieer deze URL en plak in Exact Globe om de leverancier te importeren",
         "downloadXml": "XML downloaden",
         "copyUrl": "URL kopiëren",
-        "urlCopied": "URL gekopieerd naar klembord"
+        "urlCopied": "URL gekopieerd naar klembord",
+        "postingMatrixFilled": "Doorboekmatrix in KBT gevuld"
       },
       "erp": {
         "title": "ERP",

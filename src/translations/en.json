@@ -263,6 +263,7 @@
       "saveOnly": "Save",
       "creditorNumber": "Creditor number",
       "creditorNumberPlaceholder": "Enter creditor number",
+      "postingMatrixFilled": "Posting matrix filled in KBT",
       "successSubmitERP": "Details saved and forwarded to ERP",
       "successComplete": "Details saved and request completed",
       "successSave": "Details saved",
@@ -372,7 +373,8 @@
         "exactXmlDescription": "Copy this URL and paste it in Exact Globe to import the supplier",
         "downloadXml": "Download XML",
         "copyUrl": "Copy URL",
-        "urlCopied": "URL copied to clipboard"
+        "urlCopied": "URL copied to clipboard",
+        "postingMatrixFilled": "Posting matrix filled in KBT"
       },
       "erp": {
         "title": "ERP",

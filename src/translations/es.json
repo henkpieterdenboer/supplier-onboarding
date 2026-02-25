@@ -263,6 +263,7 @@
       "saveOnly": "Guardar",
       "creditorNumber": "Número de acreedor",
       "creditorNumberPlaceholder": "Introduzca el número de acreedor",
+      "postingMatrixFilled": "Matriz de contabilización completada en KBT",
       "successSubmitERP": "Datos guardados y enviados a ERP",
       "successComplete": "Datos guardados y solicitud completada",
       "successSave": "Datos guardados",
@@ -372,7 +373,8 @@
         "exactXmlDescription": "Copie esta URL y péguela en Exact Globe para importar el proveedor",
         "downloadXml": "Descargar XML",
         "copyUrl": "Copiar URL",
-        "urlCopied": "URL copiada al portapapeles"
+        "urlCopied": "URL copiada al portapapeles",
+        "postingMatrixFilled": "Matriz de contabilización completada en KBT"
       },
       "erp": {
         "title": "ERP",

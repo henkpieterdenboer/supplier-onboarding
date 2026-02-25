@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -115,6 +116,7 @@ interface Request {
   accountManager: string | null
   // Finance fields
   creditorNumber: string | null
+  postingMatrixFilled: boolean | null
   // ERP fields
   kbtCode: string | null
   // Invitation
@@ -139,6 +141,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   const { t, language } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
   const [creditorNumber, setCreditorNumber] = useState('')
+  const [postingMatrixFilled, setPostingMatrixFilled] = useState(request.postingMatrixFilled ?? false)
   const [kbtCode, setKbtCode] = useState('')
   const [isViesRechecking, setIsViesRechecking] = useState(false)
   const [viesExpanded, setViesExpanded] = useState(!!request.vatCheckResponse)
@@ -296,7 +299,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -1043,9 +1046,17 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                 )}
 
                 {request.creditorNumber ? (
-                  <div>
-                    <Label className="text-muted-foreground">{t('requests.detail.finance.creditorNumber')}</Label>
-                    <p className="font-medium">{request.creditorNumber}</p>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-muted-foreground">{t('requests.detail.finance.creditorNumber')}</Label>
+                      <p className="font-medium">{request.creditorNumber}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox id="postingMatrixFilledReadonly" checked={request.postingMatrixFilled ?? false} disabled />
+                      <Label htmlFor="postingMatrixFilledReadonly" className="text-muted-foreground">
+                        {t('requests.detail.finance.postingMatrixFilled')}
+                      </Label>
+                    </div>
                   </div>
                 ) : userRoles.includes('FINANCE') ? (
                   <div className="space-y-4">
@@ -1058,8 +1069,18 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                         placeholder={t('requests.detail.finance.enterCreditor')}
                       />
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="postingMatrixFilled"
+                        checked={postingMatrixFilled}
+                        onCheckedChange={(checked) => setPostingMatrixFilled(checked === true)}
+                      />
+                      <Label htmlFor="postingMatrixFilled">
+                        {t('requests.detail.finance.postingMatrixFilled')}
+                      </Label>
+                    </div>
                     <Button
-                      onClick={() => handleAction('finance-submit', { creditorNumber })}
+                      onClick={() => handleAction('finance-submit', { creditorNumber, postingMatrixFilled })}
                       disabled={isLoading || !creditorNumber}
                     >
                       {t('common.save')}
