@@ -580,7 +580,7 @@ export async function PATCH(
 
         // Financial fields required for Koop/O-kweker
         if (showFinancialSection(submitType)) {
-          const financialRequired = ['chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName'] as const
+          const financialRequired = ['chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName', 'invoiceCurrency'] as const
           for (const field of financialRequired) {
             if (!validatedData[field]) {
               return NextResponse.json(

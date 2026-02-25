@@ -27,8 +27,8 @@ import {
   showDirectorSection,
   showAuctionSection,
   showBankUpload,
-
   requiresIncoterm,
+  getMissingRequiredFields,
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale } from '@/lib/i18n'
@@ -367,7 +367,8 @@ export default function EditRequestPage() {
     formData.chamberOfCommerceNumber &&
     formData.vatNumber &&
     formData.iban &&
-    formData.bankName
+    formData.bankName &&
+    formData.invoiceCurrency
   )
   const directorFieldsFilled = !showDirector || !!(
     formData.directorName &&
@@ -444,6 +445,16 @@ export default function EditRequestPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Check for missing required fields before submitting
+    const context = canEditAsInkoper ? 'purchaser' : 'finance'
+    const missing = getMissingRequiredFields(context, formData, supplierType, region)
+    if (missing.length > 0) {
+      const fieldNames = missing.map(f => t(`validation.fieldNames.${f}`)).join(', ')
+      toast.error(t('validation.missingFieldsTitle'), { description: fieldNames })
+      return
+    }
+
     setError('')
     setIsSubmitting(true)
 
@@ -1143,7 +1154,7 @@ export default function EditRequestPage() {
           </Button>
           <Button
             type="submit"
-            disabled={busy || !canSubmit}
+            disabled={busy}
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {canEditAsFinance ? t('requests.edit.submitComplete') : t('requests.edit.submitToERP')}

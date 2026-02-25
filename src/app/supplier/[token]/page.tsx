@@ -25,6 +25,7 @@ import {
   showAuctionSection,
   showBankUpload,
   showMandateUpload,
+  getMissingRequiredFields,
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale } from '@/lib/i18n'
@@ -289,6 +290,15 @@ export default function SupplierFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Check for missing required fields before submitting
+    const missing = getMissingRequiredFields('supplier', formData, supplierType, region)
+    if (missing.length > 0) {
+      const fieldNames = missing.map(f => t(`validation.fieldNames.${f}`)).join(', ')
+      toast.error(t('validation.missingFieldsTitle'), { description: fieldNames })
+      return
+    }
+
     await submitForm('submit')
   }
 

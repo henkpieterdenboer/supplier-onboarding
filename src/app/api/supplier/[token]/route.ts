@@ -12,6 +12,7 @@ import { formatUserName } from '@/lib/user-utils'
 import type { Language } from '@/lib/i18n'
 import { supplierFormSchema } from '@/lib/validations'
 import { checkVat } from '@/lib/vies'
+import { showFinancialSection, showDirectorSection } from '@/lib/supplier-type-utils'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -369,7 +370,37 @@ export async function POST(
 
       return NextResponse.json({ success: true, saved: true })
     } else {
-      // Submit: existing behavior — status change, invalidate token
+      // Submit: validate required fields
+      const submitType = supplierRequest.supplierType || 'KOOP'
+      const submitRegion = supplierRequest.region || 'EU'
+
+      const baseRequired = ['companyName', 'address', 'postalCode', 'city', 'country', 'contactName', 'contactPhone', 'contactEmail']
+      const missingFields: string[] = []
+      for (const field of baseRequired) {
+        if (!data[field as keyof typeof data]) missingFields.push(field)
+      }
+
+      if (showFinancialSection(submitType)) {
+        const financialRequired = ['chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName', 'invoiceCurrency']
+        for (const field of financialRequired) {
+          if (!data[field as keyof typeof data]) missingFields.push(field)
+        }
+      }
+
+      if (showDirectorSection(submitType, submitRegion)) {
+        const directorRequired = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber']
+        for (const field of directorRequired) {
+          if (!data[field as keyof typeof data]) missingFields.push(field)
+        }
+      }
+
+      if (missingFields.length > 0) {
+        return NextResponse.json(
+          { error: `Required fields missing: ${missingFields.join(', ')}` },
+          { status: 400 }
+        )
+      }
+
       // VIES check for EU suppliers with vatNumber
       if (supplierRequest.region === 'EU' && data.vatNumber) {
         try {

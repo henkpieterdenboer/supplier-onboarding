@@ -224,7 +224,7 @@
       "invoiceAddress": "Factuuradres",
       "invoicePostalCode": "Factuur postcode",
       "invoiceCity": "Factuur plaats",
-      "currency": "Valuta",
+      "currency": "Valuta *",
       "director": "Bestuurder (ROW)",
       "directorName": "Naam bestuurder *",
       "directorFunction": "Functie *",
@@ -461,7 +461,7 @@
         "invoiceAddressHint": "Alleen invullen als dit afwijkt van het bedrijfsadres",
         "invoicePostalCode": "Factuur postcode",
         "invoiceCity": "Factuur plaats",
-        "currency": "Valuta",
+        "currency": "Valuta *",
         "currencyPlaceholder": "Selecteer valuta",
         "currencyEUR": "EUR - Euro",
         "currencyUSD": "USD - US Dollar",
@@ -768,6 +768,31 @@
       "SELF_FILL_ACTIVATED": "Zelf invullen geactiveerd",
       "PURCHASER_SAVED": "Inkoper heeft gegevens opgeslagen",
       "FINANCE_SAVED": "Finance heeft gegevens opgeslagen"
+    }
+  },
+  "validation": {
+    "missingFieldsTitle": "Niet alle verplichte velden zijn ingevuld",
+    "fieldNames": {
+      "companyName": "Bedrijfsnaam",
+      "address": "Adres",
+      "postalCode": "Postcode",
+      "city": "Plaats",
+      "country": "Land",
+      "contactName": "Contactpersoon",
+      "contactPhone": "Telefoon",
+      "contactEmail": "Contact email",
+      "chamberOfCommerceNumber": "KvK nummer",
+      "vatNumber": "BTW nummer",
+      "iban": "IBAN",
+      "bankName": "Bank",
+      "invoiceCurrency": "Valuta",
+      "directorName": "Naam bestuurder",
+      "directorFunction": "Functie bestuurder",
+      "directorDateOfBirth": "Geboortedatum bestuurder",
+      "directorPassportNumber": "Paspoortnummer bestuurder",
+      "incoterm": "Incoterm",
+      "creditorNumber": "Crediteurnummer",
+      "kbtCode": "KBT-code"
     }
   }
 }

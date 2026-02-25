@@ -224,7 +224,7 @@
       "invoiceAddress": "Indirizzo di fatturazione",
       "invoicePostalCode": "CAP fatturazione",
       "invoiceCity": "Città di fatturazione",
-      "currency": "Valuta",
+      "currency": "Valuta *",
       "director": "Amministratore (Resto del Mondo)",
       "directorName": "Nome amministratore *",
       "directorFunction": "Funzione *",
@@ -461,7 +461,7 @@
         "invoiceAddressHint": "Compilare solo se diverso dall'indirizzo aziendale",
         "invoicePostalCode": "CAP fatturazione",
         "invoiceCity": "Città di fatturazione",
-        "currency": "Valuta",
+        "currency": "Valuta *",
         "currencyPlaceholder": "Seleziona valuta",
         "currencyEUR": "EUR - Euro",
         "currencyUSD": "USD - Dollaro USA",
@@ -768,6 +768,31 @@
       "SELF_FILL_ACTIVATED": "Compilazione autonoma attivata",
       "PURCHASER_SAVED": "L'acquirente ha salvato i dati",
       "FINANCE_SAVED": "Finance ha salvato i dati"
+    }
+  },
+  "validation": {
+    "missingFieldsTitle": "Non tutti i campi obbligatori sono stati compilati",
+    "fieldNames": {
+      "companyName": "Ragione sociale",
+      "address": "Indirizzo",
+      "postalCode": "CAP",
+      "city": "Città",
+      "country": "Paese",
+      "contactName": "Referente",
+      "contactPhone": "Telefono",
+      "contactEmail": "Email di contatto",
+      "chamberOfCommerceNumber": "Numero Camera di Commercio",
+      "vatNumber": "Partita IVA",
+      "iban": "IBAN",
+      "bankName": "Banca",
+      "invoiceCurrency": "Valuta",
+      "directorName": "Nome amministratore",
+      "directorFunction": "Funzione amministratore",
+      "directorDateOfBirth": "Data di nascita amministratore",
+      "directorPassportNumber": "Numero passaporto amministratore",
+      "incoterm": "Incoterm",
+      "creditorNumber": "Numero creditore",
+      "kbtCode": "Codice KBT"
     }
   }
 }

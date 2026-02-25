@@ -224,7 +224,7 @@
       "invoiceAddress": "Invoice address",
       "invoicePostalCode": "Invoice postal code",
       "invoiceCity": "Invoice city",
-      "currency": "Currency",
+      "currency": "Currency *",
       "director": "Director (ROW)",
       "directorName": "Director name *",
       "directorFunction": "Function *",
@@ -461,7 +461,7 @@
         "invoiceAddressHint": "Only fill in if different from company address",
         "invoicePostalCode": "Invoice postal code",
         "invoiceCity": "Invoice city",
-        "currency": "Currency",
+        "currency": "Currency *",
         "currencyPlaceholder": "Select currency",
         "currencyEUR": "EUR - Euro",
         "currencyUSD": "USD - US Dollar",
@@ -768,6 +768,31 @@
       "SELF_FILL_ACTIVATED": "Self-fill activated",
       "PURCHASER_SAVED": "Purchaser saved details",
       "FINANCE_SAVED": "Finance saved details"
+    }
+  },
+  "validation": {
+    "missingFieldsTitle": "Not all required fields have been filled in",
+    "fieldNames": {
+      "companyName": "Company name",
+      "address": "Address",
+      "postalCode": "Postal code",
+      "city": "City",
+      "country": "Country",
+      "contactName": "Contact person",
+      "contactPhone": "Phone",
+      "contactEmail": "Contact email",
+      "chamberOfCommerceNumber": "Chamber of Commerce number",
+      "vatNumber": "VAT number",
+      "iban": "IBAN",
+      "bankName": "Bank",
+      "invoiceCurrency": "Currency",
+      "directorName": "Director name",
+      "directorFunction": "Director function",
+      "directorDateOfBirth": "Director date of birth",
+      "directorPassportNumber": "Director passport number",
+      "incoterm": "Incoterm",
+      "creditorNumber": "Creditor number",
+      "kbtCode": "KBT code"
     }
   }
 }

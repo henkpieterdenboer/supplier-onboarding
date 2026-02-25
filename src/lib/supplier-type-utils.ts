@@ -47,3 +47,60 @@ export function showMandateUpload(type: string): boolean {
 export function requiresIncoterm(type: string): boolean {
   return type === SupplierType.KOOP || type === SupplierType.O_KWEKER
 }
+
+/**
+ * Get list of missing required field names for a given context.
+ * Returns field keys (matching validation.fieldNames in translations).
+ */
+export function getMissingRequiredFields(
+  context: 'supplier' | 'purchaser' | 'erp' | 'finance',
+  data: Record<string, unknown>,
+  supplierType: string,
+  region: string
+): string[] {
+  const missing: string[] = []
+  const isEmpty = (key: string) => !data[key]
+
+  if (context === 'supplier' || context === 'purchaser') {
+    // Base fields always required
+    const baseFields = ['companyName', 'address', 'postalCode', 'city', 'country', 'contactName', 'contactPhone', 'contactEmail']
+    for (const field of baseFields) {
+      if (isEmpty(field)) missing.push(field)
+    }
+
+    // Financial fields for Koop/O-kweker
+    if (showFinancialSection(supplierType)) {
+      const financialFields = ['chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName', 'invoiceCurrency']
+      for (const field of financialFields) {
+        if (isEmpty(field)) missing.push(field)
+      }
+    }
+
+    // Director fields for Koop/O-kweker ROW
+    if (showDirectorSection(supplierType, region)) {
+      const directorFields = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber']
+      for (const field of directorFields) {
+        if (isEmpty(field)) missing.push(field)
+      }
+    }
+  }
+
+  // Purchaser-specific: incoterm
+  if (context === 'purchaser') {
+    if (requiresIncoterm(supplierType) && isEmpty('incoterm')) {
+      missing.push('incoterm')
+    }
+  }
+
+  // Finance: creditorNumber
+  if (context === 'finance') {
+    if (isEmpty('creditorNumber')) missing.push('creditorNumber')
+  }
+
+  // ERP: kbtCode
+  if (context === 'erp') {
+    if (isEmpty('kbtCode')) missing.push('kbtCode')
+  }
+
+  return missing
+}

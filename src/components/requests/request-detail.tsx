@@ -956,6 +956,46 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
             </Card>
           )}
 
+          {/* ERP Section */}
+          {(request.kbtCode || request.status === 'AWAITING_ERP') && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('requests.detail.erp.title')}</CardTitle>
+                <CardDescription>
+                  {request.kbtCode ? t('requests.detail.erp.kbtAssigned') : t('requests.detail.erp.waitingForKbt')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {request.kbtCode ? (
+                  <div>
+                    <Label className="text-muted-foreground">{t('requests.detail.erp.kbtCode')}</Label>
+                    <p className="font-medium">{request.kbtCode}</p>
+                  </div>
+                ) : userRoles.includes('ERP') ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="kbtCode">{t('requests.detail.erp.kbtCode')} *</Label>
+                      <Input
+                        id="kbtCode"
+                        value={kbtCode}
+                        onChange={(e) => setKbtCode(e.target.value)}
+                        placeholder={t('requests.detail.erp.enterKbt')}
+                      />
+                    </div>
+                    <Button
+                      onClick={() => handleAction('erp-submit', { kbtCode })}
+                      disabled={isLoading || !kbtCode}
+                    >
+                      {t('common.save')}
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">{t('requests.detail.erp.waiting')}</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Finance Section */}
           {(request.creditorNumber || request.status === 'AWAITING_FINANCE') && (
             <Card>
@@ -1027,46 +1067,6 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                   </div>
                 ) : (
                   <p className="text-muted-foreground">{t('requests.detail.finance.waiting')}</p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* ERP Section */}
-          {(request.kbtCode || request.status === 'AWAITING_ERP') && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('requests.detail.erp.title')}</CardTitle>
-                <CardDescription>
-                  {request.kbtCode ? t('requests.detail.erp.kbtAssigned') : t('requests.detail.erp.waitingForKbt')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {request.kbtCode ? (
-                  <div>
-                    <Label className="text-muted-foreground">{t('requests.detail.erp.kbtCode')}</Label>
-                    <p className="font-medium">{request.kbtCode}</p>
-                  </div>
-                ) : userRoles.includes('ERP') ? (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="kbtCode">{t('requests.detail.erp.kbtCode')} *</Label>
-                      <Input
-                        id="kbtCode"
-                        value={kbtCode}
-                        onChange={(e) => setKbtCode(e.target.value)}
-                        placeholder={t('requests.detail.erp.enterKbt')}
-                      />
-                    </div>
-                    <Button
-                      onClick={() => handleAction('erp-submit', { kbtCode })}
-                      disabled={isLoading || !kbtCode}
-                    >
-                      {t('common.save')}
-                    </Button>
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">{t('requests.detail.erp.waiting')}</p>
                 )}
               </CardContent>
             </Card>

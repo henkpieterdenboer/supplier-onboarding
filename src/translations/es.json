@@ -224,7 +224,7 @@
       "invoiceAddress": "Dirección de facturación",
       "invoicePostalCode": "Código postal de facturación",
       "invoiceCity": "Ciudad de facturación",
-      "currency": "Moneda",
+      "currency": "Moneda *",
       "director": "Director (ROW)",
       "directorName": "Nombre del director *",
       "directorFunction": "Cargo *",
@@ -461,7 +461,7 @@
         "invoiceAddressHint": "Solo complete si es diferente a la dirección de la empresa",
         "invoicePostalCode": "Código postal de facturación",
         "invoiceCity": "Ciudad de facturación",
-        "currency": "Moneda",
+        "currency": "Moneda *",
         "currencyPlaceholder": "Seleccionar moneda",
         "currencyEUR": "EUR - Euro",
         "currencyUSD": "USD - Dólar estadounidense",
@@ -768,6 +768,31 @@
       "SELF_FILL_ACTIVATED": "Autocompletado activado",
       "PURCHASER_SAVED": "Comprador guardó datos",
       "FINANCE_SAVED": "Finanzas guardó datos"
+    }
+  },
+  "validation": {
+    "missingFieldsTitle": "No se han completado todos los campos obligatorios",
+    "fieldNames": {
+      "companyName": "Nombre de la empresa",
+      "address": "Dirección",
+      "postalCode": "Código postal",
+      "city": "Ciudad",
+      "country": "País",
+      "contactName": "Persona de contacto",
+      "contactPhone": "Teléfono",
+      "contactEmail": "Correo de contacto",
+      "chamberOfCommerceNumber": "Número de registro mercantil",
+      "vatNumber": "Número de IVA",
+      "iban": "IBAN",
+      "bankName": "Banco",
+      "invoiceCurrency": "Moneda",
+      "directorName": "Nombre del director",
+      "directorFunction": "Cargo del director",
+      "directorDateOfBirth": "Fecha de nacimiento del director",
+      "directorPassportNumber": "Número de pasaporte del director",
+      "incoterm": "Incoterm",
+      "creditorNumber": "Número de acreedor",
+      "kbtCode": "Código KBT"
     }
   }
 }
