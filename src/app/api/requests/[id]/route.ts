@@ -933,9 +933,23 @@ export async function PATCH(
           }
         }
 
+        // VIES check + PDF when vatNumber changed
+        let finSaveViesData: Record<string, unknown> = {}
+        const finSaveVatNumber = finSaveData.vatNumber
+        if (existingRequest.region === 'EU' && finSaveVatNumber && finSaveVatNumber !== existingRequest.vatNumber) {
+          try {
+            finSaveViesData = await runViesCheckWithPdf(id, finSaveVatNumber, existingRequest.supplierName, existingRequest.label, session.user.id)
+          } catch {
+            // VIES failure should not block save
+          }
+        }
+
         const updatedFinSave = await prisma.supplierRequest.update({
           where: { id },
-          data: financeSaveUpdateData,
+          data: {
+            ...financeSaveUpdateData,
+            ...finSaveViesData,
+          },
         })
 
         await prisma.auditLog.create({
@@ -1011,9 +1025,23 @@ export async function PATCH(
           }
         }
 
+        // VIES check + PDF when vatNumber changed
+        let finSubmitViesData: Record<string, unknown> = {}
+        const finSubmitVatNumber = financeSupplierData.vatNumber || existingRequest.vatNumber
+        if (existingRequest.region === 'EU' && finSubmitVatNumber && finSubmitVatNumber !== existingRequest.vatNumber) {
+          try {
+            finSubmitViesData = await runViesCheckWithPdf(id, finSubmitVatNumber, existingRequest.supplierName, existingRequest.label, session.user.id)
+          } catch {
+            // VIES failure should not block submission
+          }
+        }
+
         const updated = await prisma.supplierRequest.update({
           where: { id },
-          data: financeUpdateData,
+          data: {
+            ...financeUpdateData,
+            ...finSubmitViesData,
+          },
         })
 
         await prisma.auditLog.create({
