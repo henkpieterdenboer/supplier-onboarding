@@ -59,6 +59,22 @@ export async function checkVat(vatNumber: string): Promise<ViesResult | null> {
 
     clearTimeout(timeout)
 
+    // 4xx = invalid number/format, return as invalid (not unavailable)
+    if (response.status >= 400 && response.status < 500) {
+      return {
+        isValid: false,
+        name: '',
+        address: '',
+        requestDate: '',
+        userError: '',
+        vatNumber: parsed.number,
+        countryCode: parsed.countryCode,
+        requestIdentifier: '',
+        serviceUnavailable: false,
+      }
+    }
+
+    // 5xx = actual service issue
     if (!response.ok) return null
 
     const data = await response.json()
