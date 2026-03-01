@@ -176,6 +176,8 @@ export function RequestDetail({ request, userRoles }: RequestDetailProps) {
       } else {
         toast.success(t('common.success'))
       }
+      // Refresh server data so the files list updates with the new VIES report
+      router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('common.error'))
     } finally {

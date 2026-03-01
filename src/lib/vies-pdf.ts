@@ -87,22 +87,28 @@ export async function generateViesReport(input: ViesReportInput): Promise<Buffer
   // --- Result badge ---
   doc.setTextColor(0, 0, 0)
   const isValid = viesResult.isValid
-  const badgeText = isValid ? ' VALID ' : ' INVALID '
+  const badgeText = isValid ? 'VALID' : 'INVALID'
   const badgeColor: [number, number, number] = isValid ? [34, 139, 34] : [220, 38, 38]
-  const badgeX = margin
-  const badgeWidth = doc.getTextWidth(badgeText) + 8
 
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
 
+  const badgeH = 9
+  const badgePadX = 5
+  const textW = doc.getTextWidth(badgeText)
+  const badgeW = textW + badgePadX * 2
+  // Cap-height ~35% of font size in mm (14pt * 0.3528mm/pt * 0.7)
+  const capH = 14 * 0.3528 * 0.7
+  const textBaseline = y + (badgeH + capH) / 2
+
   // Draw badge background
   doc.setFillColor(...badgeColor)
-  doc.roundedRect(badgeX, y - 5, badgeWidth, 8, 2, 2, 'F')
+  doc.roundedRect(margin, y, badgeW, badgeH, 2, 2, 'F')
 
-  // Draw badge text
+  // Draw badge text centered
   doc.setTextColor(255, 255, 255)
-  doc.text(badgeText, badgeX + 4, y)
-  y += 12
+  doc.text(badgeText, margin + badgePadX, textBaseline)
+  y += badgeH + 6
 
   // --- Horizontal line ---
   doc.setDrawColor(200, 200, 200)

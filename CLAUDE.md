@@ -27,13 +27,15 @@ UI is in **Dutch**, code (variables, comments) is in **English**.
 ```bash
 npm run dev              # Start dev server (localhost:3000)
 npm run build            # Production build
-npm run lint             # ESLint (eslint-config-next)
+npm run lint             # ESLint (next/core-web-vitals + next/typescript)
 npm run db:seed          # Seed demo accounts (tsx prisma/seed.ts)
 npm run db:sync-test     # Sync production → test DB (tsx prisma/sync-test-db.ts)
 npx prisma db push       # Push schema changes to DB
 npx prisma generate      # Regenerate Prisma client after schema changes
 npx prisma studio        # Open Prisma Studio DB browser
 ```
+
+**ESLint custom rules** (`eslint.config.mjs`): `@next/next/no-img-element` is disabled (project uses `<img>` tags, not `next/image`). `react-hooks/set-state-in-effect` is set to warn. Standalone `*.js` utility scripts in the root are globally ignored.
 
 **Important**: Do NOT use `prisma migrate dev` — this project uses `prisma db push` for schema changes and manual SQL when needed. The `prisma/migrations/` directory is historical only — do not use it.
 

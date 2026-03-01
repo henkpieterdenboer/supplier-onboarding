@@ -12,6 +12,7 @@ import { formatUserName } from '@/lib/user-utils'
 import type { Language } from '@/lib/i18n'
 import { supplierFormSchema } from '@/lib/validations'
 import { checkVat } from '@/lib/vies'
+import { generateViesReport } from '@/lib/vies-pdf'
 import { showFinancialSection, showDirectorSection } from '@/lib/supplier-type-utils'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -401,6 +402,7 @@ export async function POST(
       }
 
       // VIES check for EU suppliers with vatNumber
+      let viesResultForPdf: Awaited<ReturnType<typeof checkVat>> = null
       if (supplierRequest.region === 'EU' && data.vatNumber) {
         try {
           const viesResult = await checkVat(data.vatNumber)
@@ -408,6 +410,9 @@ export async function POST(
             updateData.vatValid = viesResult.isValid
             updateData.vatCheckResponse = JSON.stringify(viesResult)
             updateData.vatCheckedAt = new Date()
+            if (viesResult.isValid) {
+              viesResultForPdf = viesResult
+            }
           }
         } catch {
           // VIES failure should not block submission
@@ -431,6 +436,42 @@ export async function POST(
             ...file,
           },
         })
+      }
+
+      // Generate VIES PDF report if valid
+      if (viesResultForPdf && data.vatNumber) {
+        try {
+          const pdfBuffer = await generateViesReport({
+            viesResult: viesResultForPdf,
+            supplierName: supplierRequest.supplierName,
+            vatNumber: data.vatNumber,
+            label: supplierRequest.label,
+          })
+
+          const fileName = `vies_report_${Date.now()}.pdf`
+          let filePath = `/api/files/${supplierRequest.id}/${fileName}`
+
+          if (process.env.BLOB_READ_WRITE_TOKEN) {
+            const { put } = await import('@vercel/blob')
+            const blob = await put(`${supplierRequest.id}/${fileName}`, pdfBuffer, {
+              access: 'public',
+              addRandomSuffix: false,
+            })
+            filePath = blob.url
+          }
+
+          await prisma.supplierFile.create({
+            data: {
+              requestId: supplierRequest.id,
+              fileName: `VIES_Report_${viesResultForPdf.countryCode}${viesResultForPdf.vatNumber}.pdf`,
+              fileType: 'VIES_REPORT',
+              filePath,
+            },
+          })
+        } catch (error) {
+          console.error('Error generating VIES report on supplier submit:', error)
+          // Don't block submission
+        }
       }
 
       // Create audit log

@@ -388,6 +388,14 @@ export default function EditRequestPage() {
     return JSON.stringify({
       action,
       ...formData,
+      // Clear invoice fields when "different invoice address" is unchecked
+      ...(useOtherInvoiceDetails ? {} : {
+        invoiceEmail: '',
+        invoiceAddress: '',
+        invoicePostalCode: '',
+        invoiceCity: '',
+        invoiceCurrency: '',
+      }),
       commissionPercentage: formData.commissionPercentage
         ? parseFloat(formData.commissionPercentage)
         : null,
@@ -556,50 +564,6 @@ export default function EditRequestPage() {
                   </Select>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Creditor Number - Finance only */}
-        {canEditAsFinance && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('requests.edit.creditorNumber')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="creditorNumber">{t('requests.edit.creditorNumber')} *</Label>
-                <Input
-                  id="creditorNumber"
-                  value={formData.creditorNumber}
-                  onChange={(e) => setFormData({ ...formData, creditorNumber: e.target.value })}
-                  placeholder={t('requests.edit.creditorNumberPlaceholder')}
-                  disabled={busy}
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="postingMatrixFilled"
-                  checked={formData.postingMatrixFilled}
-                  onCheckedChange={(checked) => setFormData({ ...formData, postingMatrixFilled: checked === true })}
-                  disabled={busy}
-                />
-                <Label htmlFor="postingMatrixFilled">
-                  {t('requests.edit.postingMatrixFilled')}
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Finance file upload */}
-        {canEditAsFinance && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('requests.edit.otherFileUpload')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderFileInput('financeFile', 'OTHER', t('requests.edit.otherFileUpload'))}
             </CardContent>
           </Card>
         )}
@@ -1132,6 +1096,50 @@ export default function EditRequestPage() {
             {renderFileInput('otherFile', 'OTHER', t('requests.edit.otherFileUpload'))}
           </CardContent>
         </Card>
+
+        {/* Creditor Number - Finance only */}
+        {canEditAsFinance && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('requests.edit.creditorNumber')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="creditorNumber">{t('requests.edit.creditorNumber')} *</Label>
+                <Input
+                  id="creditorNumber"
+                  value={formData.creditorNumber}
+                  onChange={(e) => setFormData({ ...formData, creditorNumber: e.target.value })}
+                  placeholder={t('requests.edit.creditorNumberPlaceholder')}
+                  disabled={busy}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="postingMatrixFilled"
+                  checked={formData.postingMatrixFilled}
+                  onCheckedChange={(checked) => setFormData({ ...formData, postingMatrixFilled: checked === true })}
+                  disabled={busy}
+                />
+                <Label htmlFor="postingMatrixFilled">
+                  {t('requests.edit.postingMatrixFilled')}
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Finance file upload */}
+        {canEditAsFinance && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('requests.edit.otherFileUpload')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderFileInput('financeFile', 'OTHER', t('requests.edit.otherFileUpload'))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Actions: Save + Save & Submit */}
         <div className="flex gap-4">
