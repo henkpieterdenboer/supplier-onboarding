@@ -246,7 +246,12 @@ export async function PATCH(
     // Handle different actions
     switch (action) {
       case 'cancel': {
-        // Any role can cancel
+        // Inkoper can only cancel their own requests; Admin/Finance/ERP can cancel any
+        const roles = session.user.roles as string[]
+        const isInkoperOnly = roles.includes('INKOPER') && !roles.includes('ADMIN') && !roles.includes('FINANCE') && !roles.includes('ERP')
+        if (isInkoperOnly && existingRequest.createdBy?.id !== session.user.id) {
+          return NextResponse.json({ error: 'You can only cancel your own requests' }, { status: 403 })
+        }
         const updated = await prisma.supplierRequest.update({
           where: { id },
           data: { status: Status.CANCELLED },

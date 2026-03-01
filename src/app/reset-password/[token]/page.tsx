@@ -27,8 +27,16 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     setError('')
 
-    if (password.length < 6) {
+    if (password.length < 14) {
       setError(t('auth.resetPassword.errorMinLength'))
+      return
+    }
+    if (!/[A-Z]/.test(password)) {
+      setError(t('auth.resetPassword.errorUppercase'))
+      return
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      setError(t('auth.resetPassword.errorSpecialChar'))
       return
     }
 

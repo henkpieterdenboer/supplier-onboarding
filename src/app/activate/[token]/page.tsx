@@ -26,8 +26,16 @@ export default function ActivatePage() {
     e.preventDefault()
     setError('')
 
-    if (password.length < 6) {
+    if (password.length < 14) {
       setError(t('auth.activate.errorMinLength'))
+      return
+    }
+    if (!/[A-Z]/.test(password)) {
+      setError(t('auth.activate.errorUppercase'))
+      return
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      setError(t('auth.activate.errorSpecialChar'))
       return
     }
 

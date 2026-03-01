@@ -134,9 +134,10 @@ interface Request {
 interface RequestDetailProps {
   request: Request
   userRoles: string[]
+  userId: string
 }
 
-export function RequestDetail({ request, userRoles }: RequestDetailProps) {
+export function RequestDetail({ request, userRoles, userId }: RequestDetailProps) {
   const router = useRouter()
   const { t, language } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
@@ -259,7 +260,8 @@ export function RequestDetail({ request, userRoles }: RequestDetailProps) {
 
   const canSelfFill = userRoles.includes('INKOPER') && request.status === 'INVITATION_SENT'
   const canDelete = userRoles.includes('ADMIN') && request.status === 'CANCELLED'
-  const canCancel = request.status !== 'CANCELLED' && request.status !== 'COMPLETED'
+  const isInkoperOnly = userRoles.includes('INKOPER') && !userRoles.includes('ADMIN') && !userRoles.includes('FINANCE') && !userRoles.includes('ERP')
+  const canCancel = request.status !== 'CANCELLED' && request.status !== 'COMPLETED' && (!isInkoperOnly || request.createdBy.id === userId)
   const canReopen = request.status === 'CANCELLED'
   const canResendInvitation = request.status === 'INVITATION_SENT'
   const canSendReminder =

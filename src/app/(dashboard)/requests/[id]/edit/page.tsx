@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -17,9 +16,10 @@ import {
 import { Alert } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
 
 import { toast } from 'sonner'
-import { Check, X, Loader2, AlertTriangle, FileDown, Trash2, Upload, Building2, Landmark, UserCheck, Gavel } from 'lucide-react'
+import { Loader2, FileDown, Trash2, Upload, Building2, Landmark, UserCheck, Gavel } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { SupplierTypeLabels, RegionLabels } from '@/types'
 import {
@@ -32,6 +32,14 @@ import {
 } from '@/lib/supplier-type-utils'
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale } from '@/lib/i18n'
+import {
+  CompanyFields,
+  RegistrationFields,
+  BankingFields,
+  InvoiceFields,
+  DirectorFields,
+  AuctionFields,
+} from '@/components/forms/supplier-form-fields'
 
 interface SupplierFile {
   id: string
@@ -74,7 +82,6 @@ interface Request {
   directorPassportNumber: string | null
   auctionNumberRFH: string | null
   salesSheetEmail: string | null
-  mandateRFH: boolean | null
   apiKeyFloriday: string | null
   incoterm: string | null
   commissionPercentage: number | null
@@ -83,7 +90,6 @@ interface Request {
   creditorNumber: string | null
   postingMatrixFilled: boolean | null
   allChecksCompleted: boolean | null
-  files: SupplierFile[]
 }
 
 export default function EditRequestPage() {
@@ -91,11 +97,12 @@ export default function EditRequestPage() {
   const params = useParams()
   const { data: session } = useSession()
   const { t, language } = useLanguage()
+
   const [request, setRequest] = useState<Request | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Instant file upload/delete state
   const [files, setFiles] = useState<SupplierFile[]>([])
@@ -105,67 +112,6 @@ export default function EditRequestPage() {
   const [supplierType, setSupplierType] = useState<string>('KOOP')
   const [region, setRegion] = useState<string>('EU')
   const [useOtherInvoiceDetails, setUseOtherInvoiceDetails] = useState(false)
-
-  // VIES VAT validation state
-  const [viesStatus, setViesStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'error' | 'invalid-format'>('idle')
-  const [viesResult, setViesResult] = useState<{ name: string; address: string } | null>(null)
-  const viesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const checkViesVat = useCallback(async (vatNumber: string) => {
-    if (!vatNumber || vatNumber.replace(/[\s.\-]/g, '').length < 4) {
-      setViesStatus('idle')
-      setViesResult(null)
-      return
-    }
-
-    setViesStatus('checking')
-    try {
-      const res = await fetch('/api/vies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vatNumber }),
-      })
-
-      if (res.status === 400) {
-        setViesStatus('invalid-format')
-        setViesResult(null)
-        return
-      }
-
-      if (res.status === 503) {
-        setViesStatus('error')
-        setViesResult(null)
-        return
-      }
-
-      if (!res.ok) {
-        setViesStatus('error')
-        setViesResult(null)
-        return
-      }
-
-      const data = await res.json()
-      if (data.serviceUnavailable) {
-        setViesStatus('error')
-        setViesResult(null)
-      } else if (data.isValid) {
-        setViesStatus('valid')
-        setViesResult({ name: data.name, address: data.address })
-      } else {
-        setViesStatus('invalid')
-        setViesResult(null)
-      }
-    } catch {
-      setViesStatus('error')
-      setViesResult(null)
-    }
-  }, [])
-
-  const handleVatChange = useCallback((value: string) => {
-    setFormData((prev) => ({ ...prev, vatNumber: value }))
-    if (viesTimerRef.current) clearTimeout(viesTimerRef.current)
-    viesTimerRef.current = setTimeout(() => checkViesVat(value), 800)
-  }, [checkViesVat])
 
   const [formData, setFormData] = useState({
     // Supplier data
@@ -204,6 +150,11 @@ export default function EditRequestPage() {
     postingMatrixFilled: false,
     allChecksCompleted: false,
   })
+
+  // Generic field change handler for shared components
+  const handleFieldChange = useCallback((field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }, [])
 
   useEffect(() => {
     const fetchRequest = async () => {
@@ -583,98 +534,14 @@ export default function EditRequestPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">{t('requests.edit.companyName')}</Label>
-                <Input
-                  id="companyName"
-                  value={formData.companyName}
-                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                  disabled={busy}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactName">{t('requests.edit.contactName')}</Label>
-                <Input
-                  id="contactName"
-                  value={formData.contactName}
-                  onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                  disabled={busy}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">{t('requests.edit.address')}</Label>
-              <Input
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                disabled={busy}
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="postalCode">{t('requests.edit.postalCode')}</Label>
-                <Input
-                  id="postalCode"
-                  value={formData.postalCode}
-                  onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                  disabled={busy}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">{t('requests.edit.city')}</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  disabled={busy}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="country">{t('requests.edit.country')}</Label>
-                <Input
-                  id="country"
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  disabled={busy}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contactPhone">{t('requests.edit.phone')}</Label>
-                <Input
-                  id="contactPhone"
-                  value={formData.contactPhone}
-                  onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                  disabled={busy}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail">{t('requests.edit.contactEmail')}</Label>
-                <Input
-                  id="contactEmail"
-                  type="email"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                  disabled={busy}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="glnNumber">{t('requests.edit.glnNumber')}</Label>
-              <Input
-                id="glnNumber"
-                value={formData.glnNumber}
-                onChange={(e) => setFormData({ ...formData, glnNumber: e.target.value })}
-                disabled={busy}
-              />
-            </div>
+            {/* Company & contact fields */}
+            <CompanyFields
+              formData={formData}
+              onChange={handleFieldChange}
+              disabled={busy}
+              t={t}
+              context="edit"
+            />
 
             {/* Invoice details toggle */}
             <div className="flex items-center space-x-2">
@@ -690,49 +557,13 @@ export default function EditRequestPage() {
             </div>
 
             {useOtherInvoiceDetails && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="invoiceEmail">{t('requests.edit.invoiceEmail')}</Label>
-                  <Input
-                    id="invoiceEmail"
-                    type="email"
-                    value={formData.invoiceEmail}
-                    onChange={(e) => setFormData({ ...formData, invoiceEmail: e.target.value })}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="invoiceAddress">{t('requests.edit.invoiceAddress')}</Label>
-                  <Input
-                    id="invoiceAddress"
-                    value={formData.invoiceAddress}
-                    onChange={(e) => setFormData({ ...formData, invoiceAddress: e.target.value })}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="invoicePostalCode">{t('requests.edit.invoicePostalCode')}</Label>
-                    <Input
-                      id="invoicePostalCode"
-                      value={formData.invoicePostalCode}
-                      onChange={(e) => setFormData({ ...formData, invoicePostalCode: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="invoiceCity">{t('requests.edit.invoiceCity')}</Label>
-                    <Input
-                      id="invoiceCity"
-                      value={formData.invoiceCity}
-                      onChange={(e) => setFormData({ ...formData, invoiceCity: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                </div>
-              </>
+              <InvoiceFields
+                formData={formData}
+                onChange={handleFieldChange}
+                disabled={busy}
+                t={t}
+                context="edit"
+              />
             )}
 
             {/* Financial fields - Koop + O-kweker */}
@@ -744,64 +575,14 @@ export default function EditRequestPage() {
                     {t('requests.edit.registrationDetails')}
                   </h3>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="chamberOfCommerceNumber">{t('requests.edit.kvkNumber')}</Label>
-                    <Input
-                      id="chamberOfCommerceNumber"
-                      value={formData.chamberOfCommerceNumber}
-                      onChange={(e) =>
-                        setFormData({ ...formData, chamberOfCommerceNumber: e.target.value })
-                      }
-                      disabled={busy}
-                    />
-                    <p className="text-xs text-muted-foreground">{t('requests.edit.kvkHint')}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="vatNumber">{t('requests.edit.vatNumber')}</Label>
-
-                    <div className="relative">
-                      <Input
-                        id="vatNumber"
-                        value={formData.vatNumber}
-                        onChange={(e) => handleVatChange(e.target.value)}
-                        disabled={busy}
-                      />
-                      {region === 'EU' && viesStatus === 'checking' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        </div>
-                      )}
-                      {region === 'EU' && viesStatus === 'valid' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
-                          <Check className="h-5 w-5" />
-                        </div>
-                      )}
-                      {region === 'EU' && viesStatus === 'invalid' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-600">
-                          <X className="h-5 w-5" />
-                        </div>
-                      )}
-                      {region === 'EU' && viesStatus === 'error' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500">
-                          <AlertTriangle className="h-5 w-5" />
-                        </div>
-                      )}
-                    </div>
-                    {region === 'EU' && viesStatus === 'valid' && viesResult && (
-                      <p className="text-xs text-green-600">{t('supplier.form.financial.viesValid')}: {viesResult.name}</p>
-                    )}
-                    {region === 'EU' && viesStatus === 'invalid' && (
-                      <p className="text-xs text-red-600">{t('supplier.form.financial.viesInvalid')}</p>
-                    )}
-                    {region === 'EU' && viesStatus === 'error' && (
-                      <p className="text-xs text-orange-500">{t('supplier.form.financial.viesUnavailable')}</p>
-                    )}
-                    {region === 'EU' && viesStatus === 'invalid-format' && (
-                      <p className="text-xs text-red-600">{t('supplier.form.financial.viesInvalidFormat')}</p>
-                    )}
-                  </div>
-                </div>
+                <RegistrationFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={busy}
+                  t={t}
+                  context="edit"
+                  region={region}
+                />
 
                 {canEditAsInkoper && renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
 
@@ -812,49 +593,19 @@ export default function EditRequestPage() {
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="iban">{t('requests.edit.iban')}</Label>
-                    <Input
-                      id="iban"
-                      value={formData.iban}
-                      onChange={(e) => setFormData({ ...formData, iban: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bankName">{t('requests.edit.bank')}</Label>
-                    <Input
-                      id="bankName"
-                      value={formData.bankName}
-                      onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="invoiceCurrency">{t('requests.edit.currency')}</Label>
-                    <Select
-                      value={formData.invoiceCurrency}
-                      onValueChange={(value) => setFormData({ ...formData, invoiceCurrency: value })}
-                      disabled={busy}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('requests.edit.currency')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="ZAR">ZAR</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                <BankingFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={busy}
+                  t={t}
+                  context="edit"
+                />
 
                 {canEditAsInkoper && showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
               </>
             )}
 
-            {/* Director fields - Koop + O-kweker, ROW only */}
+            {/* Director fields - Koop + O-kweker */}
             {showDirector && (
               <>
                 <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
@@ -863,47 +614,14 @@ export default function EditRequestPage() {
                     {t('requests.edit.director')}
                   </h3>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="directorName">{t('requests.edit.directorName')}</Label>
-                    <Input
-                      id="directorName"
-                      value={formData.directorName}
-                      onChange={(e) => setFormData({ ...formData, directorName: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="directorFunction">{t('requests.edit.directorFunction')}</Label>
-                    <Input
-                      id="directorFunction"
-                      value={formData.directorFunction}
-                      onChange={(e) => setFormData({ ...formData, directorFunction: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="directorDateOfBirth">{t('requests.edit.directorDob')}</Label>
-                    <Input
-                      id="directorDateOfBirth"
-                      type="date"
-                      value={formData.directorDateOfBirth}
-                      onChange={(e) => setFormData({ ...formData, directorDateOfBirth: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="directorPassportNumber">{t('requests.edit.directorPassport')}</Label>
-                    <Input
-                      id="directorPassportNumber"
-                      value={formData.directorPassportNumber}
-                      onChange={(e) => setFormData({ ...formData, directorPassportNumber: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                </div>
+                <DirectorFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={busy}
+                  t={t}
+                  context="edit"
+                  region={region}
+                />
                 {canEditAsInkoper && renderFileInput('passport', 'PASSPORT', t('requests.edit.passportUpload'))}
               </>
             )}
@@ -917,27 +635,13 @@ export default function EditRequestPage() {
                     {t('requests.edit.auctionDetails')}
                   </h3>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="auctionNumberRFH">{t('requests.edit.auctionNumberRFH')}</Label>
-                    <Input
-                      id="auctionNumberRFH"
-                      value={formData.auctionNumberRFH}
-                      onChange={(e) => setFormData({ ...formData, auctionNumberRFH: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="salesSheetEmail">{t('requests.edit.salesSheetEmail')}</Label>
-                    <Input
-                      id="salesSheetEmail"
-                      type="email"
-                      value={formData.salesSheetEmail}
-                      onChange={(e) => setFormData({ ...formData, salesSheetEmail: e.target.value })}
-                      disabled={busy}
-                    />
-                  </div>
-                </div>
+                <AuctionFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={busy}
+                  t={t}
+                  context="edit"
+                />
                 {/* Mandate upload - instant */}
                 {canEditAsInkoper && (
                   <div className="space-y-2">
@@ -977,15 +681,6 @@ export default function EditRequestPage() {
                     <p className="text-xs text-muted-foreground">{t('requests.edit.fileHint')}</p>
                   </div>
                 )}
-                <div className="space-y-2">
-                  <Label htmlFor="apiKeyFloriday">{t('requests.edit.apiKeyFloriday')}</Label>
-                  <Input
-                    id="apiKeyFloriday"
-                    value={formData.apiKeyFloriday}
-                    onChange={(e) => setFormData({ ...formData, apiKeyFloriday: e.target.value })}
-                    disabled={busy}
-                  />
-                </div>
               </>
             )}
           </CardContent>

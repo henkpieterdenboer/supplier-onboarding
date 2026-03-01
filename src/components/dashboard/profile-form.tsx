@@ -60,7 +60,15 @@ export function ProfileForm({ initialLanguage, initialReceiveEmails }: ProfileFo
   }
 
   const handleChangePassword = async () => {
-    if (newPassword.length < 8) {
+    if (newPassword.length < 14) {
+      toast.error(t('profile.passwordTooShort'))
+      return
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      toast.error(t('profile.passwordTooShort'))
+      return
+    }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
       toast.error(t('profile.passwordTooShort'))
       return
     }

@@ -9,6 +9,12 @@ const roleEnum = z.enum(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'])
 const languageEnum = z.enum(['nl', 'en', 'es', 'it'])
 const incotermEnum = z.enum(['CIF', 'FOB'])
 
+const passwordSchema = z.string()
+  .min(14, 'Password must be at least 14 characters')
+  .max(128)
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character')
+
 // --- Requests ---
 
 export const createRequestSchema = z.object({
@@ -226,14 +232,14 @@ export const updateProfileSchema = z.object({
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  newPassword: passwordSchema,
 })
 
 // --- Auth ---
 
 export const activateSchema = z.object({
   token: z.string().uuid('Invalid token'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  password: passwordSchema,
 })
 
 export const forgotPasswordSchema = z.object({
@@ -242,5 +248,5 @@ export const forgotPasswordSchema = z.object({
 
 export const resetPasswordSchema = z.object({
   token: z.string().uuid('Invalid token'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  password: passwordSchema,
 })

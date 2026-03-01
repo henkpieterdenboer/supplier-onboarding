@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,16 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Check, X, Loader2, AlertTriangle, FileDown } from 'lucide-react'
+import { Loader2, FileDown } from 'lucide-react'
 import { getLabelConfig } from '@/lib/label-config'
+import { LanguageSelector } from '@/components/ui/language-selector'
 import {
   showFinancialSection,
   showDirectorSection,
@@ -29,6 +23,14 @@ import {
 import { useLanguage } from '@/lib/i18n-context'
 import { getDateLocale } from '@/lib/i18n'
 import type { Language } from '@/lib/i18n'
+import {
+  CompanyFields,
+  RegistrationFields,
+  BankingFields,
+  InvoiceFields,
+  DirectorFields,
+  AuctionFields,
+} from '@/components/forms/supplier-form-fields'
 
 interface Request {
   id: string
@@ -111,66 +113,10 @@ export default function SupplierFormPage() {
     apiKeyFloriday: '',
   })
 
-  // VIES VAT validation state
-  const [viesStatus, setViesStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid' | 'error' | 'invalid-format'>('idle')
-  const [viesResult, setViesResult] = useState<{ name: string; address: string } | null>(null)
-  const viesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const checkViesVat = useCallback(async (vatNumber: string) => {
-    if (!vatNumber || vatNumber.replace(/[\s.\-]/g, '').length < 4) {
-      setViesStatus('idle')
-      setViesResult(null)
-      return
-    }
-
-    setViesStatus('checking')
-    try {
-      const res = await fetch('/api/vies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vatNumber }),
-      })
-
-      if (res.status === 400) {
-        setViesStatus('invalid-format')
-        setViesResult(null)
-        return
-      }
-
-      if (res.status === 503) {
-        setViesStatus('error')
-        setViesResult(null)
-        return
-      }
-
-      if (!res.ok) {
-        setViesStatus('error')
-        setViesResult(null)
-        return
-      }
-
-      const data = await res.json()
-      if (data.serviceUnavailable) {
-        setViesStatus('error')
-        setViesResult(null)
-      } else if (data.isValid) {
-        setViesStatus('valid')
-        setViesResult({ name: data.name, address: data.address })
-      } else {
-        setViesStatus('invalid')
-        setViesResult(null)
-      }
-    } catch {
-      setViesStatus('error')
-      setViesResult(null)
-    }
+  // Generic field change handler for shared components
+  const handleFieldChange = useCallback((field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
   }, [])
-
-  const handleVatChange = useCallback((value: string) => {
-    setFormData((prev) => ({ ...prev, vatNumber: value }))
-    if (viesTimerRef.current) clearTimeout(viesTimerRef.current)
-    viesTimerRef.current = setTimeout(() => checkViesVat(value), 800)
-  }, [checkViesVat])
 
   const [files, setFiles] = useState<{
     kvk: File | null
@@ -403,6 +349,9 @@ export default function SupplierFormPage() {
     <div className="min-h-screen bg-muted/40 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
+          <div className="flex justify-end mb-2">
+            <LanguageSelector />
+          </div>
           <div className="flex justify-center mb-4">
             <img
               src={labelConfig.logoPath}
@@ -448,107 +397,13 @@ export default function SupplierFormPage() {
               <CardDescription>{t('supplier.form.company.description')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">{t('supplier.form.company.companyName')}</Label>
-                <Input
-                  id="companyName"
-                  value={formData.companyName}
-                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                  required
-                  disabled={isDisabled}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">{t('supplier.form.company.address')}</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  required
-                  disabled={isDisabled}
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="postalCode">{t('supplier.form.company.postalCode')}</Label>
-                  <Input
-                    id="postalCode"
-                    value={formData.postalCode}
-                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                    required
-                    disabled={isDisabled}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="city">{t('supplier.form.company.city')}</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    required
-                    disabled={isDisabled}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="country">{t('supplier.form.company.country')}</Label>
-                  <Input
-                    id="country"
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    required
-                    disabled={isDisabled}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="glnNumber">{t('supplier.form.company.glnNumber')}</Label>
-                <Input
-                  id="glnNumber"
-                  value={formData.glnNumber}
-                  onChange={(e) => setFormData({ ...formData, glnNumber: e.target.value })}
-                  disabled={isDisabled}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="contactName">{t('supplier.form.company.contactName')}</Label>
-                  <Input
-                    id="contactName"
-                    value={formData.contactName}
-                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                    required
-                    disabled={isDisabled}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contactPhone">{t('supplier.form.company.phone')}</Label>
-                  <Input
-                    id="contactPhone"
-                    value={formData.contactPhone}
-                    onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                    required
-                    disabled={isDisabled}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail">{t('supplier.form.company.contactEmail')}</Label>
-                <Input
-                  id="contactEmail"
-                  type="email"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                  required
-                  disabled={isDisabled}
-                />
-              </div>
+              <CompanyFields
+                formData={formData}
+                onChange={handleFieldChange}
+                disabled={isDisabled}
+                t={t}
+                context="supplier"
+              />
             </CardContent>
           </Card>
 
@@ -562,156 +417,37 @@ export default function SupplierFormPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="chamberOfCommerceNumber">{t('supplier.form.financial.kvkNumber')}</Label>
-                    <Input
-                      id="chamberOfCommerceNumber"
-                      value={formData.chamberOfCommerceNumber}
-                      onChange={(e) =>
-                        setFormData({ ...formData, chamberOfCommerceNumber: e.target.value })
-                      }
-                      required
-                      disabled={isDisabled}
-                    />
-                    <p className="text-xs text-muted-foreground">{t('supplier.form.financial.kvkHint')}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="vatNumber">{t('supplier.form.financial.vatNumber')}</Label>
-                    <div className="relative">
-                      <Input
-                        id="vatNumber"
-                        value={formData.vatNumber}
-                        onChange={(e) => handleVatChange(e.target.value)}
-                        required
-                        disabled={isDisabled}
-                      />
-                      {region === 'EU' && viesStatus === 'checking' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        </div>
-                      )}
-                      {region === 'EU' && viesStatus === 'valid' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
-                          <Check className="h-5 w-5" />
-                        </div>
-                      )}
-                      {region === 'EU' && viesStatus === 'invalid' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-600">
-                          <X className="h-5 w-5" />
-                        </div>
-                      )}
-                      {region === 'EU' && viesStatus === 'error' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500">
-                          <AlertTriangle className="h-5 w-5" />
-                        </div>
-                      )}
-                    </div>
-                    {region === 'EU' && viesStatus === 'valid' && viesResult && (
-                      <p className="text-xs text-green-600">{t('supplier.form.financial.viesValid')}: {viesResult.name}</p>
-                    )}
-                    {region === 'EU' && viesStatus === 'invalid' && (
-                      <p className="text-xs text-red-600">{t('supplier.form.financial.viesInvalid')}</p>
-                    )}
-                    {region === 'EU' && viesStatus === 'error' && (
-                      <p className="text-xs text-orange-500">{t('supplier.form.financial.viesUnavailable')}</p>
-                    )}
-                    {region === 'EU' && viesStatus === 'invalid-format' && (
-                      <p className="text-xs text-red-600">{t('supplier.form.financial.viesInvalidFormat')}</p>
-                    )}
-                  </div>
-                </div>
+                <RegistrationFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={isDisabled}
+                  t={t}
+                  context="supplier"
+                  region={region}
+                />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="iban">{t('supplier.form.financial.iban')}</Label>
-                    <Input
-                      id="iban"
-                      value={formData.iban}
-                      onChange={(e) => setFormData({ ...formData, iban: e.target.value })}
-                      required
-                      disabled={isDisabled}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bankName">{t('supplier.form.financial.bank')}</Label>
-                    <Input
-                      id="bankName"
-                      value={formData.bankName}
-                      onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                      required
-                      disabled={isDisabled}
-                    />
-                  </div>
-                </div>
+                <BankingFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={isDisabled}
+                  t={t}
+                  context="supplier"
+                />
 
                 <Separator />
 
-                <div className="space-y-2">
-                  <Label htmlFor="invoiceEmail">{t('supplier.form.financial.invoiceEmail')}</Label>
-                  <Input
-                    id="invoiceEmail"
-                    type="email"
-                    value={formData.invoiceEmail}
-                    onChange={(e) => setFormData({ ...formData, invoiceEmail: e.target.value })}
-                    disabled={isDisabled}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="invoiceAddress">{t('supplier.form.financial.invoiceAddress')}</Label>
-                  <Input
-                    id="invoiceAddress"
-                    value={formData.invoiceAddress}
-                    onChange={(e) => setFormData({ ...formData, invoiceAddress: e.target.value })}
-                    placeholder={t('supplier.form.financial.invoiceAddressHint')}
-                    disabled={isDisabled}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="invoicePostalCode">{t('supplier.form.financial.invoicePostalCode')}</Label>
-                    <Input
-                      id="invoicePostalCode"
-                      value={formData.invoicePostalCode}
-                      onChange={(e) => setFormData({ ...formData, invoicePostalCode: e.target.value })}
-                      disabled={isDisabled}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="invoiceCity">{t('supplier.form.financial.invoiceCity')}</Label>
-                    <Input
-                      id="invoiceCity"
-                      value={formData.invoiceCity}
-                      onChange={(e) => setFormData({ ...formData, invoiceCity: e.target.value })}
-                      disabled={isDisabled}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="invoiceCurrency">{t('supplier.form.financial.currency')}</Label>
-                  <Select
-                    value={formData.invoiceCurrency}
-                    onValueChange={(value) => setFormData({ ...formData, invoiceCurrency: value })}
-                    disabled={isDisabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('supplier.form.financial.currencyPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="EUR">{t('supplier.form.financial.currencyEUR')}</SelectItem>
-                      <SelectItem value="USD">{t('supplier.form.financial.currencyUSD')}</SelectItem>
-                      <SelectItem value="ZAR">{t('supplier.form.financial.currencyZAR')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <InvoiceFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={isDisabled}
+                  t={t}
+                  context="supplier"
+                />
               </CardContent>
             </Card>
           )}
 
-          {/* Director section - Koop + O-kweker, only ROW */}
+          {/* Director section - Koop + O-kweker */}
           {showDirector && (
             <Card className="mb-6">
               <CardHeader>
@@ -721,52 +457,14 @@ export default function SupplierFormPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="directorName">{t('supplier.form.director.name')}</Label>
-                    <Input
-                      id="directorName"
-                      value={formData.directorName}
-                      onChange={(e) => setFormData({ ...formData, directorName: e.target.value })}
-                      required
-                      disabled={isDisabled}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="directorFunction">{t('supplier.form.director.function')}</Label>
-                    <Input
-                      id="directorFunction"
-                      value={formData.directorFunction}
-                      onChange={(e) => setFormData({ ...formData, directorFunction: e.target.value })}
-                      required
-                      disabled={isDisabled}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="directorDateOfBirth">{t('supplier.form.director.dob')}</Label>
-                    <Input
-                      id="directorDateOfBirth"
-                      type="date"
-                      value={formData.directorDateOfBirth}
-                      onChange={(e) => setFormData({ ...formData, directorDateOfBirth: e.target.value })}
-                      required
-                      disabled={isDisabled}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="directorPassportNumber">{t('supplier.form.director.passport')}</Label>
-                    <Input
-                      id="directorPassportNumber"
-                      value={formData.directorPassportNumber}
-                      onChange={(e) => setFormData({ ...formData, directorPassportNumber: e.target.value })}
-                      required
-                      disabled={isDisabled}
-                    />
-                  </div>
-                </div>
+                <DirectorFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={isDisabled}
+                  t={t}
+                  context="supplier"
+                  region={region}
+                />
               </CardContent>
             </Card>
           )}
@@ -781,27 +479,13 @@ export default function SupplierFormPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="auctionNumberRFH">{t('supplier.form.auction.auctionNumberRFH')}</Label>
-                    <Input
-                      id="auctionNumberRFH"
-                      value={formData.auctionNumberRFH}
-                      onChange={(e) => setFormData({ ...formData, auctionNumberRFH: e.target.value })}
-                      disabled={isDisabled}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="salesSheetEmail">{t('supplier.form.auction.salesSheetEmail')}</Label>
-                    <Input
-                      id="salesSheetEmail"
-                      type="email"
-                      value={formData.salesSheetEmail}
-                      onChange={(e) => setFormData({ ...formData, salesSheetEmail: e.target.value })}
-                      disabled={isDisabled}
-                    />
-                  </div>
-                </div>
+                <AuctionFields
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  disabled={isDisabled}
+                  t={t}
+                  context="supplier"
+                />
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-4">
@@ -824,16 +508,6 @@ export default function SupplierFormPage() {
                     disabled={isDisabled}
                   />
                   <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="apiKeyFloriday">{t('supplier.form.auction.apiKeyFloriday')}</Label>
-                  <Input
-                    id="apiKeyFloriday"
-                    value={formData.apiKeyFloriday}
-                    onChange={(e) => setFormData({ ...formData, apiKeyFloriday: e.target.value })}
-                    disabled={isDisabled}
-                  />
                 </div>
               </CardContent>
             </Card>
