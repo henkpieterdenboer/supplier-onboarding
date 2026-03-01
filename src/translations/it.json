@@ -459,6 +459,7 @@
         "phone": "Telefono *",
         "contactEmail": "Email di contatto *"
       },
+      "useOtherInvoiceDetails": "Usa dati di fatturazione diversi",
       "financial": {
         "title": "Dati finanziari",
         "description": "Compili i dati aziendali e bancari",

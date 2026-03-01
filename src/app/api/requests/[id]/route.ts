@@ -20,6 +20,7 @@ import { purchaserSubmitSchema, financeSubmitSchema, financeSaveSchema, erpSubmi
 import { checkVat } from '@/lib/vies'
 import { checkSanctions } from '@/lib/sanctions'
 import { generateViesReport } from '@/lib/vies-pdf'
+import { generateSanctionsReport } from '@/lib/sanctions-pdf'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -1340,6 +1341,58 @@ export async function PATCH(
             }),
           },
         })
+
+        // Generate sanctions report PDF
+        try {
+          const pdfBuffer = await generateSanctionsReport({
+            sanctionsResult,
+            companyName,
+            directorName: existingRequest.directorName || null,
+            label: existingRequest.label,
+          })
+
+          // Delete any existing SANCTIONS_REPORT files
+          const existingSanctionsFiles = await prisma.supplierFile.findMany({
+            where: { requestId: id, fileType: 'SANCTIONS_REPORT' },
+          })
+          for (const oldFile of existingSanctionsFiles) {
+            if (process.env.BLOB_READ_WRITE_TOKEN && oldFile.filePath.startsWith('http')) {
+              try {
+                const { del } = await import('@vercel/blob')
+                await del(oldFile.filePath)
+              } catch (e) {
+                console.error('Error deleting old sanctions report from blob:', e)
+              }
+            }
+            await prisma.supplierFile.delete({ where: { id: oldFile.id } })
+          }
+
+          // Upload PDF
+          const fileName = `sanctions_report_${Date.now()}.pdf`
+          let filePath = `/api/files/${id}/${fileName}`
+
+          if (process.env.BLOB_READ_WRITE_TOKEN) {
+            const { put } = await import('@vercel/blob')
+            const blob = await put(`${id}/${fileName}`, pdfBuffer, {
+              access: 'public',
+              addRandomSuffix: false,
+              contentType: 'application/pdf',
+            })
+            filePath = blob.url
+          }
+
+          await prisma.supplierFile.create({
+            data: {
+              requestId: id,
+              fileName: `Sanctions_Report_${companyName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+              fileType: 'SANCTIONS_REPORT',
+              filePath,
+              uploadedById: session.user.id,
+            },
+          })
+        } catch (error) {
+          console.error('Error generating sanctions report:', error)
+        }
 
         return NextResponse.json({
           ...updatedSanctions,

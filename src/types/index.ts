@@ -68,6 +68,7 @@ export const FileType = {
   BANK_DETAILS: 'BANK_DETAILS',
   MANDATE_RFH: 'MANDATE_RFH',
   VIES_REPORT: 'VIES_REPORT',
+  SANCTIONS_REPORT: 'SANCTIONS_REPORT',
   OTHER: 'OTHER',
 } as const
 export type FileType = (typeof FileType)[keyof typeof FileType]
@@ -78,6 +79,7 @@ export const FileTypeLabels: Record<FileType, string> = {
   BANK_DETAILS: 'Screenshot bankgegevens',
   MANDATE_RFH: 'RFH Incassovolmacht',
   VIES_REPORT: 'VIES Rapport',
+  SANCTIONS_REPORT: 'Sanctierapport',
   OTHER: 'Overig',
 }
 

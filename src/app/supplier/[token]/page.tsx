@@ -81,6 +81,7 @@ export default function SupplierFormPage() {
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [error, setError] = useState('')
 
+  const [useOtherInvoiceDetails, setUseOtherInvoiceDetails] = useState(false)
   const [formData, setFormData] = useState({
     // Shared
     companyName: '',
@@ -171,6 +172,10 @@ export default function SupplierFormPage() {
             salesSheetEmail: data.salesSheetEmail || '',
             apiKeyFloriday: data.apiKeyFloriday || '',
           })
+          // Show invoice section if any invoice fields were previously filled
+          if (data.invoiceEmail || data.invoiceAddress || data.invoicePostalCode || data.invoiceCity) {
+            setUseOtherInvoiceDetails(true)
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : t('supplier.form.invalidLinkTitle'))
@@ -390,13 +395,13 @@ export default function SupplierFormPage() {
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Company details - always shown */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>{t('supplier.form.company.title')}</CardTitle>
               <CardDescription>{t('supplier.form.company.description')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Company & contact fields */}
               <CompanyFields
                 formData={formData}
                 onChange={handleFieldChange}
@@ -404,38 +409,21 @@ export default function SupplierFormPage() {
                 t={t}
                 context="supplier"
               />
-            </CardContent>
-          </Card>
 
-          {/* Financial section - Koop + O-kweker */}
-          {showFinancial && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>{t('supplier.form.financial.title')}</CardTitle>
-                <CardDescription>
-                  {t('supplier.form.financial.description')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RegistrationFields
-                  formData={formData}
-                  onChange={handleFieldChange}
+              {/* Invoice details toggle */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="useOtherInvoiceDetails"
+                  checked={useOtherInvoiceDetails}
+                  onCheckedChange={(checked) => setUseOtherInvoiceDetails(checked === true)}
                   disabled={isDisabled}
-                  t={t}
-                  context="supplier"
-                  region={region}
                 />
+                <Label htmlFor="useOtherInvoiceDetails" className="text-sm font-normal cursor-pointer">
+                  {t('supplier.form.useOtherInvoiceDetails')}
+                </Label>
+              </div>
 
-                <BankingFields
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  disabled={isDisabled}
-                  t={t}
-                  context="supplier"
-                />
-
-                <Separator />
-
+              {useOtherInvoiceDetails && (
                 <InvoiceFields
                   formData={formData}
                   onChange={handleFieldChange}
@@ -443,111 +431,51 @@ export default function SupplierFormPage() {
                   t={t}
                   context="supplier"
                 />
-              </CardContent>
-            </Card>
-          )}
+              )}
 
-          {/* Director section - Koop + O-kweker */}
-          {showDirector && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>{t('supplier.form.director.title')}</CardTitle>
-                <CardDescription>
-                  {t('supplier.form.director.description')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <DirectorFields
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  disabled={isDisabled}
-                  t={t}
-                  context="supplier"
-                  region={region}
-                />
-              </CardContent>
-            </Card>
-          )}
+              {/* Financial fields - Koop + O-kweker */}
+              {showFinancial && (
+                <>
+                  <Separator />
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    {t('supplier.form.financial.title')}
+                  </h3>
+                  <RegistrationFields
+                    formData={formData}
+                    onChange={handleFieldChange}
+                    disabled={isDisabled}
+                    t={t}
+                    context="supplier"
+                    region={region}
+                  />
 
-          {/* Auction section - X-kweker only */}
-          {showAuction && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>{t('supplier.form.auction.title')}</CardTitle>
-                <CardDescription>
-                  {t('supplier.form.auction.description')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <AuctionFields
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  disabled={isDisabled}
-                  t={t}
-                  context="supplier"
-                />
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
-                    <a
-                      href="/rfh-incassovolmacht-template.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
-                      <FileDown className="h-3.5 w-3.5" />
-                      {t('supplier.form.documents.mandateDownload')}
-                    </a>
+                  <div className="space-y-2">
+                    <Label htmlFor="kvk">{t('supplier.form.documents.kvk')}</Label>
+                    <Input
+                      id="kvk"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
+                      disabled={isDisabled}
+                    />
+                    <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
                   </div>
-                  <Input
-                    id="mandateRfh"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('mandateRfh', e.target.files?.[0] || null)}
+
+                  <Separator />
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    {t('supplier.form.financial.bank') || 'Bank'}
+                  </h3>
+
+                  <BankingFields
+                    formData={formData}
+                    onChange={handleFieldChange}
                     disabled={isDisabled}
+                    t={t}
+                    context="supplier"
                   />
-                  <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Documents - not shown for X-kweker (mandate upload is in auction section) */}
-          {!showAuction && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>{t('supplier.form.documents.title')}</CardTitle>
-                <CardDescription>{t('supplier.form.documents.description')}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
-
-                <div className="grid grid-cols-[1fr_1fr] items-center gap-x-4 gap-y-3">
-                  <Label htmlFor="kvk">{t('supplier.form.documents.kvk')}</Label>
-                  <Input
-                    id="kvk"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('kvk', e.target.files?.[0] || null)}
-                    disabled={isDisabled}
-                  />
-
-                  {showDirector && (
-                    <>
-                      <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
-                      <Input
-                        id="passport"
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
-                        disabled={isDisabled}
-                      />
-                    </>
-                  )}
 
                   {showBank && (
-                    <>
+                    <div className="space-y-2">
                       <Label htmlFor="bankDetails">{t('supplier.form.documents.bank')}</Label>
                       <Input
                         id="bankDetails"
@@ -556,13 +484,83 @@ export default function SupplierFormPage() {
                         onChange={(e) => handleFileChange('bankDetails', e.target.files?.[0] || null)}
                         disabled={isDisabled}
                       />
-                    </>
+                      <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
+                    </div>
                   )}
+                </>
+              )}
 
-                </div>
-              </CardContent>
-            </Card>
-          )}
+              {/* Director fields - Koop + O-kweker */}
+              {showDirector && (
+                <>
+                  <Separator />
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    {t('supplier.form.director.title')}
+                  </h3>
+                  <DirectorFields
+                    formData={formData}
+                    onChange={handleFieldChange}
+                    disabled={isDisabled}
+                    t={t}
+                    context="supplier"
+                    region={region}
+                  />
+
+                  <div className="space-y-2">
+                    <Label htmlFor="passport">{t('supplier.form.documents.passport')}</Label>
+                    <Input
+                      id="passport"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange('passport', e.target.files?.[0] || null)}
+                      disabled={isDisabled}
+                    />
+                    <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Auction fields - X-kweker only */}
+              {showAuction && (
+                <>
+                  <Separator />
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    {t('supplier.form.auction.title')}
+                  </h3>
+                  <AuctionFields
+                    formData={formData}
+                    onChange={handleFieldChange}
+                    disabled={isDisabled}
+                    t={t}
+                    context="supplier"
+                  />
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-4">
+                      <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
+                      <a
+                        href="/rfh-incassovolmacht-template.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                        {t('supplier.form.documents.mandateDownload')}
+                      </a>
+                    </div>
+                    <Input
+                      id="mandateRfh"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange('mandateRfh', e.target.files?.[0] || null)}
+                      disabled={isDisabled}
+                    />
+                    <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
           {error && (
             <Alert variant="destructive" className="mb-6">

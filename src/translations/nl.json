@@ -459,6 +459,7 @@
         "phone": "Telefoon *",
         "contactEmail": "Contact email *"
       },
+      "useOtherInvoiceDetails": "Gebruik afwijkende factuurgegevens",
       "financial": {
         "title": "Financiële gegevens",
         "description": "Vul uw bedrijfs- en bankgegevens in",
