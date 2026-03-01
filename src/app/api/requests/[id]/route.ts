@@ -41,7 +41,7 @@ const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
 
 /**
  * Run VIES check, generate PDF if valid, and replace any existing VIES report.
- * Returns the viesData fields to merge into the DB update, or {} on failure.
+ * Always returns viesData fields to clear stale data — even when the API is unreachable.
  */
 async function runViesCheckWithPdf(
   requestId: string,
@@ -51,7 +51,15 @@ async function runViesCheckWithPdf(
   userId?: string,
 ): Promise<Record<string, unknown>> {
   const viesResult = await checkVat(vatNumber)
-  if (!viesResult || viesResult.serviceUnavailable) return {}
+
+  // Clear stale VIES data when the API is unreachable or service is down
+  if (!viesResult || viesResult.serviceUnavailable) {
+    return {
+      vatValid: null,
+      vatCheckResponse: null,
+      vatCheckedAt: null,
+    }
+  }
 
   const viesData: Record<string, unknown> = {
     vatValid: viesResult.isValid,
