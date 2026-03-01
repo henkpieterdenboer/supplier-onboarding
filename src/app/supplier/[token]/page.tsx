@@ -7,10 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import { Loader2, FileDown } from 'lucide-react'
+import { Loader2, FileDown, Building2, Landmark, UserCheck, Gavel } from 'lucide-react'
 import { getLabelConfig } from '@/lib/label-config'
 import { LanguageSelector } from '@/components/ui/language-selector'
 import {
@@ -436,10 +435,12 @@ export default function SupplierFormPage() {
               {/* Financial fields - Koop + O-kweker */}
               {showFinancial && (
                 <>
-                  <Separator />
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    {t('supplier.form.financial.title')}
-                  </h3>
+                  <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      {t('supplier.form.financial.title')}
+                    </h3>
+                  </div>
                   <RegistrationFields
                     formData={formData}
                     onChange={handleFieldChange}
@@ -461,10 +462,12 @@ export default function SupplierFormPage() {
                     <p className="text-xs text-muted-foreground">{t('supplier.form.fileHint')}</p>
                   </div>
 
-                  <Separator />
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    {t('supplier.form.financial.bank') || 'Bank'}
-                  </h3>
+                  <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <Landmark className="h-4 w-4" />
+                      {t('supplier.form.financial.bank')}
+                    </h3>
+                  </div>
 
                   <BankingFields
                     formData={formData}
@@ -493,10 +496,12 @@ export default function SupplierFormPage() {
               {/* Director fields - Koop + O-kweker */}
               {showDirector && (
                 <>
-                  <Separator />
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    {t('supplier.form.director.title')}
-                  </h3>
+                  <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <UserCheck className="h-4 w-4" />
+                      {t('supplier.form.director.title')}
+                    </h3>
+                  </div>
                   <DirectorFields
                     formData={formData}
                     onChange={handleFieldChange}
@@ -523,10 +528,12 @@ export default function SupplierFormPage() {
               {/* Auction fields - X-kweker only */}
               {showAuction && (
                 <>
-                  <Separator />
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    {t('supplier.form.auction.title')}
-                  </h3>
+                  <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <Gavel className="h-4 w-4" />
+                      {t('supplier.form.auction.title')}
+                    </h3>
+                  </div>
                   <AuctionFields
                     formData={formData}
                     onChange={handleFieldChange}
