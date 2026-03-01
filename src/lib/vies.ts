@@ -79,10 +79,12 @@ export async function checkVat(vatNumber: string): Promise<ViesResult | null> {
 
     const data = await response.json()
 
-    // VIES returns userError when a member state service is down
-    // e.g. "MS_UNAVAILABLE", "TIMEOUT", "MS_MAX_CONCURRENT_REQ"
+    // VIES userError values:
+    // "VALID" / "INVALID" = normal responses (not service issues)
+    // "MS_UNAVAILABLE", "TIMEOUT", "MS_MAX_CONCURRENT_REQ" etc. = actual service issues
     const userError = data.userError || ''
-    const serviceUnavailable = !!(userError && userError !== 'VALID' && data.isValid !== true)
+    const normalResponses = ['', 'VALID', 'INVALID']
+    const serviceUnavailable = !!(userError && !normalResponses.includes(userError) && data.isValid !== true)
 
     return {
       isValid: data.isValid === true,
