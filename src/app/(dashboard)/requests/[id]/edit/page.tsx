@@ -387,7 +387,7 @@ export default function EditRequestPage() {
 
     // Check for missing required fields before submitting
     const context = canEditAsInkoper ? 'purchaser' : 'finance'
-    const missing = getMissingRequiredFields(context, formData, supplierType)
+    const missing = getMissingRequiredFields(context, formData, supplierType, region)
     if (missing.length > 0) {
       const fieldNames = missing.map(f => t(`validation.fieldNames.${f}`)).join(', ')
       toast.error(t('validation.missingFieldsTitle'), { description: fieldNames })

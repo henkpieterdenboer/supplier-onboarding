@@ -208,6 +208,8 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
       setLocalSanctionsCheckedAt(result.sanctionsCheckedAt ? new Date(result.sanctionsCheckedAt) : null)
       setSanctionsExpanded(true)
       toast.success(t('common.success'))
+      // Refresh server data so the files list updates with the new sanctions report
+      router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('requests.detail.sanctions.error'))
     } finally {

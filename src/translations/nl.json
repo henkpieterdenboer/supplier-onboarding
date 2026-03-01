@@ -758,6 +758,7 @@
       "BANK_DETAILS": "Screenshot bankgegevens",
       "MANDATE_RFH": "RFH Incassovolmacht",
       "VIES_REPORT": "VIES Rapport",
+      "SANCTIONS_REPORT": "Sanctierapport",
       "OTHER": "Overig"
     },
     "auditAction": {

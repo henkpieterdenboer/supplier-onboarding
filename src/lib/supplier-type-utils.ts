@@ -55,7 +55,8 @@ export function requiresIncoterm(type: string): boolean {
 export function getMissingRequiredFields(
   context: 'supplier' | 'purchaser' | 'erp' | 'finance',
   data: Record<string, unknown>,
-  supplierType: string
+  supplierType: string,
+  region?: string
 ): string[] {
   const missing: string[] = []
   const isEmpty = (key: string) => !data[key]
@@ -75,8 +76,8 @@ export function getMissingRequiredFields(
       }
     }
 
-    // Director fields for Koop/O-kweker ROW
-    if (showDirectorSection(supplierType)) {
+    // Director fields for Koop/O-kweker ROW only
+    if (showDirectorSection(supplierType) && region === 'ROW') {
       const directorFields = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber']
       for (const field of directorFields) {
         if (isEmpty(field)) missing.push(field)

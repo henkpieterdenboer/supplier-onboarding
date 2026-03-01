@@ -758,6 +758,7 @@
       "BANK_DETAILS": "Bank details screenshot",
       "MANDATE_RFH": "RFH Direct Debit Mandate",
       "VIES_REPORT": "VIES Report",
+      "SANCTIONS_REPORT": "Sanctions Report",
       "OTHER": "Other"
     },
     "auditAction": {

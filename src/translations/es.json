@@ -758,6 +758,7 @@
       "BANK_DETAILS": "Captura de datos bancarios",
       "MANDATE_RFH": "Mandato de domiciliación RFH",
       "VIES_REPORT": "Informe VIES",
+      "SANCTIONS_REPORT": "Informe de sanciones",
       "OTHER": "Otro"
     },
     "auditAction": {

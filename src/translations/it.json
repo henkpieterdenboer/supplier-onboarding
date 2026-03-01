@@ -758,6 +758,7 @@
       "BANK_DETAILS": "Screenshot dati bancari",
       "MANDATE_RFH": "Mandato di addebito diretto RFH",
       "VIES_REPORT": "Report VIES",
+      "SANCTIONS_REPORT": "Rapporto sanzioni",
       "OTHER": "Altro"
     },
     "auditAction": {

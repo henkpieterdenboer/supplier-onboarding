@@ -245,7 +245,7 @@ export default function SupplierFormPage() {
     e.preventDefault()
 
     // Check for missing required fields before submitting
-    const missing = getMissingRequiredFields('supplier', formData, supplierType)
+    const missing = getMissingRequiredFields('supplier', formData, supplierType, region)
     if (missing.length > 0) {
       const fieldNames = missing.map(f => t(`validation.fieldNames.${f}`)).join(', ')
       toast.error(t('validation.missingFieldsTitle'), { description: fieldNames })
