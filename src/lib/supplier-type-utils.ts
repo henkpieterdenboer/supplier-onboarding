@@ -91,9 +91,11 @@ export function getMissingRequiredFields(
     }
   }
 
-  // Finance: creditorNumber
+  // Finance: creditorNumber + postingMatrixFilled + allChecksCompleted
   if (context === 'finance') {
     if (isEmpty('creditorNumber')) missing.push('creditorNumber')
+    if (data.postingMatrixFilled !== true) missing.push('postingMatrixFilled')
+    if (data.allChecksCompleted !== true) missing.push('allChecksCompleted')
   }
 
   // ERP: kbtCode

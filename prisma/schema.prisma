@@ -105,6 +105,7 @@ model SupplierRequest {
   // Finance fields
   creditorNumber       String?  @unique
   postingMatrixFilled  Boolean?
+  allChecksCompleted   Boolean?
 
   // ERP fields
   kbtCode String? @unique

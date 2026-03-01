@@ -263,7 +263,8 @@
       "saveOnly": "Guardar",
       "creditorNumber": "Número de acreedor",
       "creditorNumberPlaceholder": "Introduzca el número de acreedor",
-      "postingMatrixFilled": "Matriz de contabilización completada en KBT",
+      "postingMatrixFilled": "Matriz de contabilización completada en KBT *",
+      "allChecksCompleted": "Todas las verificaciones realizadas (nombre/número, VIES, sanciones). Expediente aprobado",
       "successSubmitERP": "Datos guardados y enviados a ERP",
       "successComplete": "Datos guardados y solicitud completada",
       "successSave": "Datos guardados",
@@ -375,7 +376,8 @@
         "downloadXml": "Descargar XML",
         "copyUrl": "Copiar URL",
         "urlCopied": "URL copiada al portapapeles",
-        "postingMatrixFilled": "Matriz de contabilización completada en KBT"
+        "postingMatrixFilled": "Matriz de contabilización completada en KBT *",
+        "allChecksCompleted": "Todas las verificaciones realizadas (nombre/número, VIES, sanciones). Expediente aprobado"
       },
       "erp": {
         "title": "ERP",
@@ -798,7 +800,9 @@
       "directorPassportNumber": "Número de pasaporte del director",
       "incoterm": "Incoterm",
       "creditorNumber": "Número de acreedor",
-      "kbtCode": "Código KBT"
+      "kbtCode": "Código KBT",
+      "postingMatrixFilled": "Matriz de contabilización completada en KBT",
+      "allChecksCompleted": "Todas las verificaciones realizadas"
     }
   }
 }

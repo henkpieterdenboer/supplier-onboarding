@@ -916,6 +916,7 @@ export async function PATCH(
         const financeSaveUpdateData: Record<string, unknown> = {}
         if (finSaveData.creditorNumber) financeSaveUpdateData.creditorNumber = finSaveData.creditorNumber
         if (finSaveData.postingMatrixFilled !== undefined && finSaveData.postingMatrixFilled !== null) financeSaveUpdateData.postingMatrixFilled = finSaveData.postingMatrixFilled
+        if (finSaveData.allChecksCompleted !== undefined && finSaveData.allChecksCompleted !== null) financeSaveUpdateData.allChecksCompleted = finSaveData.allChecksCompleted
         // Save all supplier data fields
         const finSaveFields = [
           'companyName', 'address', 'postalCode', 'city', 'country',
@@ -971,7 +972,7 @@ export async function PATCH(
             { status: 400 }
           )
         }
-        const { creditorNumber, postingMatrixFilled, ...financeSupplierData } = parsedFinance.data
+        const { creditorNumber, postingMatrixFilled, allChecksCompleted, ...financeSupplierData } = parsedFinance.data
 
         // Check for duplicate creditor number
         const existingCreditor = await prisma.supplierRequest.findFirst({
@@ -992,6 +993,7 @@ export async function PATCH(
         const financeUpdateData: Record<string, unknown> = {
           creditorNumber,
           postingMatrixFilled: postingMatrixFilled ?? false,
+          allChecksCompleted: allChecksCompleted ?? false,
           status: Status.COMPLETED,
         }
         const financeFields = [

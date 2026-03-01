@@ -117,6 +117,7 @@ interface Request {
   // Finance fields
   creditorNumber: string | null
   postingMatrixFilled: boolean | null
+  allChecksCompleted: boolean | null
   // ERP fields
   kbtCode: string | null
   // Invitation
@@ -141,6 +142,7 @@ export function RequestDetail({ request, userRoles }: RequestDetailProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [creditorNumber, setCreditorNumber] = useState('')
   const [postingMatrixFilled, setPostingMatrixFilled] = useState(request.postingMatrixFilled ?? false)
+  const [allChecksCompleted, setAllChecksCompleted] = useState(request.allChecksCompleted ?? false)
   const [kbtCode, setKbtCode] = useState('')
   const [isViesRechecking, setIsViesRechecking] = useState(false)
   const [viesExpanded, setViesExpanded] = useState(!!request.vatCheckResponse)
@@ -1062,6 +1064,12 @@ export function RequestDetail({ request, userRoles }: RequestDetailProps) {
                         {t('requests.detail.finance.postingMatrixFilled')}
                       </Label>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox id="allChecksCompletedReadonly" checked={request.allChecksCompleted ?? false} disabled />
+                      <Label htmlFor="allChecksCompletedReadonly" className="text-muted-foreground">
+                        {t('requests.detail.finance.allChecksCompleted')}
+                      </Label>
+                    </div>
                   </div>
                 ) : userRoles.includes('FINANCE') ? (
                   <div className="space-y-4">
@@ -1084,8 +1092,18 @@ export function RequestDetail({ request, userRoles }: RequestDetailProps) {
                         {t('requests.detail.finance.postingMatrixFilled')}
                       </Label>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="allChecksCompleted"
+                        checked={allChecksCompleted}
+                        onCheckedChange={(checked) => setAllChecksCompleted(checked === true)}
+                      />
+                      <Label htmlFor="allChecksCompleted">
+                        {t('requests.detail.finance.allChecksCompleted')}
+                      </Label>
+                    </div>
                     <Button
-                      onClick={() => handleAction('finance-submit', { creditorNumber, postingMatrixFilled })}
+                      onClick={() => handleAction('finance-submit', { creditorNumber, postingMatrixFilled, allChecksCompleted })}
                       disabled={isLoading || !creditorNumber}
                     >
                       {t('common.save')}

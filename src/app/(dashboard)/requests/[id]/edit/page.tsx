@@ -81,6 +81,8 @@ interface Request {
   paymentTerm: string | null
   accountManager: string | null
   creditorNumber: string | null
+  postingMatrixFilled: boolean | null
+  allChecksCompleted: boolean | null
   files: SupplierFile[]
 }
 
@@ -200,6 +202,7 @@ export default function EditRequestPage() {
     // Finance data
     creditorNumber: '',
     postingMatrixFilled: false,
+    allChecksCompleted: false,
   })
 
   useEffect(() => {
@@ -249,6 +252,7 @@ export default function EditRequestPage() {
           accountManager: data.accountManager || '',
           creditorNumber: data.creditorNumber || '',
           postingMatrixFilled: data.postingMatrixFilled ?? false,
+          allChecksCompleted: data.allChecksCompleted ?? false,
         })
       } catch {
         setError(t('requests.edit.notFound'))
@@ -1123,6 +1127,17 @@ export default function EditRequestPage() {
                 />
                 <Label htmlFor="postingMatrixFilled">
                   {t('requests.edit.postingMatrixFilled')}
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="allChecksCompleted"
+                  checked={formData.allChecksCompleted}
+                  onCheckedChange={(checked) => setFormData({ ...formData, allChecksCompleted: checked === true })}
+                  disabled={busy}
+                />
+                <Label htmlFor="allChecksCompleted">
+                  {t('requests.edit.allChecksCompleted')}
                 </Label>
               </div>
             </CardContent>

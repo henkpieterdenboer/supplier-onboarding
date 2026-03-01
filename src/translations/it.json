@@ -263,7 +263,8 @@
       "saveOnly": "Salva",
       "creditorNumber": "Numero creditore",
       "creditorNumberPlaceholder": "Inserisca il numero creditore",
-      "postingMatrixFilled": "Matrice di registrazione compilata in KBT",
+      "postingMatrixFilled": "Matrice di registrazione compilata in KBT *",
+      "allChecksCompleted": "Tutti i controlli completati (nome/numero, VIES, sanzioni). Fascicolo approvato",
       "successSubmitERP": "Dati salvati e inoltrati a ERP",
       "successComplete": "Dati salvati e richiesta completata",
       "successSave": "Dati salvati",
@@ -375,7 +376,8 @@
         "downloadXml": "Scarica XML",
         "copyUrl": "Copia URL",
         "urlCopied": "URL copiato negli appunti",
-        "postingMatrixFilled": "Matrice di registrazione compilata in KBT"
+        "postingMatrixFilled": "Matrice di registrazione compilata in KBT *",
+        "allChecksCompleted": "Tutti i controlli completati (nome/numero, VIES, sanzioni). Fascicolo approvato"
       },
       "erp": {
         "title": "ERP",
@@ -798,7 +800,9 @@
       "directorPassportNumber": "Numero passaporto amministratore",
       "incoterm": "Incoterm",
       "creditorNumber": "Numero creditore",
-      "kbtCode": "Codice KBT"
+      "kbtCode": "Codice KBT",
+      "postingMatrixFilled": "Matrice di registrazione compilata in KBT",
+      "allChecksCompleted": "Tutti i controlli completati"
     }
   }
 }

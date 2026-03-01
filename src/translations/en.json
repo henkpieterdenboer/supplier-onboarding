@@ -263,7 +263,8 @@
       "saveOnly": "Save",
       "creditorNumber": "Creditor number",
       "creditorNumberPlaceholder": "Enter creditor number",
-      "postingMatrixFilled": "Posting matrix filled in KBT",
+      "postingMatrixFilled": "Posting matrix filled in KBT *",
+      "allChecksCompleted": "All checks completed (name/number, VIES, sanctions). File approved",
       "successSubmitERP": "Details saved and forwarded to ERP",
       "successComplete": "Details saved and request completed",
       "successSave": "Details saved",
@@ -375,7 +376,8 @@
         "downloadXml": "Download XML",
         "copyUrl": "Copy URL",
         "urlCopied": "URL copied to clipboard",
-        "postingMatrixFilled": "Posting matrix filled in KBT"
+        "postingMatrixFilled": "Posting matrix filled in KBT *",
+        "allChecksCompleted": "All checks completed (name/number, VIES, sanctions). File approved"
       },
       "erp": {
         "title": "ERP",
@@ -798,7 +800,9 @@
       "directorPassportNumber": "Director passport number",
       "incoterm": "Incoterm",
       "creditorNumber": "Creditor number",
-      "kbtCode": "KBT code"
+      "kbtCode": "KBT code",
+      "postingMatrixFilled": "Posting matrix filled in KBT",
+      "allChecksCompleted": "All checks completed"
     }
   }
 }

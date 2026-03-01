@@ -65,6 +65,7 @@ export const purchaserSubmitSchema = z.object({
 export const financeSubmitSchema = z.object({
   creditorNumber: z.string().min(1, 'Creditor number is required').max(50),
   postingMatrixFilled: z.boolean().nullish(),
+  allChecksCompleted: z.boolean().nullish(),
   // Optional supplier data that Finance can edit
   companyName: z.string().max(200).nullish(),
   address: z.string().max(500).nullish(),
@@ -107,6 +108,7 @@ export const financeSubmitSchema = z.object({
 export const financeSaveSchema = z.object({
   creditorNumber: z.string().max(50).nullish(),
   postingMatrixFilled: z.boolean().nullish(),
+  allChecksCompleted: z.boolean().nullish(),
   companyName: z.string().max(200).nullish(),
   address: z.string().max(500).nullish(),
   postalCode: z.string().max(20).nullish(),

@@ -263,7 +263,8 @@
       "saveOnly": "Opslaan",
       "creditorNumber": "Crediteurnummer",
       "creditorNumberPlaceholder": "Voer crediteurnummer in",
-      "postingMatrixFilled": "Doorboekmatrix in KBT gevuld",
+      "postingMatrixFilled": "Doorboekmatrix in KBT gevuld *",
+      "allChecksCompleted": "Alle checks uitgevoerd (naam/nummer, VIES, sanctie). Dossier akkoord",
       "successSubmitERP": "Gegevens opgeslagen en doorgestuurd naar ERP",
       "successComplete": "Gegevens opgeslagen en aanvraag afgerond",
       "successSave": "Gegevens opgeslagen",
@@ -375,7 +376,8 @@
         "downloadXml": "XML downloaden",
         "copyUrl": "URL kopiëren",
         "urlCopied": "URL gekopieerd naar klembord",
-        "postingMatrixFilled": "Doorboekmatrix in KBT gevuld"
+        "postingMatrixFilled": "Doorboekmatrix in KBT gevuld *",
+        "allChecksCompleted": "Alle checks uitgevoerd (naam/nummer, VIES, sanctie). Dossier akkoord"
       },
       "erp": {
         "title": "ERP",
@@ -798,7 +800,9 @@
       "directorPassportNumber": "Paspoortnummer bestuurder",
       "incoterm": "Incoterm",
       "creditorNumber": "Crediteurnummer",
-      "kbtCode": "KBT-code"
+      "kbtCode": "KBT-code",
+      "postingMatrixFilled": "Doorboekmatrix in KBT gevuld",
+      "allChecksCompleted": "Alle checks uitgevoerd"
     }
   }
 }
