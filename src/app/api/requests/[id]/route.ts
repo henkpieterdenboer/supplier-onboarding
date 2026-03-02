@@ -689,8 +689,8 @@ export async function PATCH(
           }
         }
 
-        // Director fields required for Koop/O-kweker
-        if (showDirectorSection(submitType)) {
+        // Director fields required for Koop/O-kweker ROW only
+        if (showDirectorSection(submitType) && existingRequest.region === 'ROW') {
           const directorRequired = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber'] as const
           for (const field of directorRequired) {
             if (!validatedData[field]) {

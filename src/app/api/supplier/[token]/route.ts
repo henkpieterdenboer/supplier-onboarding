@@ -387,7 +387,7 @@ export async function POST(
         }
       }
 
-      if (showDirectorSection(submitType)) {
+      if (showDirectorSection(submitType) && supplierRequest.region === 'ROW') {
         const directorRequired = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber']
         for (const field of directorRequired) {
           if (!data[field as keyof typeof data]) missingFields.push(field)
