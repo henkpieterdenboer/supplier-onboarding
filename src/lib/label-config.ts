@@ -29,7 +29,22 @@ export function getLabelConfig(label: string): LabelConfig {
   return labelConfigs[label as Label] ?? labelConfigs.COLORIGINZ
 }
 
+export function getLabelAppUrl(label: string): string {
+  const fallback = process.env.APP_URL || 'http://localhost:3000'
+  if (label === 'PFC') {
+    return process.env.APP_URL_PFC || fallback
+  }
+  return fallback
+}
+
+export function getLabelEmailFrom(label: string): string {
+  const fallback = process.env.EMAIL_FROM || '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
+  if (label === 'PFC') {
+    return process.env.EMAIL_FROM_PFC || fallback
+  }
+  return fallback
+}
+
 export function getLabelLogoUrl(label: string): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
-  return `${appUrl}${getLabelConfig(label).logoPath}`
+  return `${getLabelAppUrl(label)}${getLabelConfig(label).logoPath}`
 }

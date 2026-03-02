@@ -1,14 +1,14 @@
 import nodemailer from 'nodemailer'
 import { cookies } from 'next/headers'
 import { getTranslation, Language, formatDate, formatTime } from './i18n'
-import { getLabelConfig } from './label-config'
+import { getLabelConfig, getLabelAppUrl, getLabelEmailFrom } from './label-config'
 
 // Generate email header with label-specific logo
 // Uses HTML width/height attributes (old Outlook ignores CSS) + white background for dark mode
 function getEmailHeader(label?: string): string {
-  const config = getLabelConfig(label || 'COLORIGINZ')
-  const appUrl = process.env.APP_URL || 'http://localhost:3000'
-  const logoUrl = `${appUrl}${config.logoPath}`
+  const effectiveLabel = label || 'COLORIGINZ'
+  const config = getLabelConfig(effectiveLabel)
+  const logoUrl = `${getLabelAppUrl(effectiveLabel)}${config.logoPath}`
   return `
     <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; background-color: #ffffff;">
       <img src="${logoUrl}" alt="${config.name}" width="${config.emailLogoWidth}" height="${config.emailLogoHeight}" style="display: inline-block; height: ${config.emailLogoHeight}px; width: ${config.emailLogoWidth}px;" />
@@ -44,7 +44,6 @@ function emailButton(href: string, text: string): string {
 const DEMO_EMAIL = process.env.DEMO_EMAIL
 const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && !!DEMO_EMAIL
 const APP_URL = process.env.APP_URL || 'http://localhost:3000'
-const EMAIL_FROM = process.env.EMAIL_FROM || '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
 
 type EmailProvider = 'ethereal' | 'resend'
 
@@ -132,7 +131,8 @@ async function sendEmail({ to, subject, html, language, label }: SendEmailOption
       return null
     }
 
-    const fromAddress = provider === 'resend' ? EMAIL_FROM : '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
+    const labelEmailFrom = getLabelEmailFrom(label || 'COLORIGINZ')
+    const fromAddress = provider === 'resend' ? labelEmailFrom : '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
 
     if (IS_DEMO_MODE) {
       // In demo mode, all emails go to the demo address with the original recipient shown in the body
@@ -216,7 +216,8 @@ export async function sendInvitationEmail({
   label,
 }: InvitationEmailOptions): Promise<string | null> {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
-  const invitationUrl = `${APP_URL}/supplier/${invitationToken}`
+  const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
+  const invitationUrl = `${appUrl}/supplier/${invitationToken}`
 
   return sendEmail({
     to,
@@ -260,7 +261,8 @@ export async function sendSupplierSaveEmail({
   label,
 }: SupplierSaveEmailOptions): Promise<string | null> {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
-  const invitationUrl = `${APP_URL}/supplier/${invitationToken}`
+  const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
+  const invitationUrl = `${appUrl}/supplier/${invitationToken}`
 
   return sendEmail({
     to,
@@ -339,7 +341,8 @@ export async function sendPurchaserNotificationEmail({
   label,
 }: PurchaserNotificationEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
-  const requestUrl = `${APP_URL}/requests/${requestId}/edit`
+  const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
+  const requestUrl = `${appUrl}/requests/${requestId}/edit`
 
   await sendEmail({
     to,
@@ -379,7 +382,8 @@ export async function sendFinanceNotificationEmail({
   label,
 }: FinanceNotificationEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
-  const requestUrl = `${APP_URL}/requests/${requestId}`
+  const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
+  const requestUrl = `${appUrl}/requests/${requestId}`
 
   await sendEmail({
     to,
@@ -419,7 +423,8 @@ export async function sendERPNotificationEmail({
   label,
 }: ERPNotificationEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
-  const requestUrl = `${APP_URL}/requests/${requestId}`
+  const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
+  const requestUrl = `${appUrl}/requests/${requestId}`
 
   await sendEmail({
     to,
@@ -466,7 +471,8 @@ export async function sendCompletionEmail({
   language,
   label,
 }: CompletionEmailOptions) {
-  const requestUrl = `${APP_URL}/requests/${requestId}`
+  const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
+  const requestUrl = `${appUrl}/requests/${requestId}`
 
   // Email to Finance users (each in their own preferred language)
   for (const fu of financeRecipients) {
@@ -627,14 +633,15 @@ export async function sendReminderEmail({
   label,
 }: ReminderEmailOptions) {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
+  const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
   let actionUrl: string
   let actionText: string
 
   if (role === 'supplier' && invitationToken) {
-    actionUrl = `${APP_URL}/supplier/${invitationToken}`
+    actionUrl = `${appUrl}/supplier/${invitationToken}`
     actionText = t('emails.reminder.buttonSupplier')
   } else {
-    actionUrl = `${APP_URL}/requests/${requestId}`
+    actionUrl = `${appUrl}/requests/${requestId}`
     actionText = t('emails.reminder.buttonInternal')
   }
 
