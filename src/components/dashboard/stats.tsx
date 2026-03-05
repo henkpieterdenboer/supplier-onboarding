@@ -73,7 +73,7 @@ export function DashboardStats({ stats, activeTab, selectedStatus, onStatusClick
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {item.label}
                 </CardTitle>
-                <item.icon className={`h-4 w-4 ${item.color}`} />
+                <item.icon className={`h-8 w-8 ${item.color}`} />
               </div>
             </CardHeader>
             <CardContent>
