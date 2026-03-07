@@ -5,7 +5,8 @@ import { z } from 'zod'
 const regionEnum = z.enum(['EU', 'ROW'])
 const supplierTypeEnum = z.enum(['KOOP', 'X_KWEKER', 'O_KWEKER'])
 const labelEnum = z.enum(['COLORIGINZ', 'PFC'])
-const roleEnum = z.enum(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'])
+const roleEnum = z.enum(['ADMIN', 'INKOPER', 'VERKOPER', 'FINANCE', 'ERP'])
+const relationTypeEnum = z.enum(['SUPPLIER', 'CUSTOMER'])
 const languageEnum = z.enum(['nl', 'en', 'es', 'it'])
 const incotermEnum = z.enum(['CIF', 'FOB'])
 
@@ -18,10 +19,11 @@ const passwordSchema = z.string()
 // --- Requests ---
 
 export const createRequestSchema = z.object({
-  supplierName: z.string().min(1, 'Supplier name is required').max(200),
+  supplierName: z.string().min(1, 'Name is required').max(200),
   supplierEmail: z.string().email('Invalid email address'),
   region: regionEnum,
   selfFill: z.boolean().optional().default(false),
+  relationType: relationTypeEnum.optional().default('SUPPLIER'),
   supplierType: supplierTypeEnum.optional().default('KOOP'),
   supplierLanguage: languageEnum.optional().default('nl'),
   label: labelEnum.optional(),
@@ -69,7 +71,8 @@ export const purchaserSubmitSchema = z.object({
 })
 
 export const financeSubmitSchema = z.object({
-  creditorNumber: z.string().min(1, 'Creditor number is required').max(50),
+  creditorNumber: z.string().max(50).nullish(), // Supplier only (required validated in API based on relationType)
+  debtorNumber: z.string().max(50).nullish(),   // Customer only (required validated in API based on relationType)
   postingMatrixFilled: z.boolean().nullish(),
   allChecksCompleted: z.boolean().nullish(),
   // Optional supplier data that Finance can edit
@@ -113,6 +116,7 @@ export const financeSubmitSchema = z.object({
 
 export const financeSaveSchema = z.object({
   creditorNumber: z.string().max(50).nullish(),
+  debtorNumber: z.string().max(50).nullish(),
   postingMatrixFilled: z.boolean().nullish(),
   allChecksCompleted: z.boolean().nullish(),
   companyName: z.string().max(200).nullish(),
@@ -209,6 +213,7 @@ export const createUserSchema = z.object({
   lastName: z.string().min(1, 'Last name is required').max(100),
   roles: z.array(roleEnum).min(1, 'At least one role is required'),
   labels: z.array(labelEnum).optional().default(['COLORIGINZ']),
+  relationTypes: z.array(relationTypeEnum).optional().default(['SUPPLIER']),
   receiveEmails: z.boolean().optional().default(true),
   preferredLanguage: languageEnum.optional().default('nl'),
 })
@@ -219,6 +224,7 @@ export const updateUserSchema = z.object({
   lastName: z.string().min(1).max(100).optional(),
   roles: z.array(roleEnum).min(1).optional(),
   labels: z.array(labelEnum).optional(),
+  relationTypes: z.array(relationTypeEnum).optional(),
   receiveEmails: z.boolean().optional(),
   preferredLanguage: languageEnum.optional(),
 })

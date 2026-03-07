@@ -12,8 +12,9 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Users table (internal users: Admin, Inkoper, Finance, ERP)
-// roles: ADMIN | INKOPER | FINANCE | ERP (multiple allowed)
+// Users table (internal users: Admin, Inkoper, Verkoper, Finance, ERP)
+// roles: ADMIN | INKOPER | VERKOPER | FINANCE | ERP (multiple allowed)
+// relationTypes: SUPPLIER | CUSTOMER (determines which relation types the user can see/handle)
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -22,6 +23,7 @@ model User {
   lastName     String
   roles        String[] @default([])
   labels       String[] @default(["COLORIGINZ"])
+  relationTypes String[] @default(["SUPPLIER"])
   passwordHash String?
   isActive     Boolean  @default(false)
   receiveEmails     Boolean @default(true)
@@ -39,28 +41,30 @@ model User {
   auditLogs        AuditLog[]
 }
 
-// Main supplier onboarding requests
+// Main onboarding requests (supplier + customer)
+// relationType: SUPPLIER | CUSTOMER
 // status: INVITATION_SENT | AWAITING_PURCHASER | AWAITING_FINANCE | AWAITING_ERP | COMPLETED | CANCELLED
 // region: EU | ROW
 // incoterm: CIF | FOB
 model SupplierRequest {
-  id        String   @id @default(uuid())
-  status    String   @default("INVITATION_SENT") // Status enum as string
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  relationType String   @default("SUPPLIER") // SUPPLIER or CUSTOMER
+  status       String   @default("INVITATION_SENT") // Status enum as string
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  // Created by (Inkoper)
+  // Created by (Inkoper for suppliers, Verkoper for customers)
   createdById String
   createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
 
-  // Basic info (filled by Inkoper at start)
+  // Basic info (filled by Inkoper/Verkoper at start)
   supplierName  String
   supplierEmail String
   region        String  // EU or ROW
-  selfFill      Boolean @default(false) // If true, Inkoper fills form themselves
-  supplierType     String  @default("KOOP") // KOOP, X_KWEKER, O_KWEKER
+  selfFill      Boolean @default(false) // If true, creator fills form themselves
+  supplierType     String  @default("KOOP") // KOOP, X_KWEKER, O_KWEKER (supplier only)
   label            String  @default("COLORIGINZ") // COLORIGINZ, PFC
-  supplierLanguage String  @default("nl")  // Language for supplier form/emails
+  supplierLanguage String  @default("nl")  // Language for external form/emails
 
   // Supplier/Inkoper fills these fields
   companyName             String?
@@ -103,7 +107,8 @@ model SupplierRequest {
   apiKeyFloriday    String?
 
   // Finance fields
-  creditorNumber       String?  @unique
+  creditorNumber       String?  @unique // Supplier only
+  debtorNumber         String?  @unique // Customer only
   postingMatrixFilled  Boolean?
   allChecksCompleted   Boolean?
 
@@ -135,6 +140,7 @@ model SupplierRequest {
 
   @@index([status])
   @@index([label])
+  @@index([relationType])
   @@index([createdById])
 }
 

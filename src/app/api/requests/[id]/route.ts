@@ -992,26 +992,39 @@ export async function PATCH(
             { status: 400 }
           )
         }
-        const { creditorNumber, postingMatrixFilled, allChecksCompleted, ...financeSupplierData } = parsedFinance.data
+        const { creditorNumber, debtorNumber, postingMatrixFilled, allChecksCompleted, ...financeSupplierData } = parsedFinance.data
 
-        // Check for duplicate creditor number
-        const existingCreditor = await prisma.supplierRequest.findFirst({
+        // Validate creditor/debtor number based on relationType
+        const isCustomer = existingRequest.relationType === 'CUSTOMER'
+        const financeNumber = isCustomer ? debtorNumber : creditorNumber
+        const financeNumberField = isCustomer ? 'debtorNumber' : 'creditorNumber'
+        const financeNumberLabel = isCustomer ? 'Debtor number' : 'Creditor number'
+
+        if (!financeNumber) {
+          return NextResponse.json(
+            { error: `${financeNumberLabel} is required` },
+            { status: 400 }
+          )
+        }
+
+        // Check for duplicate creditor/debtor number
+        const existingFinanceNumber = await prisma.supplierRequest.findFirst({
           where: {
-            creditorNumber,
+            [financeNumberField]: financeNumber,
             id: { not: id },
           },
         })
 
-        if (existingCreditor) {
+        if (existingFinanceNumber) {
           return NextResponse.json(
-            { error: 'This creditor number is already in use' },
+            { error: `This ${financeNumberLabel.toLowerCase()} is already in use` },
             { status: 400 }
           )
         }
 
         // Build update data including optional supplier fields
         const financeUpdateData: Record<string, unknown> = {
-          creditorNumber,
+          [financeNumberField]: financeNumber,
           postingMatrixFilled: postingMatrixFilled ?? false,
           allChecksCompleted: allChecksCompleted ?? false,
           status: Status.COMPLETED,
@@ -1055,7 +1068,7 @@ export async function PATCH(
             requestId: id,
             userId: session.user.id,
             action: AuditAction.FINANCE_SUBMITTED,
-            details: JSON.stringify({ creditorNumber }),
+            details: JSON.stringify({ [financeNumberField]: financeNumber }),
           },
         })
 
@@ -1070,7 +1083,7 @@ export async function PATCH(
           purchaserName: formatUserName(existingRequest.createdBy) || 'Inkoper',
           supplierName: existingRequest.supplierName,
           requestId: id,
-          creditorNumber,
+          creditorNumber: financeNumber,
           kbtCode: existingRequest.kbtCode || '',
           language: (existingRequest.createdBy.preferredLanguage || 'nl') as Language,
           label: existingRequest.label,

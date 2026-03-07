@@ -1,3 +1,15 @@
+// RelationType enum
+export const RelationType = {
+  SUPPLIER: 'SUPPLIER',
+  CUSTOMER: 'CUSTOMER',
+} as const
+export type RelationType = (typeof RelationType)[keyof typeof RelationType]
+
+export const RelationTypeLabels: Record<RelationType, string> = {
+  SUPPLIER: 'Leverancier',
+  CUSTOMER: 'Klant',
+}
+
 // SupplierType enum
 export const SupplierType = {
   KOOP: 'KOOP',
@@ -16,6 +28,7 @@ export const SupplierTypeLabels: Record<SupplierType, string> = {
 export const Role = {
   ADMIN: 'ADMIN',
   INKOPER: 'INKOPER',
+  VERKOPER: 'VERKOPER',
   FINANCE: 'FINANCE',
   ERP: 'ERP',
 } as const
@@ -90,6 +103,7 @@ export const AuditAction = {
   INVITATION_RESENT: 'INVITATION_RESENT',
   SUPPLIER_SUBMITTED: 'SUPPLIER_SUBMITTED',
   PURCHASER_SUBMITTED: 'PURCHASER_SUBMITTED',
+  SALES_SUBMITTED: 'SALES_SUBMITTED',
   FINANCE_SUBMITTED: 'FINANCE_SUBMITTED',
   ERP_SUBMITTED: 'ERP_SUBMITTED',
   STATUS_CHANGED: 'STATUS_CHANGED',
@@ -105,6 +119,7 @@ export const AuditAction = {
   SANCTIONS_CHECKED: 'SANCTIONS_CHECKED',
   SELF_FILL_ACTIVATED: 'SELF_FILL_ACTIVATED',
   PURCHASER_SAVED: 'PURCHASER_SAVED',
+  SALES_SAVED: 'SALES_SAVED',
   FINANCE_SAVED: 'FINANCE_SAVED',
 } as const
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -113,6 +128,7 @@ export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 export const RoleLabels: Record<string, string> = {
   ADMIN: 'Admin',
   INKOPER: 'Inkoper',
+  VERKOPER: 'Verkoper',
   FINANCE: 'Finance',
   ERP: 'ERP',
 }
