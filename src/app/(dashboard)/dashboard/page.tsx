@@ -10,11 +10,13 @@ export default async function DashboardPage() {
     return null
   }
 
-  // Fetch requests filtered by user's labels
+  // Fetch requests filtered by user's labels and relation types
   const userLabels = session.user.labels || ['COLORIGINZ']
+  const userRelationTypes = session.user.relationTypes || ['SUPPLIER']
   const requests = await prisma.supplierRequest.findMany({
     where: {
       label: { in: userLabels },
+      relationType: { in: userRelationTypes },
     },
     include: {
       createdBy: {
@@ -44,7 +46,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardContent stats={stats} requests={requests} userRoles={session.user.roles} userLabels={userLabels} />
+      <DashboardContent stats={stats} requests={requests} userRoles={session.user.roles} userLabels={userLabels} userRelationTypes={userRelationTypes} />
     </div>
   )
 }

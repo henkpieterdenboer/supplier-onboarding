@@ -17,13 +17,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!session.user.roles.includes('INKOPER')) {
-      return NextResponse.json(
-        { error: 'Only purchasers can create requests' },
-        { status: 403 }
-      )
-    }
-
     const body = await request.json()
     const parsed = createRequestSchema.safeParse(body)
     if (!parsed.success) {
@@ -33,7 +26,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { supplierName, supplierEmail, region, selfFill, supplierType, supplierLanguage, label } = parsed.data
+    const { supplierName, supplierEmail, region, selfFill, relationType, supplierType, supplierLanguage, label } = parsed.data
+
+    // Check creator role: INKOPER for suppliers, VERKOPER for customers
+    const requiredRole = relationType === 'CUSTOMER' ? 'VERKOPER' : 'INKOPER'
+    if (!session.user.roles.includes(requiredRole)) {
+      return NextResponse.json(
+        { error: `Only ${requiredRole === 'VERKOPER' ? 'sales' : 'purchasers'} can create ${relationType.toLowerCase()} requests` },
+        { status: 403 }
+      )
+    }
 
     // Validate label (must be in user's labels)
     const userLabels = session.user.labels || ['COLORIGINZ']
@@ -74,6 +76,7 @@ export async function POST(request: NextRequest) {
         supplierEmail,
         region,
         selfFill,
+        relationType,
         supplierType,
         supplierLanguage,
         label: resolvedLabel,
@@ -147,11 +150,13 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Filter by user's labels
+    // Filter by user's labels and relation types
     const userLabels = session.user.labels || ['COLORIGINZ']
+    const userRelationTypes = session.user.relationTypes || ['SUPPLIER']
     const requests = await prisma.supplierRequest.findMany({
       where: {
         label: { in: userLabels },
+        relationType: { in: userRelationTypes },
       },
       include: {
         createdBy: {

@@ -70,6 +70,7 @@ export const authOptions: NextAuthOptions = {
           name: formatUserName(user),
           roles: effectiveRoles,
           labels: user.labels,
+          relationTypes: user.relationTypes,
           language: user.preferredLanguage || 'nl',
         }
       },
@@ -125,18 +126,20 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.roles = user.roles
         token.labels = user.labels || ['COLORIGINZ']
+        token.relationTypes = user.relationTypes || ['SUPPLIER']
         token.language = user.language || 'nl'
       }
 
       if (account?.provider === 'azure-ad') {
         const dbUser = await prisma.user.findFirst({
           where: { email: { equals: user.email!, mode: 'insensitive' } },
-          select: { id: true, roles: true, labels: true, preferredLanguage: true },
+          select: { id: true, roles: true, labels: true, relationTypes: true, preferredLanguage: true },
         })
         if (dbUser) {
           token.id = dbUser.id
           token.roles = dbUser.roles
           token.labels = dbUser.labels
+          token.relationTypes = dbUser.relationTypes
           token.language = dbUser.preferredLanguage || 'nl'
         }
       }
@@ -145,7 +148,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { roles: true, labels: true, isActive: true, firstName: true, middleName: true, lastName: true, preferredLanguage: true },
+            select: { roles: true, labels: true, relationTypes: true, isActive: true, firstName: true, middleName: true, lastName: true, preferredLanguage: true },
           })
           if (dbUser) {
             if (!dbUser.isActive) {
@@ -154,6 +157,7 @@ export const authOptions: NextAuthOptions = {
             }
             token.roles = dbUser.roles
             token.labels = dbUser.labels
+            token.relationTypes = dbUser.relationTypes
             token.name = formatUserName(dbUser)
             token.language = dbUser.preferredLanguage || 'nl'
           }
@@ -168,6 +172,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.roles = token.roles as string[]
         session.user.labels = (token.labels as string[]) || ['COLORIGINZ']
+        session.user.relationTypes = (token.relationTypes as string[]) || ['SUPPLIER']
         session.user.language = (token.language as string) || 'nl'
       }
       return session

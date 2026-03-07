@@ -115,6 +115,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "newRequest": "Nuova richiesta",
+    "newSupplier": "Nuovo fornitore",
+    "newCustomer": "Nuovo cliente",
     "userManagement": "Gestione utenti",
     "profile": "Il mio profilo"
   },
@@ -162,6 +164,12 @@
     "new": {
       "title": "Nuova richiesta fornitore",
       "description": "Inserisca i dati di base per registrare un nuovo fornitore",
+      "titleCustomer": "Nuova richiesta cliente",
+      "descriptionCustomer": "Compila i dati di base per l'onboarding di un nuovo cliente",
+      "customerName": "Nome del cliente *",
+      "customerNamePlaceholder": "Nome azienda cliente",
+      "customerEmail": "Email del cliente *",
+      "customerEmailPlaceholder": "contatto@cliente.com",
       "label": "Etichetta *",
       "labelDescription": "Il marchio per il quale viene creata questa richiesta",
       "supplierType": "Tipo di fornitore *",
@@ -572,6 +580,7 @@
         "emailReadonly": "L'email non può essere modificata",
         "roles": "Ruoli * (minimo 1)",
         "labels": "Etichette (marchi)",
+        "relationTypes": "Tipi di relazione",
         "receiveEmails": "Ricevi email di notifica",
         "preferredLanguage": "Lingua preferita",
         "cancel": "Annulla",
@@ -736,8 +745,13 @@
     "role": {
       "ADMIN": "Admin",
       "INKOPER": "Acquirente",
+      "VERKOPER": "Venditore",
       "FINANCE": "Finance",
       "ERP": "ERP"
+    },
+    "relationType": {
+      "SUPPLIER": "Fornitore",
+      "CUSTOMER": "Cliente"
     },
     "region": {
       "EU": "UE",
@@ -767,6 +781,7 @@
       "INVITATION_RESENT": "Invito reinviato",
       "SUPPLIER_SUBMITTED": "Il fornitore ha inviato i dati",
       "PURCHASER_SUBMITTED": "L'acquirente ha inoltrato i dati",
+      "SALES_SUBMITTED": "Venditore ha inviato i dati",
       "FINANCE_SUBMITTED": "Finance ha assegnato il numero creditore",
       "ERP_SUBMITTED": "ERP ha assegnato il codice KBT",
       "STATUS_CHANGED": "Stato modificato",
@@ -781,6 +796,7 @@
       "SANCTIONS_CHECKED": "Verifica sanzioni effettuata",
       "SELF_FILL_ACTIVATED": "Compilazione autonoma attivata",
       "PURCHASER_SAVED": "L'acquirente ha salvato i dati",
+      "SALES_SAVED": "Venditore ha salvato i dati",
       "FINANCE_SAVED": "Finance ha salvato i dati"
     }
   },

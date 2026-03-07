@@ -22,7 +22,7 @@ import {
 import { Alert } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useLanguage } from '@/lib/i18n-context'
-import { Label as LabelEnum } from '@/types'
+import { Label as LabelEnum, RelationType } from '@/types'
 
 interface User {
   id: string
@@ -32,6 +32,7 @@ interface User {
   lastName: string
   roles: string[]
   labels: string[]
+  relationTypes: string[]
   receiveEmails: boolean
   preferredLanguage?: string
 }
@@ -52,6 +53,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
   const [email, setEmail] = useState(user?.email || '')
   const [roles, setRoles] = useState<string[]>(user?.roles || ['INKOPER'])
   const [labels, setLabels] = useState<string[]>(user?.labels || ['COLORIGINZ'])
+  const [relationTypes, setRelationTypes] = useState<string[]>(user?.relationTypes || ['SUPPLIER'])
   const [receiveEmails, setReceiveEmails] = useState(user?.receiveEmails ?? true)
   const [preferredLanguage, setPreferredLanguage] = useState(user?.preferredLanguage || 'nl')
   const [error, setError] = useState('')
@@ -71,11 +73,20 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
   const handleLabelToggle = (label: string) => {
     setLabels((prev) => {
       if (prev.includes(label)) {
-        // Don't allow removing the last label
         if (prev.length <= 1) return prev
         return prev.filter((l) => l !== label)
       }
       return [...prev, label]
+    })
+  }
+
+  const handleRelationTypeToggle = (rt: string) => {
+    setRelationTypes((prev) => {
+      if (prev.includes(rt)) {
+        if (prev.length <= 1) return prev
+        return prev.filter((r) => r !== rt)
+      }
+      return [...prev, rt]
     })
   }
 
@@ -94,6 +105,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
         lastName,
         roles,
         labels,
+        relationTypes,
         receiveEmails,
         preferredLanguage,
       }
@@ -202,7 +214,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
             <div className="space-y-3">
               <Label>{t('admin.users.form.roles')}</Label>
               <div className="space-y-2">
-                {(['ADMIN', 'INKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
+                {(['ADMIN', 'INKOPER', 'VERKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
                   <div key={role} className="flex items-center gap-2">
                     <Checkbox
                       id={`role-${role}`}
@@ -231,6 +243,22 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
                     />
                     <Label htmlFor={`label-${label}`} className="font-normal">
                       {t(`enums.label.${label}`)}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+              <Label className="mt-4">{t('admin.users.form.relationTypes')}</Label>
+              <div className="space-y-2">
+                {Object.values(RelationType).map((rt) => (
+                  <div key={rt} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`rt-${rt}`}
+                      checked={relationTypes.includes(rt)}
+                      onCheckedChange={() => handleRelationTypeToggle(rt)}
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor={`rt-${rt}`} className="font-normal">
+                      {t(`enums.relationType.${rt}`)}
                     </Label>
                   </div>
                 ))}

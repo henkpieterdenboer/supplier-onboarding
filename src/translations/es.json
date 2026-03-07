@@ -115,6 +115,8 @@
   "nav": {
     "dashboard": "Panel",
     "newRequest": "Nueva solicitud",
+    "newSupplier": "Nuevo proveedor",
+    "newCustomer": "Nuevo cliente",
     "userManagement": "Gestión de usuarios",
     "profile": "Mi perfil"
   },
@@ -162,6 +164,12 @@
     "new": {
       "title": "Nueva solicitud de proveedor",
       "description": "Introduzca los datos básicos para registrar un nuevo proveedor",
+      "titleCustomer": "Nueva solicitud de cliente",
+      "descriptionCustomer": "Complete los datos básicos para incorporar un nuevo cliente",
+      "customerName": "Nombre del cliente *",
+      "customerNamePlaceholder": "Nombre de la empresa cliente",
+      "customerEmail": "Email del cliente *",
+      "customerEmailPlaceholder": "contacto@cliente.com",
       "label": "Etiqueta *",
       "labelDescription": "La marca para la que se crea esta solicitud",
       "supplierType": "Tipo de proveedor *",
@@ -572,6 +580,7 @@
         "emailReadonly": "El correo electrónico no se puede cambiar",
         "roles": "Roles * (mínimo 1)",
         "labels": "Etiquetas (marcas)",
+        "relationTypes": "Tipos de relación",
         "receiveEmails": "Recibir correos de notificación",
         "preferredLanguage": "Idioma preferido",
         "cancel": "Cancelar",
@@ -736,8 +745,13 @@
     "role": {
       "ADMIN": "Admin",
       "INKOPER": "Comprador",
+      "VERKOPER": "Vendedor",
       "FINANCE": "Finanzas",
       "ERP": "ERP"
+    },
+    "relationType": {
+      "SUPPLIER": "Proveedor",
+      "CUSTOMER": "Cliente"
     },
     "region": {
       "EU": "UE",
@@ -767,6 +781,7 @@
       "INVITATION_RESENT": "Invitación reenviada",
       "SUPPLIER_SUBMITTED": "Proveedor envió los datos",
       "PURCHASER_SUBMITTED": "Comprador envió los datos",
+      "SALES_SUBMITTED": "Vendedor ha enviado los datos",
       "FINANCE_SUBMITTED": "Finanzas asignó número de acreedor",
       "ERP_SUBMITTED": "ERP asignó código KBT",
       "STATUS_CHANGED": "Estado cambiado",
@@ -781,6 +796,7 @@
       "SANCTIONS_CHECKED": "Verificación de sanciones realizada",
       "SELF_FILL_ACTIVATED": "Autocompletado activado",
       "PURCHASER_SAVED": "Comprador guardó datos",
+      "SALES_SAVED": "Vendedor ha guardado los datos",
       "FINANCE_SAVED": "Finanzas guardó datos"
     }
   },

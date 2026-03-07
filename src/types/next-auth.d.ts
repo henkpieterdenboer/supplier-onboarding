@@ -7,6 +7,7 @@ declare module 'next-auth' {
     name: string
     roles: string[]
     labels: string[]
+    relationTypes: string[]
     language: string
   }
 
@@ -15,6 +16,7 @@ declare module 'next-auth' {
       id: string
       roles: string[]
       labels: string[]
+      relationTypes: string[]
       language: string
     }
   }
@@ -25,6 +27,7 @@ declare module 'next-auth/jwt' {
     id: string
     roles: string[]
     labels: string[]
+    relationTypes: string[]
     language: string
   }
 }

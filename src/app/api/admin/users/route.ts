@@ -25,6 +25,7 @@ export async function GET() {
         lastName: true,
         roles: true,
         labels: true,
+        relationTypes: true,
         isActive: true,
         receiveEmails: true,
         preferredLanguage: true,
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    const { email, firstName, middleName, lastName, roles, labels, receiveEmails, preferredLanguage } = parsed.data
+    const { email, firstName, middleName, lastName, roles, labels, relationTypes, receiveEmails, preferredLanguage } = parsed.data
 
     // Check for duplicate email
     const existing = await prisma.user.findUnique({
@@ -96,6 +97,7 @@ export async function POST(request: NextRequest) {
         lastName,
         roles,
         labels,
+        relationTypes,
         receiveEmails,
         preferredLanguage,
         isActive: false,

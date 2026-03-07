@@ -139,9 +139,14 @@ export function DashboardNav({ user }: DashboardNavProps) {
     { href: '/dashboard', label: t('nav.dashboard') },
   ]
 
-  // Show "Nieuwe aanvraag" for INKOPER role
+  // Show "Nieuwe leverancier" for INKOPER role
   if (user.roles.includes('INKOPER')) {
-    navItems.push({ href: '/requests/new', label: t('nav.newRequest') })
+    navItems.push({ href: '/requests/new?relationType=SUPPLIER', label: t('nav.newSupplier') })
+  }
+
+  // Show "Nieuwe klant" for VERKOPER role
+  if (user.roles.includes('VERKOPER')) {
+    navItems.push({ href: '/requests/new?relationType=CUSTOMER', label: t('nav.newCustomer') })
   }
 
   // Show "Gebruikersbeheer" for ADMIN role

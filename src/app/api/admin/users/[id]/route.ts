@@ -113,6 +113,7 @@ export async function PATCH(
     if (validData.lastName !== undefined) updateData.lastName = validData.lastName
     if (validData.roles !== undefined) updateData.roles = validData.roles
     if (validData.labels !== undefined) updateData.labels = validData.labels
+    if (validData.relationTypes !== undefined) updateData.relationTypes = validData.relationTypes
     if (validData.receiveEmails !== undefined) updateData.receiveEmails = validData.receiveEmails
     if (validData.preferredLanguage !== undefined) updateData.preferredLanguage = validData.preferredLanguage
 
@@ -127,6 +128,7 @@ export async function PATCH(
         lastName: true,
         roles: true,
         labels: true,
+        relationTypes: true,
         isActive: true,
         receiveEmails: true,
         preferredLanguage: true,

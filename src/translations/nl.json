@@ -115,6 +115,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "newRequest": "Nieuwe aanvraag",
+    "newSupplier": "Nieuwe leverancier",
+    "newCustomer": "Nieuwe klant",
     "userManagement": "Gebruikersbeheer",
     "profile": "Mijn profiel"
   },
@@ -161,7 +163,13 @@
     },
     "new": {
       "title": "Nieuwe leveranciersaanvraag",
+      "titleCustomer": "Nieuwe klantaanvraag",
       "description": "Vul de basisgegevens in om een nieuwe leverancier te onboarden",
+      "descriptionCustomer": "Vul de basisgegevens in om een nieuwe klant te onboarden",
+      "customerName": "Naam klant *",
+      "customerNamePlaceholder": "Bedrijfsnaam klant",
+      "customerEmail": "Email klant *",
+      "customerEmailPlaceholder": "contact@klant.com",
       "label": "Label *",
       "labelDescription": "Het merk waarvoor deze aanvraag wordt aangemaakt",
       "supplierType": "Type leverancier *",
@@ -572,6 +580,7 @@
         "emailReadonly": "Email kan niet gewijzigd worden",
         "roles": "Rollen * (minimaal 1)",
         "labels": "Labels (merken)",
+        "relationTypes": "Relatietypen",
         "receiveEmails": "Notificatie-emails ontvangen",
         "preferredLanguage": "Voorkeurstaal",
         "cancel": "Annuleren",
@@ -736,8 +745,13 @@
     "role": {
       "ADMIN": "Admin",
       "INKOPER": "Inkoper",
+      "VERKOPER": "Verkoper",
       "FINANCE": "Finance",
       "ERP": "ERP"
+    },
+    "relationType": {
+      "SUPPLIER": "Leverancier",
+      "CUSTOMER": "Klant"
     },
     "region": {
       "EU": "EU",
@@ -767,6 +781,7 @@
       "INVITATION_RESENT": "Uitnodiging opnieuw verstuurd",
       "SUPPLIER_SUBMITTED": "Leverancier heeft gegevens ingevuld",
       "PURCHASER_SUBMITTED": "Inkoper heeft gegevens doorgestuurd",
+      "SALES_SUBMITTED": "Verkoper heeft gegevens doorgestuurd",
       "FINANCE_SUBMITTED": "Finance heeft crediteurnummer toegewezen",
       "ERP_SUBMITTED": "ERP heeft KBT-code toegewezen",
       "STATUS_CHANGED": "Status gewijzigd",
@@ -781,6 +796,7 @@
       "SANCTIONS_CHECKED": "Sanctiecheck uitgevoerd",
       "SELF_FILL_ACTIVATED": "Zelf invullen geactiveerd",
       "PURCHASER_SAVED": "Inkoper heeft gegevens opgeslagen",
+      "SALES_SAVED": "Verkoper heeft gegevens opgeslagen",
       "FINANCE_SAVED": "Finance heeft gegevens opgeslagen"
     }
   },

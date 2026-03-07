@@ -9,6 +9,7 @@ export default withAuth(
     // Public paths that don't require auth
     if (
       path.startsWith('/supplier/') ||
+      path.startsWith('/customer/') ||
       path === '/login' ||
       path.startsWith('/activate/') ||
       path === '/forgot-password' ||
@@ -39,6 +40,7 @@ export default withAuth(
         // Public paths
         if (
           path.startsWith('/supplier/') ||
+          path.startsWith('/customer/') ||
           path === '/login' ||
           path.startsWith('/activate/') ||
           path === '/forgot-password' ||

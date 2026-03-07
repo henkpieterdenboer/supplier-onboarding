@@ -11,6 +11,7 @@ interface Request {
   id: string
   supplierName: string
   supplierEmail: string
+  relationType: string
   status: string
   region: string
   supplierType: string
@@ -39,18 +40,22 @@ interface DashboardContentProps {
   requests: Request[]
   userRoles: string[]
   userLabels: string[]
+  userRelationTypes: string[]
 }
 
 const ACTIVE_STATUSES = ['INVITATION_SENT', 'AWAITING_PURCHASER', 'AWAITING_ERP', 'AWAITING_FINANCE']
 const ARCHIVE_STATUSES = ['COMPLETED', 'CANCELLED']
 
-export function DashboardContent({ stats, requests, userRoles, userLabels }: DashboardContentProps) {
+export function DashboardContent({ stats, requests, userRoles, userLabels, userRelationTypes }: DashboardContentProps) {
   const searchParams = useSearchParams()
   const initialTab = searchParams.get('tab') === 'archive' ? 'archive' : 'active'
+  const initialRelationType = searchParams.get('relationType') || 'all'
   const [activeTab, setActiveTab] = useState<'active' | 'archive'>(initialTab)
+  const [relationTypeFilter, setRelationTypeFilter] = useState<string>(initialRelationType)
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [emailProvider, setEmailProvider] = useState<string>('ethereal')
   const { t } = useLanguage()
+  const showRelationTypeFilter = userRelationTypes.length > 1
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
@@ -63,8 +68,25 @@ export function DashboardContent({ stats, requests, userRoles, userLabels }: Das
 
   const filteredRequests = useMemo(() => {
     const statuses = activeTab === 'active' ? ACTIVE_STATUSES : ARCHIVE_STATUSES
-    return requests.filter(r => statuses.includes(r.status))
-  }, [requests, activeTab])
+    return requests
+      .filter(r => statuses.includes(r.status))
+      .filter(r => relationTypeFilter === 'all' || r.relationType === relationTypeFilter)
+  }, [requests, activeTab, relationTypeFilter])
+
+  // Recalculate stats based on relationType filter
+  const filteredStats = useMemo(() => {
+    if (relationTypeFilter === 'all') return stats
+    const filtered = requests.filter(r => r.relationType === relationTypeFilter)
+    return {
+      total: filtered.length,
+      waitingSupplier: filtered.filter(r => r.status === 'INVITATION_SENT').length,
+      waitingPurchaser: filtered.filter(r => r.status === 'AWAITING_PURCHASER').length,
+      waitingFinance: filtered.filter(r => r.status === 'AWAITING_FINANCE').length,
+      waitingERP: filtered.filter(r => r.status === 'AWAITING_ERP').length,
+      completed: filtered.filter(r => r.status === 'COMPLETED').length,
+      cancelled: filtered.filter(r => r.status === 'CANCELLED').length,
+    }
+  }, [stats, requests, relationTypeFilter])
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as 'active' | 'archive')
@@ -78,15 +100,27 @@ export function DashboardContent({ stats, requests, userRoles, userLabels }: Das
         <p className="text-gray-500">{t('dashboard.description')}</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList>
-          <TabsTrigger value="active">{t('dashboard.tabs.active')}</TabsTrigger>
-          <TabsTrigger value="archive">{t('dashboard.tabs.archive')}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList>
+            <TabsTrigger value="active">{t('dashboard.tabs.active')}</TabsTrigger>
+            <TabsTrigger value="archive">{t('dashboard.tabs.archive')}</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {showRelationTypeFilter && (
+          <Tabs value={relationTypeFilter} onValueChange={(v) => { setRelationTypeFilter(v); setSelectedStatus(null) }}>
+            <TabsList>
+              <TabsTrigger value="all">{t('common.all')}</TabsTrigger>
+              <TabsTrigger value="SUPPLIER">{t('enums.relationType.SUPPLIER')}</TabsTrigger>
+              <TabsTrigger value="CUSTOMER">{t('enums.relationType.CUSTOMER')}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+      </div>
 
       <DashboardStats
-        stats={stats}
+        stats={filteredStats}
         activeTab={activeTab}
         selectedStatus={selectedStatus}
         onStatusClick={setSelectedStatus}

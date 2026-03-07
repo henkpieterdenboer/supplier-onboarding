@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { AuditAction, Status } from '@/types'
+import { getCreatorRole } from '@/lib/workflow'
 import { requiresIncoterm, showFinancialSection, showDirectorSection } from '@/lib/supplier-type-utils'
 import {
   sendFinanceNotificationEmail,
@@ -244,13 +245,18 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Check if user has the creator/reviewer role for this request's relationType
+    // For suppliers: INKOPER, for customers: VERKOPER
+    const creatorRole = getCreatorRole(existingRequest.relationType as 'SUPPLIER' | 'CUSTOMER')
+    const hasCreatorRole = (session.user.roles as string[]).includes(creatorRole)
+
     // Handle different actions
     switch (action) {
       case 'cancel': {
         // Inkoper can only cancel their own requests; Admin/Finance/ERP can cancel any
         const roles = session.user.roles as string[]
-        const isInkoperOnly = roles.includes('INKOPER') && !roles.includes('ADMIN') && !roles.includes('FINANCE') && !roles.includes('ERP')
-        if (isInkoperOnly && existingRequest.createdBy?.id !== session.user.id) {
+        const isCreatorOnly = hasCreatorRole && !roles.includes('ADMIN') && !roles.includes('FINANCE') && !roles.includes('ERP')
+        if (isCreatorOnly && existingRequest.createdBy?.id !== session.user.id) {
           return NextResponse.json({ error: 'You can only cancel your own requests' }, { status: 403 })
         }
         const updated = await prisma.supplierRequest.update({
@@ -423,9 +429,9 @@ export async function PATCH(
 
       case 'self-fill': {
         // INKOPER activates self-fill mode
-        if (!session.user.roles.includes('INKOPER')) {
+        if (!hasCreatorRole) {
           return NextResponse.json(
-            { error: 'Only purchasers can perform this action' },
+            { error: 'You do not have permission to perform this action' },
             { status: 403 }
           )
         }
@@ -460,9 +466,9 @@ export async function PATCH(
 
       case 'purchaser-save': {
         // INKOPER saves data without status change
-        if (!session.user.roles.includes('INKOPER')) {
+        if (!hasCreatorRole) {
           return NextResponse.json(
-            { error: 'Only purchasers can perform this action' },
+            { error: 'You do not have permission to perform this action' },
             { status: 403 }
           )
         }
@@ -638,9 +644,9 @@ export async function PATCH(
 
       case 'purchaser-submit': {
         // INKOPER submits after filling additional data
-        if (!session.user.roles.includes('INKOPER')) {
+        if (!hasCreatorRole) {
           return NextResponse.json(
-            { error: 'Only purchasers can perform this action' },
+            { error: 'You do not have permission to perform this action' },
             { status: 403 }
           )
         }
@@ -1168,10 +1174,10 @@ export async function PATCH(
       }
 
       case 'change-type': {
-        // INKOPER can change supplier type
-        if (!session.user.roles.includes('INKOPER')) {
+        // Creator role can change supplier type
+        if (!hasCreatorRole) {
           return NextResponse.json(
-            { error: 'Only purchasers can change the type' },
+            { error: 'You do not have permission to change the type' },
             { status: 403 }
           )
         }
@@ -1206,10 +1212,10 @@ export async function PATCH(
       }
 
       case 'change-region': {
-        // INKOPER can change region
-        if (!session.user.roles.includes('INKOPER')) {
+        // Creator role can change region
+        if (!hasCreatorRole) {
           return NextResponse.json(
-            { error: 'Only purchasers can change the region' },
+            { error: 'You do not have permission to change the region' },
             { status: 403 }
           )
         }
@@ -1245,7 +1251,7 @@ export async function PATCH(
 
       case 'vies-recheck': {
         // INKOPER or FINANCE can recheck VIES
-        if (!session.user.roles.includes('INKOPER') && !session.user.roles.includes('FINANCE')) {
+        if (!hasCreatorRole && !session.user.roles.includes('FINANCE')) {
           return NextResponse.json(
             { error: 'Only purchasers or Finance can perform this action' },
             { status: 403 }
@@ -1304,7 +1310,7 @@ export async function PATCH(
 
       case 'sanctions-check': {
         // INKOPER or FINANCE can run sanctions check
-        if (!session.user.roles.includes('INKOPER') && !session.user.roles.includes('FINANCE')) {
+        if (!hasCreatorRole && !session.user.roles.includes('FINANCE')) {
           return NextResponse.json(
             { error: 'Only purchasers or Finance can perform this action' },
             { status: 403 }

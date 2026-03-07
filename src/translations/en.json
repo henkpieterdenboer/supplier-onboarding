@@ -115,6 +115,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "newRequest": "New request",
+    "newSupplier": "New supplier",
+    "newCustomer": "New customer",
     "userManagement": "User management",
     "profile": "My profile"
   },
@@ -162,6 +164,12 @@
     "new": {
       "title": "New supplier request",
       "description": "Enter the basic details to onboard a new supplier",
+      "titleCustomer": "New customer request",
+      "descriptionCustomer": "Fill in the basic details to onboard a new customer",
+      "customerName": "Customer name *",
+      "customerNamePlaceholder": "Customer company name",
+      "customerEmail": "Customer email *",
+      "customerEmailPlaceholder": "contact@customer.com",
       "label": "Label *",
       "labelDescription": "The brand for which this request is being created",
       "supplierType": "Supplier type *",
@@ -572,6 +580,7 @@
         "emailReadonly": "Email cannot be changed",
         "roles": "Roles * (minimum 1)",
         "labels": "Labels (brands)",
+        "relationTypes": "Relation types",
         "receiveEmails": "Receive notification emails",
         "preferredLanguage": "Preferred language",
         "cancel": "Cancel",
@@ -736,8 +745,13 @@
     "role": {
       "ADMIN": "Admin",
       "INKOPER": "Purchaser",
+      "VERKOPER": "Sales",
       "FINANCE": "Finance",
       "ERP": "ERP"
+    },
+    "relationType": {
+      "SUPPLIER": "Supplier",
+      "CUSTOMER": "Customer"
     },
     "region": {
       "EU": "EU",
@@ -767,6 +781,7 @@
       "INVITATION_RESENT": "Invitation resent",
       "SUPPLIER_SUBMITTED": "Supplier submitted details",
       "PURCHASER_SUBMITTED": "Purchaser forwarded details",
+      "SALES_SUBMITTED": "Sales has submitted data",
       "FINANCE_SUBMITTED": "Finance assigned creditor number",
       "ERP_SUBMITTED": "ERP assigned KBT code",
       "STATUS_CHANGED": "Status changed",
@@ -781,6 +796,7 @@
       "SANCTIONS_CHECKED": "Sanctions check performed",
       "SELF_FILL_ACTIVATED": "Self-fill activated",
       "PURCHASER_SAVED": "Purchaser saved details",
+      "SALES_SAVED": "Sales has saved data",
       "FINANCE_SAVED": "Finance saved details"
     }
   },

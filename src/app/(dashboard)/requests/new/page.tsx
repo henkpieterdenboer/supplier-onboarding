@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select'
 import { Alert } from '@/components/ui/alert'
 import { toast } from 'sonner'
-import { Region, SupplierType, SupplierTypeLabels } from '@/types'
+import { Region, SupplierType, SupplierTypeLabels, RelationType } from '@/types'
 import { useLanguage } from '@/lib/i18n-context'
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
@@ -26,6 +26,9 @@ export default function NewRequestPage() {
   const router = useRouter()
   const { data: session } = useSession()
   const { t } = useLanguage()
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+  const relationType = (searchParams.get('relationType') as RelationType) || 'SUPPLIER'
+  const isCustomer = relationType === 'CUSTOMER'
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -38,13 +41,15 @@ export default function NewRequestPage() {
     supplierEmail: '',
     region: 'EU' as Region,
     selfFill: false,
+    relationType,
     supplierType: 'KOOP' as SupplierType,
     supplierLanguage: 'nl',
     label: userLabels[0] || 'COLORIGINZ',
   })
 
-  // Only INKOPER can create new requests
-  if (!session?.user?.roles?.includes('INKOPER')) {
+  // Check permission: INKOPER for suppliers, VERKOPER for customers
+  const requiredRole = isCustomer ? 'VERKOPER' : 'INKOPER'
+  if (!session?.user?.roles?.includes(requiredRole)) {
     return (
       <div className="max-w-2xl mx-auto">
         <Alert variant="destructive">
@@ -138,9 +143,9 @@ export default function NewRequestPage() {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>{t('requests.new.title')}</CardTitle>
+          <CardTitle>{isCustomer ? t('requests.new.titleCustomer') : t('requests.new.title')}</CardTitle>
           <CardDescription>
-            {t('requests.new.description')}
+            {isCustomer ? t('requests.new.descriptionCustomer') : t('requests.new.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -173,49 +178,51 @@ export default function NewRequestPage() {
               </div>
             )}
 
-            {/* Supplier Type Selector */}
-            <div className="space-y-4">
-              <Label>{t('requests.new.supplierType')}</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {Object.entries(SupplierTypeLabels).map(([value]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, supplierType: value as SupplierType })}
-                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
-                      formData.supplierType === value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    disabled={isLoading}
-                  >
-                    <div className="font-medium">{t(`enums.supplierType.${value}`)}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {value === 'KOOP' && t('requests.new.typeKoop')}
-                      {value === 'X_KWEKER' && t('requests.new.typeXKweker')}
-                      {value === 'O_KWEKER' && t('requests.new.typeOKweker')}
-                    </div>
-                  </button>
-                ))}
+            {/* Supplier Type Selector (suppliers only) */}
+            {!isCustomer && (
+              <div className="space-y-4">
+                <Label>{t('requests.new.supplierType')}</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {Object.entries(SupplierTypeLabels).map(([value]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, supplierType: value as SupplierType })}
+                      className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                        formData.supplierType === value
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      disabled={isLoading}
+                    >
+                      <div className="font-medium">{t(`enums.supplierType.${value}`)}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {value === 'KOOP' && t('requests.new.typeKoop')}
+                        {value === 'X_KWEKER' && t('requests.new.typeXKweker')}
+                        {value === 'O_KWEKER' && t('requests.new.typeOKweker')}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="space-y-2">
-              <Label htmlFor="supplierName">{t('requests.new.supplierName')}</Label>
+              <Label htmlFor="supplierName">{isCustomer ? t('requests.new.customerName') : t('requests.new.supplierName')}</Label>
               <Input
                 id="supplierName"
                 value={formData.supplierName}
                 onChange={(e) =>
                   setFormData({ ...formData, supplierName: e.target.value })
                 }
-                placeholder={t('requests.new.supplierNamePlaceholder')}
+                placeholder={isCustomer ? t('requests.new.customerNamePlaceholder') : t('requests.new.supplierNamePlaceholder')}
                 required
                 disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="supplierEmail">{t('requests.new.supplierEmail')}</Label>
+              <Label htmlFor="supplierEmail">{isCustomer ? t('requests.new.customerEmail') : t('requests.new.supplierEmail')}</Label>
               <Input
                 id="supplierEmail"
                 type="email"
@@ -223,7 +230,7 @@ export default function NewRequestPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, supplierEmail: e.target.value })
                 }
-                placeholder={t('requests.new.supplierEmailPlaceholder')}
+                placeholder={isCustomer ? t('requests.new.customerEmailPlaceholder') : t('requests.new.supplierEmailPlaceholder')}
                 required
                 disabled={isLoading}
               />

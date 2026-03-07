@@ -32,6 +32,7 @@ interface Request {
   id: string
   supplierName: string
   supplierEmail: string
+  relationType: string
   status: string
   region: string
   supplierType: string
