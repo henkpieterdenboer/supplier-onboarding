@@ -8,7 +8,7 @@ const labelEnum = z.enum(['COLORIGINZ', 'PFC'])
 const roleEnum = z.enum(['ADMIN', 'INKOPER', 'VERKOPER', 'FINANCE', 'ERP'])
 const relationTypeEnum = z.enum(['SUPPLIER', 'CUSTOMER'])
 const languageEnum = z.enum(['nl', 'en', 'es', 'it'])
-const incotermEnum = z.enum(['CIF', 'FOB'])
+const incotermEnum = z.enum(['CIF', 'FOB', 'CONSIGNMENT'])
 
 const passwordSchema = z.string()
   .min(14, 'Password must be at least 14 characters')
@@ -98,7 +98,7 @@ export const financeSubmitSchema = z.object({
   directorFunction: z.string().max(100).nullish(),
   directorDateOfBirth: z.string().max(20).nullish(),
   directorPassportNumber: z.string().max(50).nullish(),
-  incoterm: z.enum(['CIF', 'FOB']).nullish().or(z.literal('').transform(() => null)),
+  incoterm: incotermEnum.nullish().or(z.literal('').transform(() => null)),
   commissionPercentage: z.union([
     z.number(),
     z.string().transform((v) => v === '' ? null : parseFloat(v)),
@@ -141,7 +141,7 @@ export const financeSaveSchema = z.object({
   directorFunction: z.string().max(100).nullish(),
   directorDateOfBirth: z.string().max(20).nullish(),
   directorPassportNumber: z.string().max(50).nullish(),
-  incoterm: z.enum(['CIF', 'FOB']).nullish().or(z.literal('').transform(() => null)),
+  incoterm: incotermEnum.nullish().or(z.literal('').transform(() => null)),
   commissionPercentage: z.union([
     z.number(),
     z.string().transform((v) => v === '' ? null : parseFloat(v)),

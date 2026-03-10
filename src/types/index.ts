@@ -71,6 +71,7 @@ export const RegionLabels: Record<Region, string> = {
 export const Incoterm = {
   CIF: 'CIF',
   FOB: 'FOB',
+  CONSIGNMENT: 'CONSIGNMENT',
 } as const
 export type Incoterm = (typeof Incoterm)[keyof typeof Incoterm]
 
@@ -113,6 +114,8 @@ export const AuditAction = {
   FILE_DELETED: 'FILE_DELETED',
   REMINDER_SENT: 'REMINDER_SENT',
   SUPPLIER_SAVED: 'SUPPLIER_SAVED',
+  CUSTOMER_SUBMITTED: 'CUSTOMER_SUBMITTED',
+  CUSTOMER_SAVED: 'CUSTOMER_SAVED',
   SUPPLIER_TYPE_CHANGED: 'SUPPLIER_TYPE_CHANGED',
   REGION_CHANGED: 'REGION_CHANGED',
   VIES_CHECKED: 'VIES_CHECKED',

@@ -141,7 +141,7 @@ export default function EditRequestPage() {
     salesSheetEmail: '',
     apiKeyFloriday: '',
     // Purchaser additional data
-    incoterm: '' as '' | 'CIF' | 'FOB',
+    incoterm: '' as '' | 'CIF' | 'FOB' | 'CONSIGNMENT',
     commissionPercentage: '',
     paymentTerm: '',
     accountManager: '',
@@ -747,7 +747,7 @@ export default function EditRequestPage() {
                   <Label htmlFor="incoterm">{t('requests.edit.incoterm')}</Label>
                   <Select
                     value={formData.incoterm}
-                    onValueChange={(value: 'CIF' | 'FOB') =>
+                    onValueChange={(value: 'CIF' | 'FOB' | 'CONSIGNMENT') =>
                       setFormData({ ...formData, incoterm: value })
                     }
                     disabled={busy}
@@ -758,6 +758,7 @@ export default function EditRequestPage() {
                     <SelectContent>
                       <SelectItem value="CIF">CIF</SelectItem>
                       <SelectItem value="FOB">FOB</SelectItem>
+                      <SelectItem value="CONSIGNMENT">Consignment</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
