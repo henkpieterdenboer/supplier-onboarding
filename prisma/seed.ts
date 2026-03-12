@@ -50,6 +50,17 @@ async function main() {
       isActive: true,
       preferredLanguage: 'nl',
     },
+    {
+      email: 'verkoper@demo.nl',
+      firstName: 'Demo',
+      lastName: 'Verkoper',
+      roles: ['VERKOPER'],
+      labels: ['COLORIGINZ', 'PFC'],
+      relationTypes: ['CUSTOMER'],
+      passwordHash,
+      isActive: true,
+      preferredLanguage: 'nl',
+    },
   ]
 
   for (const user of users) {
@@ -68,8 +79,9 @@ async function main() {
     console.log(`Created user: ${user.email}`)
   }
 
-  // Get inkoper user for creating demo requests
+  // Get inkoper and verkoper users for creating demo requests
   const inkoper = await prisma.user.findUnique({ where: { email: 'inkoper@demo.nl' } })
+  const verkoper = await prisma.user.findUnique({ where: { email: 'verkoper@demo.nl' } })
   if (!inkoper) {
     console.log('Inkoper user not found, skipping demo requests')
     return
@@ -88,6 +100,7 @@ async function main() {
         supplierLanguage: 'nl',
         selfFill: true,
         status: 'AWAITING_PURCHASER',
+        relationType: 'SUPPLIER',
         createdById: inkoper.id,
       },
       {
@@ -99,6 +112,7 @@ async function main() {
         supplierLanguage: 'nl',
         selfFill: true,
         status: 'AWAITING_PURCHASER',
+        relationType: 'SUPPLIER',
         createdById: inkoper.id,
       },
       {
@@ -110,13 +124,30 @@ async function main() {
         supplierLanguage: 'nl',
         selfFill: true,
         status: 'AWAITING_PURCHASER',
+        relationType: 'SUPPLIER',
         createdById: inkoper.id,
       },
     ]
 
+    // Add customer demo request if verkoper exists
+    if (verkoper) {
+      demoRequests.push({
+        supplierName: 'Demo Klant BV',
+        supplierEmail: 'klant@demo-customer.nl',
+        region: 'EU',
+        supplierType: 'KOOP',
+        label: 'COLORIGINZ',
+        supplierLanguage: 'nl',
+        selfFill: true,
+        status: 'AWAITING_PURCHASER',
+        relationType: 'CUSTOMER',
+        createdById: verkoper.id,
+      })
+    }
+
     for (const req of demoRequests) {
       await prisma.supplierRequest.create({ data: req })
-      console.log(`Created demo request: ${req.supplierName} (${req.supplierType})`)
+      console.log(`Created demo request: ${req.supplierName} (${req.supplierType}, ${req.relationType})`)
     }
   } else {
     console.log(`Skipping demo requests (${existingRequests} requests already exist)`)

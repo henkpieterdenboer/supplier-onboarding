@@ -530,6 +530,23 @@
       "requiredNote": "Velden met * zijn verplicht"
     }
   },
+  "customer": {
+    "form": {
+      "title": "Client Onboarding",
+      "welcome": "Welkom {supplierName}. Vul hieronder uw bedrijfsgegevens in.",
+      "savedNotice": "U heeft eerder gegevens opgeslagen op {date}. Uw eerdere gegevens zijn hieronder ingevuld.",
+      "invalidLink": "Link ongeldig",
+      "invalidLinkTitle": "Ongeldige of verlopen link",
+      "invalidLinkMessage": "De link is mogelijk verlopen of al gebruikt. Neem contact op met uw contactpersoon voor een nieuwe link.",
+      "thankYou": "Bedankt!",
+      "thankYouMessage": "Uw gegevens zijn succesvol verstuurd. U ontvangt binnenkort een bevestigingsmail.",
+      "closeWindow": "U kunt dit venster sluiten.",
+      "savedTitle": "Gegevens opgeslagen",
+      "savedMessage": "Uw gegevens zijn tussentijds opgeslagen. U ontvangt een email met een link om het formulier later af te ronden.",
+      "savedSuccess": "Gegevens opgeslagen! U ontvangt een email met de link om later verder te gaan.",
+      "submitSuccess": "Gegevens succesvol verstuurd!"
+    }
+  },
   "admin": {
     "users": {
       "title": "Gebruikersbeheer",
@@ -797,7 +814,9 @@
       "SELF_FILL_ACTIVATED": "Zelf invullen geactiveerd",
       "PURCHASER_SAVED": "Inkoper heeft gegevens opgeslagen",
       "SALES_SAVED": "Verkoper heeft gegevens opgeslagen",
-      "FINANCE_SAVED": "Finance heeft gegevens opgeslagen"
+      "FINANCE_SAVED": "Finance heeft gegevens opgeslagen",
+      "CUSTOMER_SUBMITTED": "Klant heeft gegevens ingevuld",
+      "CUSTOMER_SAVED": "Klant heeft gegevens opgeslagen"
     }
   },
   "validation": {

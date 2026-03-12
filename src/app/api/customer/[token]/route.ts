@@ -13,7 +13,6 @@ import type { Language } from '@/lib/i18n'
 import { supplierFormSchema } from '@/lib/validations'
 import { checkVat } from '@/lib/vies'
 import { generateViesReport } from '@/lib/vies-pdf'
-import { showFinancialSection, showDirectorSection } from '@/lib/supplier-type-utils'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
@@ -24,7 +23,6 @@ function validateFile(file: File): string | null {
   return null
 }
 
-// Dynamic import for Vercel Blob (only used in production)
 const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     const { put } = await import('@vercel/blob')
@@ -34,7 +32,7 @@ const uploadToBlob = async (fileName: string, file: File): Promise<string> => {
   return ''
 }
 
-// GET /api/supplier/[token] - Validate token and get request info
+// GET /api/customer/[token] - Validate token and get request info
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
@@ -42,7 +40,7 @@ export async function GET(
   try {
     const { token } = await params
 
-    const supplierRequest = await prisma.supplierRequest.findUnique({
+    const customerRequest = await prisma.supplierRequest.findUnique({
       where: { invitationToken: token },
       select: {
         id: true,
@@ -50,7 +48,7 @@ export async function GET(
         supplierEmail: true,
         region: true,
         status: true,
-        supplierType: true,
+        relationType: true,
         label: true,
         invitationExpiresAt: true,
         supplierSavedAt: true,
@@ -76,25 +74,28 @@ export async function GET(
         directorFunction: true,
         directorDateOfBirth: true,
         directorPassportNumber: true,
-        auctionNumberRFH: true,
-        salesSheetEmail: true,
-        mandateRFH: true,
-        apiKeyFloriday: true,
         supplierLanguage: true,
       },
     })
 
-    if (!supplierRequest) {
+    if (!customerRequest) {
       return NextResponse.json(
         { error: 'Invalid link. Please contact us for a new invitation.' },
         { status: 404 }
       )
     }
 
-    // Check if token is expired
+    // Verify this is a customer request
+    if (customerRequest.relationType !== 'CUSTOMER') {
+      return NextResponse.json(
+        { error: 'Invalid link.' },
+        { status: 404 }
+      )
+    }
+
     if (
-      supplierRequest.invitationExpiresAt &&
-      new Date() > new Date(supplierRequest.invitationExpiresAt)
+      customerRequest.invitationExpiresAt &&
+      new Date() > new Date(customerRequest.invitationExpiresAt)
     ) {
       return NextResponse.json(
         { error: 'This link has expired. Please contact us for a new invitation.' },
@@ -102,17 +103,16 @@ export async function GET(
       )
     }
 
-    // Check if already submitted (but allow re-access when saved)
-    if (supplierRequest.status !== 'INVITATION_SENT') {
+    if (customerRequest.status !== 'INVITATION_SENT') {
       return NextResponse.json(
         { error: 'The form has already been submitted.' },
         { status: 400 }
       )
     }
 
-    return NextResponse.json(supplierRequest)
+    return NextResponse.json(customerRequest)
   } catch (error) {
-    console.error('Error validating token:', error)
+    console.error('Error validating customer token:', error)
     return NextResponse.json(
       { error: 'An error occurred' },
       { status: 500 }
@@ -120,7 +120,7 @@ export async function GET(
   }
 }
 
-// POST /api/supplier/[token] - Submit or save supplier form
+// POST /api/customer/[token] - Submit or save customer form
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
@@ -128,8 +128,7 @@ export async function POST(
   try {
     const { token } = await params
 
-    // Validate token first
-    const supplierRequest = await prisma.supplierRequest.findUnique({
+    const customerRequest = await prisma.supplierRequest.findUnique({
       where: { invitationToken: token },
       include: {
         createdBy: {
@@ -145,7 +144,15 @@ export async function POST(
       },
     })
 
-    if (!supplierRequest) {
+    if (!customerRequest) {
+      return NextResponse.json(
+        { error: 'Invalid link' },
+        { status: 404 }
+      )
+    }
+
+    // Verify this is a customer request
+    if (customerRequest.relationType !== 'CUSTOMER') {
       return NextResponse.json(
         { error: 'Invalid link' },
         { status: 404 }
@@ -153,8 +160,8 @@ export async function POST(
     }
 
     if (
-      supplierRequest.invitationExpiresAt &&
-      new Date() > new Date(supplierRequest.invitationExpiresAt)
+      customerRequest.invitationExpiresAt &&
+      new Date() > new Date(customerRequest.invitationExpiresAt)
     ) {
       return NextResponse.json(
         { error: 'This link has expired' },
@@ -162,7 +169,7 @@ export async function POST(
       )
     }
 
-    if (supplierRequest.status !== 'INVITATION_SENT') {
+    if (customerRequest.status !== 'INVITATION_SENT') {
       return NextResponse.json(
         { error: 'The form has already been submitted' },
         { status: 400 }
@@ -198,7 +205,6 @@ export async function POST(
       formData.get('kvk') as File | null,
       formData.get('passport') as File | null,
       formData.get('bankDetails') as File | null,
-      formData.get('mandateRfh') as File | null,
     ].filter((f): f is File => f !== null && f.size > 0)
 
     for (const file of filesToValidate) {
@@ -211,12 +217,12 @@ export async function POST(
     const kvkFile = formData.get('kvk') as File | null
     if (kvkFile) {
       const fileName = `kvk_${Date.now()}_${kvkFile.name}`
-      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
+      const filePath = `/api/files/${customerRequest.id}/${fileName}`
 
       if (useVercelBlob) {
-        await uploadToBlob(`${supplierRequest.id}/${fileName}`, kvkFile)
+        await uploadToBlob(`${customerRequest.id}/${fileName}`, kvkFile)
       } else {
-        const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
+        const uploadDir = path.join(process.cwd(), 'uploads', customerRequest.id)
         await mkdir(uploadDir, { recursive: true })
         const buffer = Buffer.from(await kvkFile.arrayBuffer())
         const localPath = path.join(uploadDir, fileName)
@@ -233,12 +239,12 @@ export async function POST(
     const passportFile = formData.get('passport') as File | null
     if (passportFile) {
       const fileName = `passport_${Date.now()}_${passportFile.name}`
-      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
+      const filePath = `/api/files/${customerRequest.id}/${fileName}`
 
       if (useVercelBlob) {
-        await uploadToBlob(`${supplierRequest.id}/${fileName}`, passportFile)
+        await uploadToBlob(`${customerRequest.id}/${fileName}`, passportFile)
       } else {
-        const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
+        const uploadDir = path.join(process.cwd(), 'uploads', customerRequest.id)
         await mkdir(uploadDir, { recursive: true })
         const buffer = Buffer.from(await passportFile.arrayBuffer())
         const localPath = path.join(uploadDir, fileName)
@@ -255,12 +261,12 @@ export async function POST(
     const bankFile = formData.get('bankDetails') as File | null
     if (bankFile) {
       const fileName = `bank_${Date.now()}_${bankFile.name}`
-      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
+      const filePath = `/api/files/${customerRequest.id}/${fileName}`
 
       if (useVercelBlob) {
-        await uploadToBlob(`${supplierRequest.id}/${fileName}`, bankFile)
+        await uploadToBlob(`${customerRequest.id}/${fileName}`, bankFile)
       } else {
-        const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
+        const uploadDir = path.join(process.cwd(), 'uploads', customerRequest.id)
         await mkdir(uploadDir, { recursive: true })
         const buffer = Buffer.from(await bankFile.arrayBuffer())
         const localPath = path.join(uploadDir, fileName)
@@ -270,28 +276,6 @@ export async function POST(
       filesToCreate.push({
         fileName: bankFile.name,
         fileType: 'BANK_DETAILS',
-        filePath,
-      })
-    }
-
-    const mandateRfhFile = formData.get('mandateRfh') as File | null
-    if (mandateRfhFile) {
-      const fileName = `mandate_rfh_${Date.now()}_${mandateRfhFile.name}`
-      const filePath = `/api/files/${supplierRequest.id}/${fileName}`
-
-      if (useVercelBlob) {
-        await uploadToBlob(`${supplierRequest.id}/${fileName}`, mandateRfhFile)
-      } else {
-        const uploadDir = path.join(process.cwd(), 'uploads', supplierRequest.id)
-        await mkdir(uploadDir, { recursive: true })
-        const buffer = Buffer.from(await mandateRfhFile.arrayBuffer())
-        const localPath = path.join(uploadDir, fileName)
-        await writeFile(localPath, buffer)
-      }
-
-      filesToCreate.push({
-        fileName: mandateRfhFile.name,
-        fileType: 'MANDATE_RFH',
         filePath,
       })
     }
@@ -311,84 +295,68 @@ export async function POST(
       iban: data.iban || null,
       bankName: data.bankName || null,
       glnNumber: data.glnNumber || null,
-      // Financial fields (Koop + O-kweker)
       invoiceEmail: data.invoiceEmail || null,
       invoiceAddress: data.invoiceAddress || null,
       invoicePostalCode: data.invoicePostalCode || null,
       invoiceCity: data.invoiceCity || null,
       invoiceCurrency: data.invoiceCurrency || null,
-      // Director fields (Koop + O-kweker, ROW)
       directorName: data.directorName || null,
       directorFunction: data.directorFunction || null,
       directorDateOfBirth: data.directorDateOfBirth || null,
       directorPassportNumber: data.directorPassportNumber || null,
-      // Auction fields (X-kweker)
-      auctionNumberRFH: data.auctionNumberRFH || null,
-      salesSheetEmail: data.salesSheetEmail || null,
-      mandateRFH: data.mandateRFH ?? null,
-      apiKeyFloriday: data.apiKeyFloriday || null,
     }
 
     if (action === 'save') {
-      // Save: update fields, keep token valid, do NOT change status
       updateData.supplierSavedAt = new Date()
 
       await prisma.supplierRequest.update({
-        where: { id: supplierRequest.id },
+        where: { id: customerRequest.id },
         data: updateData,
       })
 
-      // Create file records
       for (const file of filesToCreate) {
         await prisma.supplierFile.create({
           data: {
-            requestId: supplierRequest.id,
+            requestId: customerRequest.id,
             ...file,
           },
         })
       }
 
-      // Create audit log
       await prisma.auditLog.create({
         data: {
-          requestId: supplierRequest.id,
-          action: AuditAction.SUPPLIER_SAVED,
+          requestId: customerRequest.id,
+          action: AuditAction.CUSTOMER_SAVED,
           details: JSON.stringify({ filesUploaded: filesToCreate.length }),
         },
       })
 
       // Send "continue later" email
-      if (supplierRequest.invitationExpiresAt) {
+      if (customerRequest.invitationExpiresAt) {
         await sendSupplierSaveEmail({
-          to: supplierRequest.supplierEmail,
-          supplierName: supplierRequest.supplierName,
+          to: customerRequest.supplierEmail,
+          supplierName: customerRequest.supplierName,
           invitationToken: token,
-          expiresAt: new Date(supplierRequest.invitationExpiresAt),
-          language: (supplierRequest.supplierLanguage || 'nl') as Language,
-          label: supplierRequest.label,
-          relationType: 'SUPPLIER',
+          expiresAt: new Date(customerRequest.invitationExpiresAt),
+          language: (customerRequest.supplierLanguage || 'nl') as Language,
+          label: customerRequest.label,
+          relationType: 'CUSTOMER',
         })
       }
 
       return NextResponse.json({ success: true, saved: true })
     } else {
       // Submit: validate required fields
-      const submitType = supplierRequest.supplierType || 'KOOP'
-
       const baseRequired = ['companyName', 'address', 'postalCode', 'city', 'country', 'contactName', 'contactPhone', 'contactEmail']
+      const financialRequired = ['chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName', 'invoiceCurrency']
       const missingFields: string[] = []
-      for (const field of baseRequired) {
+
+      for (const field of [...baseRequired, ...financialRequired]) {
         if (!data[field as keyof typeof data]) missingFields.push(field)
       }
 
-      if (showFinancialSection(submitType)) {
-        const financialRequired = ['chamberOfCommerceNumber', 'vatNumber', 'iban', 'bankName', 'invoiceCurrency']
-        for (const field of financialRequired) {
-          if (!data[field as keyof typeof data]) missingFields.push(field)
-        }
-      }
-
-      if (showDirectorSection(submitType) && supplierRequest.region === 'ROW') {
+      // Director fields required for ROW
+      if (customerRequest.region === 'ROW') {
         const directorRequired = ['directorName', 'directorFunction', 'directorDateOfBirth', 'directorPassportNumber']
         for (const field of directorRequired) {
           if (!data[field as keyof typeof data]) missingFields.push(field)
@@ -402,9 +370,9 @@ export async function POST(
         )
       }
 
-      // VIES check for EU suppliers with vatNumber
+      // VIES check for EU customers with vatNumber
       let viesResultForPdf: Awaited<ReturnType<typeof checkVat>> = null
-      if (supplierRequest.region === 'EU' && data.vatNumber) {
+      if (customerRequest.region === 'EU' && data.vatNumber) {
         try {
           const viesResult = await checkVat(data.vatNumber)
           if (viesResult) {
@@ -422,18 +390,17 @@ export async function POST(
 
       updateData.status = Status.AWAITING_PURCHASER
       updateData.supplierSubmittedAt = new Date()
-      updateData.invitationToken = null // Invalidate token after use
+      updateData.invitationToken = null
 
       await prisma.supplierRequest.update({
-        where: { id: supplierRequest.id },
+        where: { id: customerRequest.id },
         data: updateData,
       })
 
-      // Create file records
       for (const file of filesToCreate) {
         await prisma.supplierFile.create({
           data: {
-            requestId: supplierRequest.id,
+            requestId: customerRequest.id,
             ...file,
           },
         })
@@ -444,17 +411,17 @@ export async function POST(
         try {
           const pdfBuffer = await generateViesReport({
             viesResult: viesResultForPdf,
-            supplierName: supplierRequest.supplierName,
+            supplierName: customerRequest.supplierName,
             vatNumber: data.vatNumber,
-            label: supplierRequest.label,
+            label: customerRequest.label,
           })
 
           const fileName = `vies_report_${Date.now()}.pdf`
-          let filePath = `/api/files/${supplierRequest.id}/${fileName}`
+          let filePath = `/api/files/${customerRequest.id}/${fileName}`
 
           if (process.env.BLOB_READ_WRITE_TOKEN) {
             const { put } = await import('@vercel/blob')
-            const blob = await put(`${supplierRequest.id}/${fileName}`, pdfBuffer, {
+            const blob = await put(`${customerRequest.id}/${fileName}`, pdfBuffer, {
               access: 'public',
               addRandomSuffix: false,
             })
@@ -463,53 +430,51 @@ export async function POST(
 
           await prisma.supplierFile.create({
             data: {
-              requestId: supplierRequest.id,
+              requestId: customerRequest.id,
               fileName: `VIES_Report_${viesResultForPdf.countryCode}${viesResultForPdf.vatNumber}.pdf`,
               fileType: 'VIES_REPORT',
               filePath,
             },
           })
         } catch (error) {
-          console.error('Error generating VIES report on supplier submit:', error)
-          // Don't block submission
+          console.error('Error generating VIES report on customer submit:', error)
         }
       }
 
-      // Create audit log
       await prisma.auditLog.create({
         data: {
-          requestId: supplierRequest.id,
-          action: AuditAction.SUPPLIER_SUBMITTED,
+          requestId: customerRequest.id,
+          action: AuditAction.CUSTOMER_SUBMITTED,
           details: JSON.stringify({
             filesUploaded: filesToCreate.length,
           }),
         },
       })
 
-      // Send confirmation email to supplier
+      // Send confirmation email to customer
       await sendSupplierConfirmationEmail({
-        to: supplierRequest.supplierEmail,
-        supplierName: supplierRequest.supplierName,
-        language: (supplierRequest.supplierLanguage || 'nl') as Language,
-        label: supplierRequest.label,
+        to: customerRequest.supplierEmail,
+        supplierName: customerRequest.supplierName,
+        language: (customerRequest.supplierLanguage || 'nl') as Language,
+        label: customerRequest.label,
       })
 
-      // Notify purchaser (only if they want to receive emails)
-      if (supplierRequest.createdBy.receiveEmails) {
+      // Notify sales person (only if they want to receive emails)
+      if (customerRequest.createdBy.receiveEmails) {
         await sendPurchaserNotificationEmail({
-          to: supplierRequest.createdBy.email,
-          purchaserName: formatUserName(supplierRequest.createdBy) || 'Inkoper',
-          supplierName: supplierRequest.supplierName,
-          requestId: supplierRequest.id,
-          language: (supplierRequest.createdBy.preferredLanguage || 'nl') as Language,
-          label: supplierRequest.label,
+          to: customerRequest.createdBy.email,
+          purchaserName: formatUserName(customerRequest.createdBy) || 'Verkoper',
+          supplierName: customerRequest.supplierName,
+          requestId: customerRequest.id,
+          language: (customerRequest.createdBy.preferredLanguage || 'nl') as Language,
+          label: customerRequest.label,
         })
       }
 
       return NextResponse.json({ success: true })
     }
   } catch (error) {
-    console.error('Error processing supplier submission:', error)
+    console.error('Error processing customer submission:', error)
     return NextResponse.json(
       { error: 'An error occurred while processing your data' },
       { status: 500 }

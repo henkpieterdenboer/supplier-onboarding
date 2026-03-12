@@ -530,6 +530,23 @@
       "requiredNote": "I campi contrassegnati con * sono obbligatori"
     }
   },
+  "customer": {
+    "form": {
+      "title": "Client Onboarding",
+      "welcome": "Benvenuto {supplierName}. Compili i dati della Sua azienda qui di seguito.",
+      "savedNotice": "In precedenza ha salvato i Suoi dati il {date}. I Suoi dati precedenti sono stati precompilati qui di seguito.",
+      "invalidLink": "Link non valido",
+      "invalidLinkTitle": "Link non valido o scaduto",
+      "invalidLinkMessage": "Il link potrebbe essere scaduto o già utilizzato. Contatti il Suo referente per un nuovo link.",
+      "thankYou": "Grazie!",
+      "thankYouMessage": "I Suoi dati sono stati inviati con successo. Riceverà a breve un'email di conferma.",
+      "closeWindow": "Può chiudere questa finestra.",
+      "savedTitle": "Dati salvati",
+      "savedMessage": "I Suoi dati sono stati salvati. Riceverà un'email con un link per completare il modulo in seguito.",
+      "savedSuccess": "Dati salvati! Riceverà un'email con il link per continuare in seguito.",
+      "submitSuccess": "Dati inviati con successo!"
+    }
+  },
   "admin": {
     "users": {
       "title": "Gestione utenti",
@@ -797,7 +814,9 @@
       "SELF_FILL_ACTIVATED": "Compilazione autonoma attivata",
       "PURCHASER_SAVED": "L'acquirente ha salvato i dati",
       "SALES_SAVED": "Venditore ha salvato i dati",
-      "FINANCE_SAVED": "Finance ha salvato i dati"
+      "FINANCE_SAVED": "Finance ha salvato i dati",
+      "CUSTOMER_SUBMITTED": "Il cliente ha inviato i dati",
+      "CUSTOMER_SAVED": "Il cliente ha salvato i dati"
     }
   },
   "validation": {

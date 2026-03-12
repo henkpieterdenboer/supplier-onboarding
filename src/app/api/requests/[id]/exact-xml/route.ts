@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const userRoles = session.user.roles as string[]
-    if (!userRoles.includes('FINANCE') && !userRoles.includes('INKOPER')) {
+    if (!userRoles.includes('FINANCE') && !userRoles.includes('INKOPER') && !userRoles.includes('VERKOPER')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -45,7 +45,9 @@ export async function GET(
         invoiceCity: true,
         paymentTerm: true,
         creditorNumber: true,
+        debtorNumber: true,
         supplierType: true,
+        relationType: true,
       },
     })
 

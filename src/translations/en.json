@@ -530,6 +530,23 @@
       "requiredNote": "Fields marked with * are required"
     }
   },
+  "customer": {
+    "form": {
+      "title": "Client Onboarding",
+      "welcome": "Welcome {supplierName}. Please fill in your company details below.",
+      "savedNotice": "You previously saved your details on {date}. Your earlier details have been filled in below.",
+      "invalidLink": "Invalid link",
+      "invalidLinkTitle": "Invalid or expired link",
+      "invalidLinkMessage": "The link may have expired or has already been used. Please contact your contact person for a new link.",
+      "thankYou": "Thank you!",
+      "thankYouMessage": "Your details have been successfully submitted. You will receive a confirmation email shortly.",
+      "closeWindow": "You can close this window.",
+      "savedTitle": "Details saved",
+      "savedMessage": "Your details have been saved. You will receive an email with a link to complete the form later.",
+      "savedSuccess": "Details saved! You will receive an email with a link to continue later.",
+      "submitSuccess": "Details successfully submitted!"
+    }
+  },
   "admin": {
     "users": {
       "title": "User management",
@@ -797,7 +814,9 @@
       "SELF_FILL_ACTIVATED": "Self-fill activated",
       "PURCHASER_SAVED": "Purchaser saved details",
       "SALES_SAVED": "Sales has saved data",
-      "FINANCE_SAVED": "Finance saved details"
+      "FINANCE_SAVED": "Finance saved details",
+      "CUSTOMER_SUBMITTED": "Customer has submitted details",
+      "CUSTOMER_SAVED": "Customer has saved details"
     }
   },
   "validation": {

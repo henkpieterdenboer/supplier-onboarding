@@ -197,7 +197,7 @@ async function sendEmail({ to, subject, html, language, label }: SendEmailOption
   }
 }
 
-// Invitation email to supplier
+// Invitation email to supplier/customer
 interface InvitationEmailOptions {
   to: string
   supplierName: string
@@ -205,6 +205,7 @@ interface InvitationEmailOptions {
   expiresAt: Date
   language: Language
   label?: string
+  relationType?: string
 }
 
 export async function sendInvitationEmail({
@@ -214,10 +215,12 @@ export async function sendInvitationEmail({
   expiresAt,
   language,
   label,
+  relationType,
 }: InvitationEmailOptions): Promise<string | null> {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
-  const invitationUrl = `${appUrl}/supplier/${invitationToken}`
+  const formPath = relationType === 'CUSTOMER' ? 'customer' : 'supplier'
+  const invitationUrl = `${appUrl}/${formPath}/${invitationToken}`
 
   return sendEmail({
     to,
@@ -242,7 +245,7 @@ export async function sendInvitationEmail({
   })
 }
 
-// Save email to supplier (continue later)
+// Save email to supplier/customer (continue later)
 interface SupplierSaveEmailOptions {
   to: string
   supplierName: string
@@ -250,6 +253,7 @@ interface SupplierSaveEmailOptions {
   expiresAt: Date
   language: Language
   label?: string
+  relationType?: string
 }
 
 export async function sendSupplierSaveEmail({
@@ -259,10 +263,12 @@ export async function sendSupplierSaveEmail({
   expiresAt,
   language,
   label,
+  relationType,
 }: SupplierSaveEmailOptions): Promise<string | null> {
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars)
   const appUrl = getLabelAppUrl(label || 'COLORIGINZ')
-  const invitationUrl = `${appUrl}/supplier/${invitationToken}`
+  const formPath = relationType === 'CUSTOMER' ? 'customer' : 'supplier'
+  const invitationUrl = `${appUrl}/${formPath}/${invitationToken}`
 
   return sendEmail({
     to,

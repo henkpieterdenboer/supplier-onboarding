@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
             'finance@demo.nl': ['FINANCE'],
             'erp@demo.nl': ['ERP'],
             'admin@demo.nl': ['ADMIN'],
+            'verkoper@demo.nl': ['VERKOPER'],
           }
 
           const defaultRoles = defaultRolesMap[credentials.email]

@@ -28,7 +28,9 @@ interface SupplierRequestForXml {
   invoiceCity: string | null
   paymentTerm: string | null
   creditorNumber: string | null
+  debtorNumber: string | null
   supplierType: string
+  relationType: string
 }
 
 function escapeXml(value: string): string {
@@ -50,13 +52,15 @@ function countryFromIban(iban: string): string | null {
 }
 
 export function generateExactXml(request: SupplierRequestForXml): string {
-  const hasFinancial = showFinancialSection(request.supplierType)
-  const code = request.creditorNumber || ''
+  const isCustomer = request.relationType === 'CUSTOMER'
+  const hasFinancial = isCustomer || showFinancialSection(request.supplierType)
+  const code = isCustomer ? (request.debtorNumber || '') : (request.creditorNumber || '')
+  const accountType = isCustomer ? 'C' : 'S'
 
   let xml = `<?xml version="1.0" ?>\n`
   xml += `<eExact xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="eExact-Schema.xsd">\n`
   xml += `<Accounts>\n`
-  xml += ` <Account code="${escapeXml(code)}" status="A" type="S">\n`
+  xml += ` <Account code="${escapeXml(code)}" status="A" type="${accountType}">\n`
 
   // Basic fields
   if (request.companyName) xml += `  <Name>${escapeXml(request.companyName)}</Name>\n`
@@ -114,11 +118,12 @@ export function generateExactXml(request: SupplierRequestForXml): string {
   xml += `   </Contact>\n`
   xml += `  </Contacts>\n`
 
-  // Creditor element with bank accounts inside
-  xml += `  <Creditor number="${escapeXml(code)}" code="${escapeXml(code)}">\n`
+  // Creditor/Debtor element with bank accounts inside
+  const financeElement = isCustomer ? 'Debtor' : 'Creditor'
+  xml += `  <${financeElement} number="${escapeXml(code)}" code="${escapeXml(code)}">\n`
   xml += `   <Currency code="EUR"/>\n`
 
-  // Bank accounts inside Creditor (Globe format)
+  // Bank accounts inside Creditor/Debtor (Globe format)
   if (hasFinancial && request.iban) {
     const iban = request.iban.replace(/\s/g, '')
     const ibanCountry = countryFromIban(iban)
@@ -143,7 +148,7 @@ export function generateExactXml(request: SupplierRequestForXml): string {
     xml += `   </BankAccounts>\n`
   }
 
-  xml += `  </Creditor>\n`
+  xml += `  </${financeElement}>\n`
 
   // Payment condition
   if (request.paymentTerm) {

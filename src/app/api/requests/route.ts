@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
         expiresAt: invitationExpiresAt,
         language: supplierLanguage as Language,
         label: resolvedLabel,
+        relationType,
       })
 
       // Create audit log for invitation sent

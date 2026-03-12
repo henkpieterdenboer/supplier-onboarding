@@ -530,6 +530,23 @@
       "requiredNote": "Los campos marcados con * son obligatorios"
     }
   },
+  "customer": {
+    "form": {
+      "title": "Client Onboarding",
+      "welcome": "Bienvenido {supplierName}. Por favor, complete los datos de su empresa a continuación.",
+      "savedNotice": "Anteriormente guardó sus datos el {date}. Sus datos anteriores se han rellenado a continuación.",
+      "invalidLink": "Enlace no válido",
+      "invalidLinkTitle": "Enlace no válido o caducado",
+      "invalidLinkMessage": "El enlace puede haber caducado o ya ha sido utilizado. Póngase en contacto con su persona de contacto para obtener un nuevo enlace.",
+      "thankYou": "¡Gracias!",
+      "thankYouMessage": "Sus datos se han enviado correctamente. Recibirá un correo de confirmación en breve.",
+      "closeWindow": "Puede cerrar esta ventana.",
+      "savedTitle": "Datos guardados",
+      "savedMessage": "Sus datos han sido guardados. Recibirá un correo con un enlace para completar el formulario más tarde.",
+      "savedSuccess": "¡Datos guardados! Recibirá un correo con el enlace para continuar más tarde.",
+      "submitSuccess": "¡Datos enviados correctamente!"
+    }
+  },
   "admin": {
     "users": {
       "title": "Gestión de usuarios",
@@ -797,7 +814,9 @@
       "SELF_FILL_ACTIVATED": "Autocompletado activado",
       "PURCHASER_SAVED": "Comprador guardó datos",
       "SALES_SAVED": "Vendedor ha guardado los datos",
-      "FINANCE_SAVED": "Finanzas guardó datos"
+      "FINANCE_SAVED": "Finanzas guardó datos",
+      "CUSTOMER_SUBMITTED": "El cliente ha enviado los datos",
+      "CUSTOMER_SAVED": "El cliente ha guardado los datos"
     }
   },
   "validation": {
