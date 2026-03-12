@@ -23,6 +23,13 @@ export const labelConfigs: Record<Label, LabelConfig> = {
     emailLogoHeight: 120,
     emailLogoWidth: 174,  // 729x504 source, aspect ratio ~1.45:1
   },
+  FFS: {
+    name: 'Fresh From Source',
+    shortName: 'FFS',
+    logoPath: '/ffs.png',
+    emailLogoHeight: 60,
+    emailLogoWidth: 63,  // 480x460 source, aspect ratio ~1.04:1
+  },
 }
 
 export function getLabelConfig(label: string): LabelConfig {
@@ -34,6 +41,9 @@ export function getLabelAppUrl(label: string): string {
   if (label === 'PFC') {
     return process.env.APP_URL_PFC || fallback
   }
+  if (label === 'FFS') {
+    return process.env.APP_URL_FFS || fallback
+  }
   return fallback
 }
 
@@ -41,6 +51,9 @@ export function getLabelEmailFrom(label: string): string {
   const fallback = process.env.EMAIL_FROM || '"Supplier Onboarding" <noreply@supplier-onboarding.local>'
   if (label === 'PFC') {
     return process.env.EMAIL_FROM_PFC || fallback
+  }
+  if (label === 'FFS') {
+    return process.env.EMAIL_FROM_FFS || fallback
   }
   return fallback
 }

@@ -138,10 +138,12 @@ export const RoleLabels: Record<string, string> = {
 export const Label = {
   COLORIGINZ: 'COLORIGINZ',
   PFC: 'PFC',
+  FFS: 'FFS',
 } as const
 export type Label = (typeof Label)[keyof typeof Label]
 
 export const LabelLabels: Record<Label, string> = {
   COLORIGINZ: 'Coloriginz',
   PFC: 'Parfum Flower Company',
+  FFS: 'Fresh From Source',
 }
