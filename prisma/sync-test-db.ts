@@ -68,7 +68,7 @@ async function upsertDemoUsers(db: PrismaClient) {
 
   const users = [
     { email: 'admin@demo.nl', firstName: 'Demo', lastName: 'Admin', roles: ['ADMIN'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
-    { email: 'inkoper@demo.nl', firstName: 'Demo', lastName: 'Inkoper', roles: ['INKOPER'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
+    { email: 'commercie@demo.nl', firstName: 'Demo', lastName: 'Commercie', roles: ['COMMERCIE'], labels: ['COLORIGINZ', 'PFC'], relationTypes: ['SUPPLIER', 'CUSTOMER'], passwordHash, isActive: true },
     { email: 'finance@demo.nl', firstName: 'Demo', lastName: 'Finance', roles: ['FINANCE'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
     { email: 'erp@demo.nl', firstName: 'Demo', lastName: 'ERP', roles: ['ERP'], labels: ['COLORIGINZ', 'PFC'], passwordHash, isActive: true },
   ]

@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const userRoles = session.user.roles as string[]
-    if (!userRoles.includes('FINANCE') && !userRoles.includes('INKOPER') && !userRoles.includes('VERKOPER')) {
+    if (!userRoles.includes('FINANCE') && !userRoles.includes('COMMERCIE')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

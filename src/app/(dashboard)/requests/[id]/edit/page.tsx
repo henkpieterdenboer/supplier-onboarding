@@ -266,13 +266,13 @@ export default function EditRequestPage() {
 
   // Determine edit mode based on user role and request status
   const userRoles = session?.user?.roles || []
-  const isInkoper = userRoles.includes('INKOPER')
+  const isCommerce = userRoles.includes('COMMERCIE')
   const isFinance = userRoles.includes('FINANCE')
 
-  // Check permissions: INKOPER at AWAITING_PURCHASER, FINANCE at AWAITING_FINANCE
-  const canEditAsInkoper = isInkoper && request?.status === 'AWAITING_PURCHASER'
+  // Check permissions: COMMERCIE at AWAITING_PURCHASER, FINANCE at AWAITING_FINANCE
+  const canEditAsCommerce = isCommerce && request?.status === 'AWAITING_PURCHASER'
   const canEditAsFinance = isFinance && request?.status === 'AWAITING_FINANCE'
-  const canEditRequest = canEditAsInkoper || canEditAsFinance
+  const canEditRequest = canEditAsCommerce || canEditAsFinance
 
   if (!session?.user) {
     return (
@@ -363,7 +363,7 @@ export default function EditRequestPage() {
     setIsSaving(true)
 
     try {
-      const action = canEditAsInkoper ? 'purchaser-save' : 'finance-save'
+      const action = canEditAsCommerce ? 'purchaser-save' : 'finance-save'
       const response = await fetch(`/api/requests/${params.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -386,7 +386,7 @@ export default function EditRequestPage() {
     e.preventDefault()
 
     // Check for missing required fields before submitting
-    const context = canEditAsInkoper ? 'purchaser' : 'finance'
+    const context = canEditAsCommerce ? 'purchaser' : 'finance'
     const missing = getMissingRequiredFields(context, formData, supplierType, region)
     if (missing.length > 0) {
       const fieldNames = missing.map(f => t(`validation.fieldNames.${f}`)).join(', ')
@@ -398,7 +398,7 @@ export default function EditRequestPage() {
     setIsSubmitting(true)
 
     try {
-      const action = canEditAsInkoper ? 'purchaser-submit' : 'finance-submit'
+      const action = canEditAsCommerce ? 'purchaser-submit' : 'finance-submit'
       const response = await fetch(`/api/requests/${params.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -469,8 +469,8 @@ export default function EditRequestPage() {
           </div>
         )}
 
-        {/* Type Selector - only for INKOPER */}
-        {canEditAsInkoper && (
+        {/* Type Selector - only for COMMERCIE */}
+        {canEditAsCommerce && (
           <Card>
             <CardHeader>
               <CardTitle>{t('requests.edit.supplierType')}</CardTitle>
@@ -584,7 +584,7 @@ export default function EditRequestPage() {
                   region={region}
                 />
 
-                {canEditAsInkoper && renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
+                {canEditAsCommerce && renderFileInput('kvk', 'KVK', t('requests.edit.kvkUpload'))}
 
                 <div className="mt-4 -mx-6 px-6 py-2.5 bg-muted/70 border-y border-border/50">
                   <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -601,7 +601,7 @@ export default function EditRequestPage() {
                   context="edit"
                 />
 
-                {canEditAsInkoper && showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
+                {canEditAsCommerce && showBank && renderFileInput('bankDetails', 'BANK_DETAILS', t('requests.edit.bankUpload'))}
               </>
             )}
 
@@ -622,7 +622,7 @@ export default function EditRequestPage() {
                   context="edit"
                   region={region}
                 />
-                {canEditAsInkoper && renderFileInput('passport', 'PASSPORT', t('requests.edit.passportUpload'))}
+                {canEditAsCommerce && renderFileInput('passport', 'PASSPORT', t('requests.edit.passportUpload'))}
               </>
             )}
 
@@ -643,7 +643,7 @@ export default function EditRequestPage() {
                   context="edit"
                 />
                 {/* Mandate upload - instant */}
-                {canEditAsInkoper && (
+                {canEditAsCommerce && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-4">
                       <Label htmlFor="mandateRfh">{t('supplier.form.documents.mandate')}</Label>
@@ -710,7 +710,7 @@ export default function EditRequestPage() {
                     <span className="text-xs text-muted-foreground">
                       {new Date(file.uploadedAt).toLocaleDateString(getDateLocale(language))}
                     </span>
-                    {(canEditAsInkoper || canEditAsFinance) && (
+                    {(canEditAsCommerce || canEditAsFinance) && (
                       <button
                         type="button"
                         onClick={() => handleFileDelete(file.id)}

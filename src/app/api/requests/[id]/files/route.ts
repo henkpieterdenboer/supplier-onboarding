@@ -35,9 +35,9 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const isInkoper = session.user.roles.includes('INKOPER')
+    const isCommerce = session.user.roles.includes('COMMERCIE')
     const isFinance = session.user.roles.includes('FINANCE')
-    if (!isInkoper && !isFinance) {
+    if (!isCommerce && !isFinance) {
       return NextResponse.json({ error: 'Only purchasers or finance can upload files' }, { status: 403 })
     }
 
@@ -136,9 +136,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const isInkoper = session.user.roles.includes('INKOPER')
+    const isCommerce = session.user.roles.includes('COMMERCIE')
     const isFinance = session.user.roles.includes('FINANCE')
-    if (!isInkoper && !isFinance) {
+    if (!isCommerce && !isFinance) {
       return NextResponse.json({ error: 'Only purchasers or finance can delete files' }, { status: 403 })
     }
 

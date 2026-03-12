@@ -256,14 +256,14 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
   const [isDeleting, setIsDeleting] = useState(false)
 
   const canEdit =
-    (userRoles.includes('INKOPER') && request.status === 'AWAITING_PURCHASER') ||
+    (userRoles.includes('COMMERCIE') && request.status === 'AWAITING_PURCHASER') ||
     (userRoles.includes('FINANCE') && request.status === 'AWAITING_FINANCE') ||
     (userRoles.includes('ERP') && request.status === 'AWAITING_ERP')
 
-  const canSelfFill = userRoles.includes('INKOPER') && request.status === 'INVITATION_SENT'
+  const canSelfFill = userRoles.includes('COMMERCIE') && request.status === 'INVITATION_SENT'
   const canDelete = userRoles.includes('ADMIN') && request.status === 'CANCELLED'
-  const isInkoperOnly = userRoles.includes('INKOPER') && !userRoles.includes('ADMIN') && !userRoles.includes('FINANCE') && !userRoles.includes('ERP')
-  const canCancel = request.status !== 'CANCELLED' && request.status !== 'COMPLETED' && (!isInkoperOnly || request.createdBy.id === userId)
+  const isCommerceOnly = userRoles.includes('COMMERCIE') && !userRoles.includes('ADMIN') && !userRoles.includes('FINANCE') && !userRoles.includes('ERP')
+  const canCancel = request.status !== 'CANCELLED' && request.status !== 'COMPLETED' && (!isCommerceOnly || request.createdBy.id === userId)
   const canReopen = request.status === 'CANCELLED'
   const canResendInvitation = request.status === 'INVITATION_SENT'
   const canSendReminder =
@@ -593,7 +593,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                         {request.region === 'EU' && request.vatNumber && (
                           <div className="mt-2 space-y-2">
                             <div className="flex items-center gap-2">
-                              {(userRoles.includes('INKOPER') || userRoles.includes('FINANCE')) && (
+                              {(userRoles.includes('COMMERCIE') || userRoles.includes('FINANCE')) && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -800,8 +800,8 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
             </Card>
           )}
 
-          {/* Sanctions Check - visible for INKOPER, FINANCE, ADMIN */}
-          {(userRoles.includes('INKOPER') || userRoles.includes('FINANCE') || userRoles.includes('ADMIN')) && request.companyName && (
+          {/* Sanctions Check - visible for COMMERCIE, FINANCE, ADMIN */}
+          {(userRoles.includes('COMMERCIE') || userRoles.includes('FINANCE') || userRoles.includes('ADMIN')) && request.companyName && (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -824,7 +824,7 @@ export function RequestDetail({ request, userRoles, userId }: RequestDetailProps
                       </CardDescription>
                     )}
                   </div>
-                  {(userRoles.includes('INKOPER') || userRoles.includes('FINANCE')) && (
+                  {(userRoles.includes('COMMERCIE') || userRoles.includes('FINANCE')) && (
                     <Button
                       variant="outline"
                       size="sm"

@@ -5,7 +5,7 @@ import { z } from 'zod'
 const regionEnum = z.enum(['EU', 'ROW'])
 const supplierTypeEnum = z.enum(['KOOP', 'X_KWEKER', 'O_KWEKER'])
 const labelEnum = z.enum(['COLORIGINZ', 'PFC'])
-const roleEnum = z.enum(['ADMIN', 'INKOPER', 'VERKOPER', 'FINANCE', 'ERP'])
+const roleEnum = z.enum(['ADMIN', 'COMMERCIE', 'FINANCE', 'ERP'])
 const relationTypeEnum = z.enum(['SUPPLIER', 'CUSTOMER'])
 const languageEnum = z.enum(['nl', 'en', 'es', 'it'])
 const incotermEnum = z.enum(['CIF', 'FOB', 'CONSIGNMENT'])

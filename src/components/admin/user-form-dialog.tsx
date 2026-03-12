@@ -51,7 +51,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
   const [middleName, setMiddleName] = useState(user?.middleName || '')
   const [lastName, setLastName] = useState(user?.lastName || '')
   const [email, setEmail] = useState(user?.email || '')
-  const [roles, setRoles] = useState<string[]>(user?.roles || ['INKOPER'])
+  const [roles, setRoles] = useState<string[]>(user?.roles || ['COMMERCIE'])
   const [labels, setLabels] = useState<string[]>(user?.labels || ['COLORIGINZ'])
   const [relationTypes, setRelationTypes] = useState<string[]>(user?.relationTypes || ['SUPPLIER'])
   const [receiveEmails, setReceiveEmails] = useState(user?.receiveEmails ?? true)
@@ -214,7 +214,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
             <div className="space-y-3">
               <Label>{t('admin.users.form.roles')}</Label>
               <div className="space-y-2">
-                {(['ADMIN', 'INKOPER', 'VERKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
+                {(['ADMIN', 'COMMERCIE', 'FINANCE', 'ERP'] as const).map((role) => (
                   <div key={role} className="flex items-center gap-2">
                     <Checkbox
                       id={`role-${role}`}

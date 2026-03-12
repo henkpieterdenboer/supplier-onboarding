@@ -32,6 +32,7 @@ interface User {
   name?: string | null
   email?: string | null
   roles: string[]
+  relationTypes?: string[]
 }
 
 interface DashboardNavProps {
@@ -139,14 +140,15 @@ export function DashboardNav({ user }: DashboardNavProps) {
     { href: '/dashboard', label: t('nav.dashboard') },
   ]
 
-  // Show "Nieuwe leverancier" for INKOPER role
-  if (user.roles.includes('INKOPER')) {
-    navItems.push({ href: '/requests/new?relationType=SUPPLIER', label: t('nav.newSupplier') })
-  }
-
-  // Show "Nieuwe klant" for VERKOPER role
-  if (user.roles.includes('VERKOPER')) {
-    navItems.push({ href: '/requests/new?relationType=CUSTOMER', label: t('nav.newCustomer') })
+  // Show new request links based on COMMERCIE role + relationTypes
+  if (user.roles.includes('COMMERCIE')) {
+    const userRelationTypes = user.relationTypes || ['SUPPLIER']
+    if (userRelationTypes.includes('SUPPLIER')) {
+      navItems.push({ href: '/requests/new?relationType=SUPPLIER', label: t('nav.newSupplier') })
+    }
+    if (userRelationTypes.includes('CUSTOMER')) {
+      navItems.push({ href: '/requests/new?relationType=CUSTOMER', label: t('nav.newCustomer') })
+    }
   }
 
   // Show "Gebruikersbeheer" for ADMIN role

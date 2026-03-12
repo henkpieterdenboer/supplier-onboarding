@@ -12,8 +12,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Users table (internal users: Admin, Inkoper, Verkoper, Finance, ERP)
-// roles: ADMIN | INKOPER | VERKOPER | FINANCE | ERP (multiple allowed)
+// Users table (internal users: Admin, Commercie, Finance, ERP)
+// roles: ADMIN | COMMERCIE | FINANCE | ERP (multiple allowed)
 // relationTypes: SUPPLIER | CUSTOMER (determines which relation types the user can see/handle)
 model User {
   id           String   @id @default(uuid())

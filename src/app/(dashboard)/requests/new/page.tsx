@@ -47,9 +47,8 @@ export default function NewRequestPage() {
     label: userLabels[0] || 'COLORIGINZ',
   })
 
-  // Check permission: INKOPER for suppliers, VERKOPER for customers
-  const requiredRole = isCustomer ? 'VERKOPER' : 'INKOPER'
-  if (!session?.user?.roles?.includes(requiredRole)) {
+  // Check permission: COMMERCIE role required
+  if (!session?.user?.roles?.includes('COMMERCIE')) {
     return (
       <div className="max-w-2xl mx-auto">
         <Alert variant="destructive">

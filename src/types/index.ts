@@ -27,8 +27,7 @@ export const SupplierTypeLabels: Record<SupplierType, string> = {
 // Role enum
 export const Role = {
   ADMIN: 'ADMIN',
-  INKOPER: 'INKOPER',
-  VERKOPER: 'VERKOPER',
+  COMMERCIE: 'COMMERCIE',
   FINANCE: 'FINANCE',
   ERP: 'ERP',
 } as const
@@ -130,8 +129,7 @@ export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 // Role labels
 export const RoleLabels: Record<string, string> = {
   ADMIN: 'Admin',
-  INKOPER: 'Inkoper',
-  VERKOPER: 'Verkoper',
+  COMMERCIE: 'Commercie',
   FINANCE: 'Finance',
   ERP: 'ERP',
 }

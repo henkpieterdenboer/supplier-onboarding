@@ -761,8 +761,7 @@
     },
     "role": {
       "ADMIN": "Admin",
-      "INKOPER": "Comprador",
-      "VERKOPER": "Vendedor",
+      "COMMERCIE": "Comercio",
       "FINANCE": "Finanzas",
       "ERP": "ERP"
     },

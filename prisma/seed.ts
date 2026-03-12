@@ -21,11 +21,12 @@ async function main() {
       preferredLanguage: 'nl',
     },
     {
-      email: 'inkoper@demo.nl',
+      email: 'commercie@demo.nl',
       firstName: 'Demo',
-      lastName: 'Inkoper',
-      roles: ['INKOPER'],
+      lastName: 'Commercie',
+      roles: ['COMMERCIE'],
       labels: ['COLORIGINZ', 'PFC'],
+      relationTypes: ['SUPPLIER', 'CUSTOMER'],
       passwordHash,
       isActive: true,
       preferredLanguage: 'nl',
@@ -50,17 +51,6 @@ async function main() {
       isActive: true,
       preferredLanguage: 'nl',
     },
-    {
-      email: 'verkoper@demo.nl',
-      firstName: 'Demo',
-      lastName: 'Verkoper',
-      roles: ['VERKOPER'],
-      labels: ['COLORIGINZ', 'PFC'],
-      relationTypes: ['CUSTOMER'],
-      passwordHash,
-      isActive: true,
-      preferredLanguage: 'nl',
-    },
   ]
 
   for (const user of users) {
@@ -79,11 +69,10 @@ async function main() {
     console.log(`Created user: ${user.email}`)
   }
 
-  // Get inkoper and verkoper users for creating demo requests
-  const inkoper = await prisma.user.findUnique({ where: { email: 'inkoper@demo.nl' } })
-  const verkoper = await prisma.user.findUnique({ where: { email: 'verkoper@demo.nl' } })
-  if (!inkoper) {
-    console.log('Inkoper user not found, skipping demo requests')
+  // Get commercie user for creating demo requests
+  const commercie = await prisma.user.findUnique({ where: { email: 'commercie@demo.nl' } })
+  if (!commercie) {
+    console.log('Commercie user not found, skipping demo requests')
     return
   }
 
@@ -101,7 +90,7 @@ async function main() {
         selfFill: true,
         status: 'AWAITING_PURCHASER',
         relationType: 'SUPPLIER',
-        createdById: inkoper.id,
+        createdById: commercie.id,
       },
       {
         supplierName: 'Demo X-kweker',
@@ -113,7 +102,7 @@ async function main() {
         selfFill: true,
         status: 'AWAITING_PURCHASER',
         relationType: 'SUPPLIER',
-        createdById: inkoper.id,
+        createdById: commercie.id,
       },
       {
         supplierName: 'Demo O-kweker',
@@ -125,13 +114,9 @@ async function main() {
         selfFill: true,
         status: 'AWAITING_PURCHASER',
         relationType: 'SUPPLIER',
-        createdById: inkoper.id,
+        createdById: commercie.id,
       },
-    ]
-
-    // Add customer demo request if verkoper exists
-    if (verkoper) {
-      demoRequests.push({
+      {
         supplierName: 'Demo Klant BV',
         supplierEmail: 'klant@demo-customer.nl',
         region: 'EU',
@@ -141,9 +126,9 @@ async function main() {
         selfFill: true,
         status: 'AWAITING_PURCHASER',
         relationType: 'CUSTOMER',
-        createdById: verkoper.id,
-      })
-    }
+        createdById: commercie.id,
+      },
+    ]
 
     for (const req of demoRequests) {
       await prisma.supplierRequest.create({ data: req })

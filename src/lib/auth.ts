@@ -44,11 +44,10 @@ export const authOptions: NextAuthOptions = {
         let effectiveRoles = user.roles
         if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
           const defaultRolesMap: Record<string, string[]> = {
-            'inkoper@demo.nl': ['INKOPER'],
+            'commercie@demo.nl': ['COMMERCIE'],
             'finance@demo.nl': ['FINANCE'],
             'erp@demo.nl': ['ERP'],
             'admin@demo.nl': ['ADMIN'],
-            'verkoper@demo.nl': ['VERKOPER'],
           }
 
           const defaultRoles = defaultRolesMap[credentials.email]

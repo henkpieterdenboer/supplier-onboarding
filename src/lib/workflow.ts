@@ -7,7 +7,7 @@ export function getWorkflowSteps(relationType: RelationType): string[] {
   if (relationType === 'CUSTOMER') {
     return [
       Status.INVITATION_SENT,
-      Status.AWAITING_PURCHASER, // "AWAITING_SALES" logically, but reuse same status
+      Status.AWAITING_PURCHASER,
       Status.AWAITING_ERP,
       Status.AWAITING_FINANCE,
       Status.COMPLETED,
@@ -32,16 +32,14 @@ export function getNextStatus(relationType: RelationType, currentStatus: string)
 }
 
 // Get the role responsible for reviewing at a given status
-export function getReviewerRole(relationType: RelationType, status: string): string | null {
-  if (status === Status.AWAITING_PURCHASER) {
-    return relationType === 'CUSTOMER' ? 'VERKOPER' : 'INKOPER'
-  }
+export function getReviewerRole(_relationType: RelationType, status: string): string | null {
+  if (status === Status.AWAITING_PURCHASER) return 'COMMERCIE'
   if (status === Status.AWAITING_ERP) return 'ERP'
   if (status === Status.AWAITING_FINANCE) return 'FINANCE'
   return null
 }
 
-// Get the role that can create requests for this relation type
-export function getCreatorRole(relationType: RelationType): string {
-  return relationType === 'CUSTOMER' ? 'VERKOPER' : 'INKOPER'
+// Get the role that can create requests (always COMMERCIE, relationType determines scope)
+export function getCreatorRole(_relationType: RelationType): string {
+  return 'COMMERCIE'
 }

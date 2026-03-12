@@ -761,8 +761,7 @@
     },
     "role": {
       "ADMIN": "Admin",
-      "INKOPER": "Inkoper",
-      "VERKOPER": "Verkoper",
+      "COMMERCIE": "Commercie",
       "FINANCE": "Finance",
       "ERP": "ERP"
     },

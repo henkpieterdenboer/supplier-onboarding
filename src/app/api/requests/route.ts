@@ -28,11 +28,17 @@ export async function POST(request: NextRequest) {
 
     const { supplierName, supplierEmail, region, selfFill, relationType, supplierType, supplierLanguage, label } = parsed.data
 
-    // Check creator role: INKOPER for suppliers, VERKOPER for customers
-    const requiredRole = relationType === 'CUSTOMER' ? 'VERKOPER' : 'INKOPER'
-    if (!session.user.roles.includes(requiredRole)) {
+    // Check COMMERCIE role + matching relationType
+    if (!session.user.roles.includes('COMMERCIE')) {
       return NextResponse.json(
-        { error: `Only ${requiredRole === 'VERKOPER' ? 'sales' : 'purchasers'} can create ${relationType.toLowerCase()} requests` },
+        { error: 'Only commerce users can create requests' },
+        { status: 403 }
+      )
+    }
+    const userRelationTypes = session.user.relationTypes || ['SUPPLIER']
+    if (!userRelationTypes.includes(relationType)) {
+      return NextResponse.json(
+        { error: `You do not have permission to create ${relationType.toLowerCase()} requests` },
         { status: 403 }
       )
     }

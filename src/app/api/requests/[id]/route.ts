@@ -245,8 +245,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Check if user has the creator/reviewer role for this request's relationType
-    // For suppliers: INKOPER, for customers: VERKOPER
+    // Check if user has the COMMERCIE role (creator/reviewer for this request)
     const creatorRole = getCreatorRole(existingRequest.relationType as 'SUPPLIER' | 'CUSTOMER')
     const hasCreatorRole = (session.user.roles as string[]).includes(creatorRole)
 
@@ -428,7 +427,7 @@ export async function PATCH(
       }
 
       case 'self-fill': {
-        // INKOPER activates self-fill mode
+        // COMMERCIE activates self-fill mode
         if (!hasCreatorRole) {
           return NextResponse.json(
             { error: 'You do not have permission to perform this action' },
@@ -465,7 +464,7 @@ export async function PATCH(
       }
 
       case 'purchaser-save': {
-        // INKOPER saves data without status change
+        // COMMERCIE saves data without status change
         if (!hasCreatorRole) {
           return NextResponse.json(
             { error: 'You do not have permission to perform this action' },
@@ -643,7 +642,7 @@ export async function PATCH(
       }
 
       case 'purchaser-submit': {
-        // INKOPER submits after filling additional data
+        // COMMERCIE submits after filling additional data
         if (!hasCreatorRole) {
           return NextResponse.json(
             { error: 'You do not have permission to perform this action' },
@@ -1250,7 +1249,7 @@ export async function PATCH(
       }
 
       case 'vies-recheck': {
-        // INKOPER or FINANCE can recheck VIES
+        // COMMERCIE or FINANCE can recheck VIES
         if (!hasCreatorRole && !session.user.roles.includes('FINANCE')) {
           return NextResponse.json(
             { error: 'Only purchasers or Finance can perform this action' },
@@ -1309,7 +1308,7 @@ export async function PATCH(
       }
 
       case 'sanctions-check': {
-        // INKOPER or FINANCE can run sanctions check
+        // COMMERCIE or FINANCE can run sanctions check
         if (!hasCreatorRole && !session.user.roles.includes('FINANCE')) {
           return NextResponse.json(
             { error: 'Only purchasers or Finance can perform this action' },

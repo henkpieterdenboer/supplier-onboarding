@@ -198,7 +198,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('admin.users.table.allRoles')}</SelectItem>
-              {(['ADMIN', 'INKOPER', 'VERKOPER', 'FINANCE', 'ERP'] as const).map((role) => (
+              {(['ADMIN', 'COMMERCIE', 'FINANCE', 'ERP'] as const).map((role) => (
                 <SelectItem key={role} value={role}>
                   {t(`enums.role.${role}`)}
                 </SelectItem>
